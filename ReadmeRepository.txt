@@ -1,8 +1,3 @@
-For development in Eclipse use " mvn eclipse:eclipse -Dwtpversion=2.0 "
-
-Repository-RI
-=============
-
 New features V1.02:
 
 - Content Header Negotiation
