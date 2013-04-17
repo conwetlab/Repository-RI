@@ -122,6 +122,7 @@ public class CollectionService {
 	}
 
 
+	
 
 
 	private Response getResource(String path, boolean meta, String type) {		

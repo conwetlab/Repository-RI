@@ -1,4 +1,4 @@
-New features V1.02:
+New features V2.0:
 
 - Content Header Negotiation
 	Supported Types for reading Resource Meta Information or Collection Information:

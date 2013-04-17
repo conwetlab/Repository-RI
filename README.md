@@ -3,7 +3,7 @@ For development in Eclipse use " mvn eclipse:eclipse -Dwtpversion=2.0 "
 Repository-RI
 =============
 
-New features V1.02:
+New features V2.00:
 
 - Content Header Negotiation
 	Supported Types for reading Resource Meta Information or Collection Information:

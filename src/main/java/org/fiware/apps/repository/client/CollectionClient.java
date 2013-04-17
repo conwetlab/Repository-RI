@@ -88,14 +88,22 @@ public class CollectionClient {
 		}
 		return false;
 	}
+	
+	
+	
 	public ResourceCollection find(String id){
+		return find(id, "application/xml");
+	}
+	
+	
+	public ResourceCollection find(String id, String accept){
 		ResourceCollection r= null;
 		String xml = "";
 
 		try {
 
 			ClientRequest request = new ClientRequest(repositoryURL+id);
-			request.accept("application/xml");
+			request.accept(accept);
 			ClientResponse<String> response = request.get(String.class);
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(response.getEntity().getBytes())));

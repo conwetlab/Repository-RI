@@ -9,7 +9,7 @@ import org.fiware.apps.repository.model.ResourceCollection;
 import org.junit.Test;
 
 public class RepositoryTest extends TestCase {
-	private static final String BASE_URL = "http://localhost:8080/FiwareRepository/v1";
+	private static final String BASE_URL = "http://10.55.149.20:8080/FiwareRepository/v1";
 	//private static final String BASE_URL = "http://130.206.81.36:8080/FiwareRepository/v1";	
 	private static CollectionClient cclient = new CollectionClient(BASE_URL);
 	private static ResourceClient rclient = new ResourceClient(BASE_URL);
@@ -29,10 +29,10 @@ public class RepositoryTest extends TestCase {
 		
 		
 		
-	//	ResourceCollection col = new ResourceCollection();
-	//	col.setCreator("Creatorname");
-	//	cclient.put("/collectionY", col);
-		
+		/*ResourceCollection col = new ResourceCollection();
+		col.setCreator("Creatorname");
+		cclient.put("/testCollection", col);
+		*/
 	//	col.setCreator("CreatornameUpdate");
 	//	cclient.updateCollection("/collectionY", col);
 		
@@ -45,7 +45,14 @@ public class RepositoryTest extends TestCase {
 	//	res.setContentFileName("fdsfsd");
 //		rclient.updateResource("/ss/cde/eee235", res);
 		
-		rclient.insertResourceContentRDF("/a/cfa/res9995.usdl", "C:\\IntegrationService.usdl",  "application/rdf+xml");
+		rclient.insertResourceContentRDF("/testCollection/testResource", "C:\\setup.log",  "plain/text");
+	/*	rclient.insertResourceContentRDF("/testCollection/testResource3", "C:\\setup.log",  "text/turtle");
+		rclient.insertResourceContentRDF("/testCollection/testResource4", "C:\\setup.log",  "application/rdf+xml");
+		rclient.insertResourceContentRDF("/testCollection/collectionA/testResource2", "C:\\setup.log",  "application/rdf+xml");
+		rclient.insertResourceContentRDF("/testCollection/collectionA/testResource2", "C:\\setup.log",  "application/rdf+xml");
+		rclient.insertResourceContentRDF("/testCollection/collectionB/testResource2", "C:\\setup.log",  "application/rdf+xml");
+		rclient.insertResourceContentRDF("/testCollection//collectionC/testResource2", "C:\\setup.log",  "application/rdf+xml");
+	*/
 	//	ResourceCollection ds = cclient.find("/a/cfa");
 	//	cclient.updateCollection("/a/cfa", ds);
 	//	rclient.deleteResource("/a/res9995.usdl");
