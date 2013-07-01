@@ -27,7 +27,7 @@ public class RepositoryTest extends TestCase {
 	public void testPutRes()  {
 		
 		
-		
+		cclient.find(BASE_URL+"/testCollection");
 		
 		/*ResourceCollection col = new ResourceCollection();
 		col.setCreator("Creatorname");
@@ -45,7 +45,10 @@ public class RepositoryTest extends TestCase {
 	//	res.setContentFileName("fdsfsd");
 //		rclient.updateResource("/ss/cde/eee235", res);
 		
-		rclient.insertResourceContentRDF("/testCollection/testResource", "C:\\setup.log",  "plain/text");
+		rclient.insertResourceContentRDF("/testCollection2/testResource", "C:\\setup.log",  "plain/text");
+		rclient.insertResourceContentRDF("/testCollection2/testResource1", "C:\\setup.log",  "plain/text");
+		
+		
 	/*	rclient.insertResourceContentRDF("/testCollection/testResource3", "C:\\setup.log",  "text/turtle");
 		rclient.insertResourceContentRDF("/testCollection/testResource4", "C:\\setup.log",  "application/rdf+xml");
 		rclient.insertResourceContentRDF("/testCollection/collectionA/testResource2", "C:\\setup.log",  "application/rdf+xml");

@@ -90,20 +90,17 @@ public class CollectionClient {
 	}
 	
 	
+
 	
 	public ResourceCollection find(String id){
-		return find(id, "application/xml");
-	}
 	
-	
-	public ResourceCollection find(String id, String accept){
 		ResourceCollection r= null;
 		String xml = "";
-
+	
 		try {
 
 			ClientRequest request = new ClientRequest(repositoryURL+id);
-			request.accept(accept);
+			request.accept("application/xml");
 			ClientResponse<String> response = request.get(String.class);
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(response.getEntity().getBytes())));
@@ -120,6 +117,7 @@ public class CollectionClient {
 			ClientUtil.visualize(request, response, "Get Collection");
 			
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return null;
 		}
 

@@ -228,106 +228,107 @@ public class RestHelper {
 
 	public static Response htmlResponse (Object obj, Class clazz) throws JAXBException{
 
-		String content="";	
+		StringBuilder content = new StringBuilder();
+
 
 		if (clazz.equals(ResourceCollection.class)){
 			ResourceCollection col = (ResourceCollection) obj;
 
-			content+="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"><html><head><title>Collection: "+col.getId()+"</title>";
-			content+="<link rel=\"stylesheet\" type=\"text/css\" href=\"/FiwareRepository/style/style.css\"></head><body>";
+			content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"><html><head><title>Collection: "+col.getId()+"</title>");
+			content.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"/FiwareRepository/style/style.css\"></head><body>");
 
-			content+="<h1>Collection: "+col.getId()+"</h1>"; 
-			content+="Creation Date: "+col.getCreationDate();
-			content+="<h2>Collections:</h2>";
-			content+="<table class=\"tab\">";
-			content+="<th>Collection Id</th><th>Creation Date</th>";
+			content.append("<h1>Collection: "+col.getId()+"</h1>"); 
+			content.append("Creation Date: "+col.getCreationDate());
+			content.append("<h2>Collections:</h2>");
+			content.append("<table class=\"tab\">");
+			content.append("<th>Collection Id</th><th>Creation Date</th>");
 			for(ResourceCollection innerCol : col.getCollections()){
-				content+="<tr>";
-				content+="<td><a href=\"/FiwareRepository/v1/"+innerCol.getId()+"\">"+innerCol.getId()+"</a></td>";  
-				content+="<td>"+innerCol.getCreationDate()+"</td>";
-				content+="</tr>";
+				content.append("<tr>");
+				content.append("<td><a href=\"/FiwareRepository/v1/"+innerCol.getId()+"\">"+innerCol.getId()+"</a></td>");  
+				content.append("<td>"+innerCol.getCreationDate()+"</td>");
+				content.append("</tr>");
 			}
-			content+="</table><br />";			
-			content+="<h2>Resources:</h2>";
-			content+="<table class=\"tab\">";
-			content+="<th>Resource Id</th><th>Resource Meta Information</th><th>Creation Date</th><th>Modification Date</th><th>Filename</th><th>Mime Type</th>";
+			content.append("</table><br />");			
+			content.append("<h2>Resources:</h2>");
+			content.append("<table class=\"tab\">");
+			content.append("<th>Resource Id</th><th>Resource Meta Information</th><th>Creation Date</th><th>Modification Date</th><th>Filename</th><th>Mime Type</th>");
 			for(Resource res : col.getResources()){
-				content+="<tr>";
-				content+="<td><a href=\"/FiwareRepository/v1/"+res.getId()+"\">"+res.getId()+"</a></td>"; 
-				content+="<td><a href=\"/FiwareRepository/v1/"+res.getId()+".meta\">Meta Information</a></td>"; 
-				content+="<td>"+res.getCreationDate()+"</td>"; 
-				content+="<td>"+res.getModificationDate()+"</td>"; 
-				content+="<td>"+res.getContentFileName()+"</td>";
-				content+="<td>"+res.getContentMimeType()+"</td>";
-				content+="</tr>";
+				content.append("<tr>");
+				content.append("<td><a href=\"/FiwareRepository/v1/"+res.getId()+"\">"+res.getId()+"</a></td>"); 
+				content.append("<td><a href=\"/FiwareRepository/v1/"+res.getId()+".meta\">Meta Information</a></td>"); 
+				content.append("<td>"+res.getCreationDate()+"</td>"); 
+				content.append("<td>"+res.getModificationDate()+"</td>"); 
+				content.append("<td>"+res.getContentFileName()+"</td>");
+				content.append("<td>"+res.getContentMimeType()+"</td>");
+				content.append("</tr>");
 
 			}
-			content+="</table><br />";
-			content+="</body></html>";
-			return Response.status(200).type("text/html").entity(content).build();		
+			content.append("</table><br />");
+			content.append("</body></html>");
+			return Response.status(200).type("text/html").entity(content.toString()).build();		
 		}	
 
 		if (clazz.equals(Resource.class)){
 			Resource res = (Resource) obj;
 
-			content+="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"><html><head><title>Resource: "+res.getId()+"</title>";
-			content+="<link rel=\"stylesheet\" type=\"text/css\" href=\"/FiwareRepository/style/style.css\"></head><body>";
+			content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"><html><head><title>Resource: "+res.getId()+"</title>");
+			content.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"/FiwareRepository/style/style.css\"></head><body>");
 
-			content+="<h1>Resource: "+res.getId()+"</h1>"; 
+			content.append("<h1>Resource: "+res.getId()+"</h1>"); 
 
-			content+="<table class=\"tab\">";
-			content+="<th>Resource Id</th><th>Creation Date</th><th>Modification Date</th><th>Filename</th><th>Mime Type</th>";
+			content.append("<table class=\"tab\">");
+			content.append("<th>Resource Id</th><th>Creation Date</th><th>Modification Date</th><th>Filename</th><th>Mime Type</th>");
 
-			content+="<tr>";
-			content+="<td><a href=\"/FiwareRepository/v1/"+res.getId()+"\">"+res.getId()+"</a></td>"; 
-			content+="<td>"+res.getCreationDate()+"</td>"; 
-			content+="<td>"+res.getModificationDate()+"</td>"; 
-			content+="<td>"+res.getContentFileName()+"</td>";
-			content+="<td>"+res.getContentMimeType()+"</td>";
-			content+="</tr>";				
+			content.append("<tr>");
+			content.append("<td><a href=\"/FiwareRepository/v1/"+res.getId()+"\">"+res.getId()+"</a></td>"); 
+			content.append("<td>"+res.getCreationDate()+"</td>"); 
+			content.append("<td>"+res.getModificationDate()+"</td>"); 
+			content.append("<td>"+res.getContentFileName()+"</td>");
+			content.append("<td>"+res.getContentMimeType()+"</td>");
+			content.append("</tr>");				
 
-			content+="</table><br />";
-			content+="</body></html>";
-			return Response.status(200).type("text/html").entity(content).build();		
+			content.append("</table><br />");
+			content.append("</body></html>");
+			return Response.status(200).type("text/html").entity(content.toString()).build();		
 		}
 
-		content+="No Representation for Class "+clazz.getCanonicalName()+" found.";			
-		return Response.status(500).type("text/html").entity(content).build();				
+		content.append("No Representation for Class "+clazz.getCanonicalName()+" found.");			
+		return Response.status(500).type("text/html").entity(content.toString()).build();				
 
 	}
 
 	public static Response textResponse (Object obj, Class clazz) throws JAXBException{
-		String content="";	
+		StringBuilder content = new StringBuilder();	
 
 		if (clazz.equals(ResourceCollection.class)){
 			ResourceCollection col = (ResourceCollection) obj;
 
 
-			content+="Collection: "+col.getId()+"\n"; 
-			content+="Creation Date: "+col.getCreationDate()+"\n\n";
-			content+="Collections:\n";	
-			content+="+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-			content+=String.format("%-3s %-30s %-3s %-33s %-3s" , "++", "Collection Id", "+", "Creation Date", "++");		
-			content+="\n";
-			content+="+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";			
+			content.append("Collection: "+col.getId()+"\n"); 
+			content.append("Creation Date: "+col.getCreationDate()+"\n\n");
+			content.append("Collections:\n");	
+			content.append("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+			content.append(String.format("%-3s %-30s %-3s %-33s %-3s" , "++", "Collection Id", "+", "Creation Date", "++"));		
+			content.append("\n");
+			content.append("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");			
 			for(ResourceCollection innerCol : col.getCollections()){	
-				content+=String.format("%-3s %-30s %-3s %-33s %-3s" , "++", innerCol.getId(), "+", innerCol.getCreationDate(), "++");						     	
-				content+="\n"; 		
+				content.append(String.format("%-3s %-30s %-3s %-33s %-3s" , "++", innerCol.getId(), "+", innerCol.getCreationDate(), "++"));						     	
+				content.append("\n"); 		
 			}
-			content+="+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+			content.append("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
 
-			content+="\n\n";			
-			content+="Resources:\n";
-			content+="+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-			content+=String.format("%-3s %-30s %-3s %-30s %-3s %-30s %-3s %-20s %-3s %-22s %-3s" , "++", "Resource Id", "+", "Creation Date", "+", "Modification Date", "+", "Filename", "+", "Mime Type", "++");	
-			content+="\n";
-			content+="+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+			content.append("\n\n");			
+			content.append("Resources:\n");
+			content.append("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+			content.append(String.format("%-3s %-30s %-3s %-30s %-3s %-30s %-3s %-20s %-3s %-22s %-3s" , "++", "Resource Id", "+", "Creation Date", "+", "Modification Date", "+", "Filename", "+", "Mime Type", "++"));	
+			content.append("\n");
+			content.append("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			for(Resource res : col.getResources()){
-				content+=String.format("%-3s %-30s %-3s %-30s %-3s %-30s %-3s %-20s %-3s %-22s %-3s" , "++", res.getId(), "+", res.getCreationDate(), "+", res.getModificationDate(), "+", res.getContentFileName(), "+", res.getContentMimeType(), "++");	
-				content+="\n"; 	
+				content.append(String.format("%-3s %-30s %-3s %-30s %-3s %-30s %-3s %-20s %-3s %-22s %-3s" , "++", res.getId(), "+", res.getCreationDate(), "+", res.getModificationDate(), "+", res.getContentFileName(), "+", res.getContentMimeType(), "++"));	
+				content.append("\n"); 	
 			}
-			content+="+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+			content.append("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
 			return Response.status(200).type("text/plain").entity(content).build();		
 		}	
@@ -335,30 +336,30 @@ public class RestHelper {
 		if (clazz.equals(Resource.class)){
 			Resource res = (Resource) obj;
 
-			content+="Resource Information:\n"; 
+			content.append("Resource Information:\n"); 
 
-			content+=String.format("%-23s %-15s" ,"Resource Id:" , res.getId());		
-			content+="\n";
+			content.append(String.format("%-23s %-15s" ,"Resource Id:" , res.getId()));		
+			content.append("\n");
 
-			content+=String.format("%-23s %-15s" , "Creation Date:", res.getCreationDate());		
-			content+="\n";
+			content.append(String.format("%-23s %-15s" , "Creation Date:", res.getCreationDate()));		
+			content.append("\n");
 
-			content+=String.format("%-23s %-15s" ,"Modification Date:" , res.getModificationDate());		
-			content+="\n";
+			content.append(String.format("%-23s %-15s" ,"Modification Date:" , res.getModificationDate()));		
+			content.append("\n");
 
-			content+=String.format("%-23s %-35s" ,"Filename:" , res.getContentFileName() );		
-			content+="\n";
+			content.append(String.format("%-23s %-35s" ,"Filename:" , res.getContentFileName()));		
+			content.append("\n");
 
-			content+=String.format("%-23s %-35s" , "Mime Type:", res.getContentMimeType());		
-			content+="\n";
+			content.append(String.format("%-23s %-35s" , "Mime Type:", res.getContentMimeType()));		
+			content.append("\n");
 
 
-			return Response.status(200).type("text/plain").entity(content).build();		
+			return Response.status(200).type("text/plain").entity(content.toString()).build();		
 		}
 
 
-		content+="No Representation for Class "+clazz.getCanonicalName()+" found.";				
-		return Response.status(500).type("text/plain").entity(content).build();						
+		content.append("No Representation for Class "+clazz.getCanonicalName()+" found.");				
+		return Response.status(500).type("text/plain").entity(content.toString()).build();						
 
 	}
 

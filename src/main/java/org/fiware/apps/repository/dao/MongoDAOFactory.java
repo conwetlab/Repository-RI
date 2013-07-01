@@ -23,7 +23,7 @@ public class MongoDAOFactory extends DAOFactory {
 		if(db !=null){
 			return db;
 		}
-		System.out.println("eeeeeeeeeeeeeeeewwe");
+
 		
 		Mongo m;
 		try {
