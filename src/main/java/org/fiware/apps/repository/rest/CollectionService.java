@@ -34,6 +34,8 @@ package org.fiware.apps.repository.rest;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -100,58 +102,6 @@ public class CollectionService {
 		return getResource(path, true, accept);
 	}
 
-	/*
-
-	@GET	
-	@Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.rdf")	
-	@Produces("application/rdf+xml")
-	public Response getResourceRdfXml(@PathParam("path") String path) {		
-		return getResourceRdf(path, "application/rdf+xml", "RDF/XML");
-
-	}
-
-	@GET	
-	@Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.turtle")	
-	@Produces("text/turtle")
-	public Response getResourceRdfTurtle(@PathParam("path") String path) {		
-		return getResourceRdf(path, "text/turtle", "TURTLE");
-
-	}
-
-	@GET	
-	@Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.n3")	
-	@Produces("text/n3")
-	public Response getResourceRdfN3(@PathParam("path") String path) {		
-		return getResourceRdf(path, "text/n3", "N3");
-
-	}
-	 */
-
-	private Response getResourceRdf(String path, String rdfType, String jenaFormat){
-		Resource r = null;
-		try {			
-			r = mongoResourceDAO.getResourceContent(path);
-			if(r.getContent()==null){
-				 throw new RestNotFoundException("Representation not found");					
-			}
-			
-			ByteArrayInputStream in = new ByteArrayInputStream(r.getContent());
-						
-			Model model = ModelFactory.createDefaultModel();
-			model.read(in, null);			
-			Writer writer = new StringWriter();
-			in.close();
-			
-			model.write(writer, jenaFormat);			
-			 
-			String responseString = writer.toString();
-			return Response.status(Response.Status.OK).header("content-length", responseString.length()).entity(responseString).type(rdfType).build();  
-
-		} catch (Exception e) {	
-			return Response.status(Response.Status.NO_CONTENT).build();  
-		}		
-	}
-
 	private Response getResource(String path, boolean meta, String type) {		
 		Resource resource = null;
 		ResourceCollection resourceCollection = null;
@@ -194,26 +144,31 @@ public class CollectionService {
 		if(path.startsWith("/")){
 			path = path.substring(1);
 		}
-
+		return insertResource(path, absRes);
+	}
+	
+	private Response insertResource(String path, AbstractResource absRes) {
+		Resource resource = (Resource) absRes;
 		try {
-			if(absRes.getClass().equals(Resource.class)){
-				Resource res = (Resource) absRes;				
-				mongoResourceDAO.updateResource(path, res);
-			}else{
-				ResourceCollection col = (ResourceCollection) absRes;				
-				mongoCollectionDAO.updateCollection(path, col);
+			if(RestHelper.isRDF(resource.getContentMimeType())) {
+				virtuosoResourceDAO.insertResource(path, resource.getContent().toString(), resource.getContentMimeType());
 			}
+			mongoResourceDAO.insertResource(resource);
+			return Response.status(Status.CREATED).contentLocation(new URI(path)).build();
 		} catch (DatasourceException e) {
 			e.printStackTrace();
 			throw new RestInternalServerException(e.getMessage());
-		} 
-		return Response.status(201).build();
+		} catch (SameIdException e) {
+			e.printStackTrace();
+			return Response.status(Status.CONFLICT).build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new RestInternalServerException(e.getMessage());
+		}
 	}
 	
-	//TODO: insert resource con AbstractResource
 	
-	private Response insertResource(String path, FileUploadForm form)//NEW
-	{
+	private Response insertResource(String path, FileUploadForm form) {
 		Resource resource;
 		try {
 			resource = new Resource();
@@ -237,39 +192,6 @@ public class CollectionService {
 		} catch (SameIdException e) {
 			throw new RestConflictException(e.getMessage());
 		}
-	}
-
-
-	
-	private Response insertResourceContent(String path, FileUploadForm form) {
-		try {			
-
-			Resource r = mongoResourceDAO.getResource(path);
-			if(r==null){
-				r= new Resource();
-				r.setId(path);
-				try {
-					// create if not exist. TODO: set creator Name
-					mongoResourceDAO.insertResource(r);
-				} catch (SameIdException e) {
-					//should never happen
-				}
-			}
-
-			r.setContent(form.getFileData());	
-			r.setContentFileName(form.getFilename());
-			r.setContentMimeType(form.getMimeType());		
-			try {
-				mongoResourceDAO.updateResourceContent(r);
-			} catch (DatasourceException e) {
-				throw new RestConflictException(e.getMessage());
-			}
-			return Response.status(Status.OK).build();
-
-		} catch (DatasourceException e) {
-			throw new RestInternalServerException(e.getMessage());
-		}
-
 	}
 	
 	private Response insertResourceContentRdfGeneric(String path, String content, String rdfType) {
@@ -311,12 +233,33 @@ public class CollectionService {
 			return insertResourceContent(path, form);
 		}*/
 		
-		return insertResourceContentRdfGeneric(path, content, contentType);
+		//return insertResourceContentRdfGeneric(path, content, contentType);
+		return updateResource(path, content, contentType);
 		
 	}
 	
-	private Response updateResource(String path, AbstractResource absRes)//NEW
-	{
+	private Response updateResource(String path, String content, String type) {
+		Resource resource;
+		try {
+			resource = mongoResourceDAO.getResource(path);
+			resource.setContent(content.getBytes());
+			resource.setContentMimeType(type);
+			if(RestHelper.isRDF(resource.getContentMimeType())) {
+				virtuosoResourceDAO.updateResource(path, resource.getContent().toString(), resource.getContentMimeType());
+			}
+			mongoResourceDAO.insertResource(resource);
+			
+		} catch (DatasourceException e) {
+			e.printStackTrace();
+			throw new RestInternalServerException(e.getMessage());
+		} catch (SameIdException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return Response.status(Status.OK).build();
+	}
+	
+	private Response updateResource(String path, AbstractResource absRes) {
 		Resource resource;
 		ResourceCollection resourceCollection;
 		try {
@@ -324,7 +267,9 @@ public class CollectionService {
 			{
 				resource = (Resource) absRes;
 				mongoResourceDAO.updateResource(path, resource);
-				virtuosoResourceDAO.updateResource(path, resource);
+				if(RestHelper.isRDF(resource.getContentMimeType())) {
+					virtuosoResourceDAO.updateResource(path, resource.getContent().toString(), resource.getContentMimeType());
+				}
 			}
 			else
 			{
@@ -368,25 +313,29 @@ public class CollectionService {
 
 */
 
-
-
-
-
-
 	@DELETE
 	@Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")	
 	public Response delete(@PathParam("path") String path) {
+		return deleteResource(path);
+	}
+	
+	private Response deleteResource(String path)
+	{
+		// Check if the path is a resource or a collection and remove it.
 		try {
-			if (mongoResourceDAO.isResource(path)){
+			if (mongoResourceDAO.isResource(path))
+			{
 				mongoResourceDAO.deleteResource(path);
-			}else{
+				virtuosoResourceDAO.deleteResource(path);
+			}
+			else
+			{
 				mongoCollectionDAO.deleteCollection(path);
 			}
 		} catch (DatasourceException e) {
+			e.printStackTrace();
 			throw new RestInternalServerException(e.getMessage());
 		}
-		return null;
+		return Response.status(Status.ACCEPTED).build();
 	}
-
-
 }

@@ -33,35 +33,27 @@ package org.fiware.apps.repository.dao.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
-import java.util.List;
 
-import org.fiware.apps.repository.dao.ResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.Resource;
-import org.fiware.apps.repository.model.ResourceFilter;
 import org.fiware.apps.repository.settings.RepositorySettings;
 
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import virtuoso.jena.driver.VirtGraph;
 import virtuoso.jena.driver.VirtModel;
-import virtuoso.jena.driver.VirtuosoQueryExecution;
 import virtuoso.jena.driver.VirtuosoQueryExecutionFactory;
-import virtuoso.jena.driver.VirtuosoUpdateFactory;
-import virtuoso.jena.driver.VirtuosoUpdateRequest;
 
 public class VirtuosoResourceDAO {
 	
+	private static VirtGraph set;
+	
 	public VirtuosoResourceDAO() {
-
+		if (set == null)
+			set = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, RepositorySettings.VIRTUOSO_DB, 
+				RepositorySettings.VIRTUOSO_DB);
 	}
 	
 	public Resource getResource(String graph, String type) throws DatasourceException {
@@ -108,10 +100,20 @@ public class VirtuosoResourceDAO {
 		return model.isEmpty();
 	}
 
-	public Boolean updateResource(String graph, Resource r)
+	public Boolean updateResource(String graph, String content, String type)
 			throws DatasourceException {
-		// TODO: ES NECESARIO??
-		return null;
+		//Remove the content of the resource in the triple store, and insert the new content.
+		Model model = VirtModel.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
+				RepositorySettings.VIRTUOSO_DB, RepositorySettings.VIRTUOSO_DB);
+		ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
+		try {
+			model.removeAll();
+			model.read(new InputStreamReader(input), null, type);
+		} catch (Exception e) {
+			throw new DatasourceException(e.getMessage(), Resource.class);
+		}
+		model.close();
+		return true;
 	}
 
 	public Boolean deleteResource(String graph) {
@@ -122,6 +124,19 @@ public class VirtuosoResourceDAO {
 		model.removeAll();
 		model.close();
 		return true;
+	}
+	
+	public String executeQuery(String query, String type)
+	{
+		//Execute the query and return result in the format given.
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		Model model = VirtuosoQueryExecutionFactory.create(QueryFactory.create(query), set).execSelect().getResourceModel();
+		try {
+			model.write(output, type, null);
+		} catch (Exception e) {
+			
+		}
+		return output.toString();
 	}
 
 }

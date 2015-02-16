@@ -30,6 +30,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
+
+import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
+
+@Path("/query")
 public class QueryService {
 
+	private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
+	
+	@Context
+	 UriInfo uriInfo;
+	
+	@GET	
+	public Response executeQuery(@HeaderParam("Accept") String accept) {
+		String query = "";
+		String result = virtuosoResourceDAO.executeQuery(query, accept);
+		if (result == "") {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+		else {
+			return Response.status(Status.ACCEPTED).type(accept).entity(result).build();
+		}
+	}
 }
