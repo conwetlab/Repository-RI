@@ -2,7 +2,6 @@
 Modified BSD License  
 ====================
 
-Copyright (c) 2012, SAP AG
 Copyright (c) 2015, CoNWeTLab, UPM
 All rights reserved.
 
@@ -29,16 +28,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.fiware.apps.repository.settings;
+package org.fiware.apps.repository.rest;
 
-public class RepositorySettings {
-	public static String MONGO_HOST = "127.0.0.1";
-	public static String MONGO_DB = "test";
-	public static Integer MONGO_PORT = 27017;
-	public static String REPOSITORY_BASE_URL = "http://localhost:8080/FiwareRepository/";
-	public static String VIRTUOSO_HOST = "jdbc:virtuoso://localhost:";
-	public static Integer VIRTUOSO_PORT = 1111;
-	public static String VIRTUOSO_DB = "dba";
-	
+public class QueryService {
 
 }
