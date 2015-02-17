@@ -33,7 +33,7 @@ package org.fiware.apps.repository.rest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -50,8 +50,7 @@ public class QueryService {
 	 UriInfo uriInfo;
 	
 	@GET	
-	public Response executeQuery(@HeaderParam("Accept") String accept) {
-		String query = "";
+	public Response executeQuery(@HeaderParam("Accept") String accept, @QueryParam("query") String query) {
 		String result = virtuosoResourceDAO.executeQuery(query, accept);
 		if (result == "") {
 			return Response.status(Status.BAD_REQUEST).build();

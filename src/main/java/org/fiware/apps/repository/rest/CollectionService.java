@@ -122,7 +122,7 @@ public class CollectionService {
 			{
 				// Obtain the resource content from virtuoso triple store.
 				if(!type.equalsIgnoreCase("application/rdf+xml") && RestHelper.isRDF(type))
-					resource.setContent(virtuosoResourceDAO.getResource(resource.getContentFileName(), type).getContent());
+					resource.setContent(virtuosoResourceDAO.getResource(resource.getContentFileName(), RestHelper.typeMap.get(type)).getContent());
 				// Obtain the resource content mongo DB. 
 				else
 					resource.setContent(mongoResourceDAO.getResourceContent(path).getContent());
@@ -151,7 +151,8 @@ public class CollectionService {
 		Resource resource = (Resource) absRes;
 		try {
 			if(RestHelper.isRDF(resource.getContentMimeType())) {
-				virtuosoResourceDAO.insertResource(path, resource.getContent().toString(), resource.getContentMimeType());
+				virtuosoResourceDAO.insertResource(path, resource.getContent().toString(), 
+						RestHelper.typeMap.get(resource.getContentMimeType()));
 			}
 			mongoResourceDAO.insertResource(resource);
 			return Response.status(Status.CREATED).contentLocation(new URI(path)).build();
@@ -176,14 +177,15 @@ public class CollectionService {
 			resource.setContentFileName(form.getFilename());
 			resource.setContentMimeType(form.getMimeType());
 			resource.setContent(form.getFileData());
-			//resource.setContentUrl(); de donde sale?? es el path??
+			//resource.setContentUrl();
 			//resource.setCreationDate();
-			//resource.setCreator(creator); donde lo averiguo??
+			//resource.setCreator(creator);
 			//resource.setModificationDate();
 			//resource.setName("");
 			if(RestHelper.isRDF(resource.getContentMimeType()))
 			{
-				virtuosoResourceDAO.insertResource(path, resource.getContent().toString(), resource.getContentMimeType());
+				virtuosoResourceDAO.insertResource(path, resource.getContent().toString(), 
+						RestHelper.typeMap.get(resource.getContentMimeType()));
 			}
 			mongoResourceDAO.insertResource(resource);
 			return Response.status(Status.CREATED).build();
@@ -245,7 +247,8 @@ public class CollectionService {
 			resource.setContent(content.getBytes());
 			resource.setContentMimeType(type);
 			if(RestHelper.isRDF(resource.getContentMimeType())) {
-				virtuosoResourceDAO.updateResource(path, resource.getContent().toString(), resource.getContentMimeType());
+				virtuosoResourceDAO.updateResource(path, resource.getContent().toString(), 
+						RestHelper.typeMap.get(resource.getContentMimeType()));
 			}
 			mongoResourceDAO.insertResource(resource);
 			
@@ -268,7 +271,8 @@ public class CollectionService {
 				resource = (Resource) absRes;
 				mongoResourceDAO.updateResource(path, resource);
 				if(RestHelper.isRDF(resource.getContentMimeType())) {
-					virtuosoResourceDAO.updateResource(path, resource.getContent().toString(), resource.getContentMimeType());
+					virtuosoResourceDAO.updateResource(path, resource.getContent().toString(), 
+							RestHelper.typeMap.get(resource.getContentMimeType()));
 				}
 			}
 			else
