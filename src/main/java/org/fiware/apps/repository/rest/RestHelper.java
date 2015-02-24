@@ -3,7 +3,7 @@ Modified BSD License
 ====================
 
 Copyright (c) 2012, SAP AG
-Copyright (c) 2015, CoNWeTLab, UPM
+Copyright (c) 2015, CoNWeTLab, Universidad Politecnica Madrid
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,12 @@ public class RestHelper {
 		typeMap = new HashMap<String, String>();
 		typeMap.put("application/json","application/json");
 		typeMap.put("application/rdf+xml","RDF/XML");
+                typeMap.put("application/ld+json","JSON-LD");
 		typeMap.put("text/turtle","TURTLE");
-		typeMap.put("text/n3","N-TRIPLE");
+                typeMap.put("application/x-turtle","TURTLE");
+		typeMap.put("text/n3","N3");
+                typeMap.put("text/rdf+n3","N3");
+                typeMap.put("text/plain","N-TRIPLE");
 		typeMap.put("text/html","text/html");
 		typeMap.put("application/x-ms-application","text/html");
 		typeMap.put("text/plain","text/plain");
