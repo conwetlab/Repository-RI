@@ -38,7 +38,8 @@ public class RepositorySettings {
 	public static String REPOSITORY_BASE_URL = "http://localhost:8080/FiwareRepository/";
 	public static String VIRTUOSO_HOST = "jdbc:virtuoso://localhost:";
 	public static Integer VIRTUOSO_PORT = 1111;
-	public static String VIRTUOSO_DB = "dba";
+	public static String VIRTUOSO_USER = "dba";
+        public static String VIRTUOSO_PASSWORD = "dba";
 	
 
 }

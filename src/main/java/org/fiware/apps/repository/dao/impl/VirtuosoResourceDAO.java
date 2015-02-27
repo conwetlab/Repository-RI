@@ -30,7 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.dao.impl;
 
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import java.io.ByteArrayInputStream;
@@ -42,22 +41,13 @@ import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
 
-import com.hp.hpl.jena.query.QueryFactory;
+
 import com.hp.hpl.jena.query.QueryParseException;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.rdf.model.InfModel;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.reasoner.Reasoner;
-import com.hp.hpl.jena.reasoner.ReasonerRegistry;
 import org.fiware.apps.repository.exceptions.db.BadQueryException;
-import org.fiware.apps.repository.exceptions.web.RestNotAcceptableException;
-import org.fiware.apps.repository.exceptions.web.RestQueryBadConstruction;
 
 import virtuoso.jena.driver.VirtGraph;
 import virtuoso.jena.driver.VirtModel;
-import virtuoso.jena.driver.VirtuosoQueryExecutionFactory;
 
 public class VirtuosoResourceDAO {
     
@@ -65,18 +55,20 @@ public class VirtuosoResourceDAO {
     
     public VirtuosoResourceDAO() {
         if (set == null)
-            set = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, RepositorySettings.VIRTUOSO_DB,
-                    RepositorySettings.VIRTUOSO_DB);
+        {
+            set = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, 
+                    RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+            set.setReadFromAllGraphs(true); 
+        }
     }
     
     public Resource getResource(String graph, String type) throws DatasourceException {
         
         //Obtain the resource in the specified format.
         Resource res = new Resource();
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
         Model model = VirtModel.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_DB, RepositorySettings.VIRTUOSO_DB);
-        
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
             model.write(output, type, null);
         } catch (Exception e) {
@@ -93,7 +85,7 @@ public class VirtuosoResourceDAO {
         
         //Insert the nodes in a graph.
         Model model = VirtModel.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_DB, RepositorySettings.VIRTUOSO_DB);
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
         ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
         try
         {
@@ -110,7 +102,7 @@ public class VirtuosoResourceDAO {
         
         //Check if the graph exist and have any triple.
         Model model = VirtModel.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_DB, RepositorySettings.VIRTUOSO_DB);
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
         return model.isEmpty();
     }
     
@@ -118,7 +110,7 @@ public class VirtuosoResourceDAO {
             throws DatasourceException {
         //Remove the content of the resource in the triple store, and insert the new content.
         Model model = VirtModel.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_DB, RepositorySettings.VIRTUOSO_DB);
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
         ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
         try {
             model.removeAll();
@@ -130,11 +122,37 @@ public class VirtuosoResourceDAO {
         return true;
     }
     
+    public Boolean updateResource(String oldGraph, String newGraph, String content, String type)
+            throws DatasourceException {
+        Model oldModel = VirtModel.openDatabaseModel(oldGraph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
+            oldModel.write(output, type, null);
+            oldModel.removeAll();
+        } catch (Exception e) {
+            throw new DatasourceException(e.getMessage(), Resource.class);
+        }
+        oldModel.close();
+        
+        Model newModel = VirtModel.openDatabaseModel(newGraph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+        try {
+            newModel.removeAll();
+            newModel.read(new InputStreamReader(input), null, type);
+        } catch (Exception e) {
+            throw new DatasourceException(e.getMessage(), Resource.class);
+        }
+        newModel.close();
+        return true;
+    }
+    
     public Boolean deleteResource(String graph) {
         
         //It is not necessary to check if "id" is a graph.
         Model model = VirtModel.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_DB, RepositorySettings.VIRTUOSO_DB);
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
         model.removeAll();
         model.close();
         return true;
@@ -144,21 +162,16 @@ public class VirtuosoResourceDAO {
     {
         //Execute the query and return result in the format given.
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        Model model = new VirtModel(set);
-        Model result = null;
+        Model modelAux = new VirtModel(set);
         try {
-            Reasoner reasoner = ReasonerRegistry.getRDFSReasoner();
-            InfModel infModel = ModelFactory.createInfModel(reasoner, model);
-            infModel.commit();
-            Query sparql;
-            sparql = QueryFactory.create(query);
-            QueryExecution vqe = QueryExecutionFactory.create (sparql, infModel);
-            model = vqe.execSelect().getResourceModel();
+            QueryExecution vqe = QueryExecutionFactory.create(query, modelAux);
+            Model model = vqe.execSelect().getResourceModel();
             model.write(output, type, null);
         } catch (QueryParseException e) {
             e.printStackTrace();
             throw new BadQueryException(query);
         }
+        
         return output.toString();
     }
     

@@ -65,7 +65,7 @@ public class RestHelper {
                 typeMap.put("application/x-turtle","TURTLE");
 		typeMap.put("text/n3","N3");
                 typeMap.put("text/rdf+n3","N3");
-                typeMap.put("text/plain","N-TRIPLE");
+                typeMap.put("text/n-triples","N-TRIPLE");
 		typeMap.put("text/html","text/html");
 		typeMap.put("application/x-ms-application","text/html");
 		typeMap.put("text/plain","text/plain");
@@ -74,8 +74,13 @@ public class RestHelper {
 	
 	public static Boolean isRDF(String string)
 	{
-		return string.equalsIgnoreCase("application/rdf+xml") || string.equalsIgnoreCase("text/turtle") ||
-				string.equalsIgnoreCase("text/n3");
+		return string.equalsIgnoreCase("application/rdf+xml") || 
+                        string.equalsIgnoreCase("application/ld+json")|| 
+                        string.equalsIgnoreCase("text/turtle") ||
+                        string.equalsIgnoreCase("application/x-turtle") ||
+                        string.equalsIgnoreCase("text/rdf+n3") ||
+                        string.equalsIgnoreCase("text/n-triples") ||
+                        string.equalsIgnoreCase("text/n3");
 	}
 
 	public static Response multiFormatResponse(Object obj, Class clazz, String type, UriInfo uriInfo) throws JAXBException{

@@ -33,10 +33,7 @@ package org.fiware.apps.repository.rest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -47,7 +44,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -66,6 +62,7 @@ import org.fiware.apps.repository.exceptions.web.RestInternalServerException;
 import org.fiware.apps.repository.exceptions.web.RestNotFoundException;
 import org.fiware.apps.repository.model.AbstractResource;
 import org.fiware.apps.repository.model.FileUploadForm;
+import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 
@@ -86,7 +83,6 @@ public class CollectionService {
     @Produces({"application/xml", "application/json"})
     public Response getResourceRoot() {
         throw new RestNotFoundException("Please specify a collection");
-        
     }
     
     @GET
@@ -102,17 +98,17 @@ public class CollectionService {
     }
     
     private Response getResource(String path, boolean meta, String type) {
-        Resource resource = null;
-        ResourceCollection resourceCollection = null;
-        
         try {
-            // Check, if the path is a resource or a collection or does not exists
+            Resource resource = null;
+            ResourceCollection resourceCollection = null;
+            
+            // Check, if the path is a resource or a collection or does not exists.
             resource = mongoResourceDAO.getResource(path);
             if (resource == null)
             {
                 resourceCollection = mongoCollectionDAO.getCollection(path);
-                if (resourceCollection == null)
-                    throw new RestNotFoundException("Collection or resource not found");
+                if (resourceCollection == null || meta)
+                    return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
                 else
                     return RestHelper.multiFormatResponse(resourceCollection, ResourceCollection.class, type, uriInfo);
             }
@@ -120,60 +116,63 @@ public class CollectionService {
             if(!meta)
             {
                 // Obtain the resource content from virtuoso triple store.
-                if(!type.equalsIgnoreCase("application/rdf+xml") && RestHelper.isRDF(type))
-                    resource.setContent(virtuosoResourceDAO.getResource(resource.getContentFileName(), RestHelper.typeMap.get(type)).getContent());
+                if(!type.equalsIgnoreCase("application/rdf+xml") && RestHelper.isRDF(type)) {
+                    resource.setContent(virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(type)).getContent());
+                }
                 // Obtain the resource content mongo DB.
-                else
+                else {
                     resource.setContent(mongoResourceDAO.getResourceContent(path).getContent());
+                }
+                if (resource.getContent() == null)
+                {
+                    return Response.status(Response.Status.NO_CONTENT).build();
+                }
+                return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(type).build();
             }
-            
-            return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(type).build();
-            
-        } catch (DatasourceException e) {
-            throw new RestInternalServerException(e.getMessage());
-        } catch (JAXBException e) {
+            else
+            {
+                return RestHelper.multiFormatResponse(resource, Resource.class, type, uriInfo);
+            }
+        } catch (DatasourceException ex) {
             throw new RestInternalServerException("Error parsing content");
+        } catch (JAXBException ex) {
+            throw new RestInternalServerException(ex.getMessage());
         }
+        
     }
     
     @POST
-    @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
     @Consumes({"application/xml", "application/json"})
-    public Response postResource(@PathParam("path") String path,  AbstractResource absRes) {
-        if(path.startsWith("/")){
-            path = path.substring(1);
-        }
+    public Response postResource(AbstractResource absRes) {
         if(absRes.getClass().equals(Resource.class)) {
-            return insertResource(path, absRes);
+            return insertResource((Resource) absRes);
         }
         else {
-            return insertCollection(path, absRes);
+            return insertCollection((ResourceCollection) absRes);
         }
     }
     
-    private Response insertResource(String path, AbstractResource absRes) {
-        Resource resource = (Resource) absRes;
+    private Response insertResource(Resource resource) {
+        // Create a new resource with the resource metadata given.
+        // Some metadata can not be given by the user.
+        resource.setContentMimeType("");
+        resource.setCreationDate(new Date());
+        resource.setContentUrl(uriInfo.getAbsolutePath().toString() + "/" + resource.getId());
         try {
-            if(RestHelper.isRDF(resource.getContentMimeType())) {
-                virtuosoResourceDAO.insertResource(path, new String(resource.getContent()),
-                        RestHelper.typeMap.get(resource.getContentMimeType()));
-            }
             mongoResourceDAO.insertResource(resource);
-            return Response.status(Status.CREATED).contentLocation(new URI(path)).build();
+            return Response.status(Status.CREATED).contentLocation(new URI(resource.getContentUrl())).build();
         } catch (DatasourceException e) {
-            e.printStackTrace();
             throw new RestInternalServerException(e.getMessage());
         } catch (SameIdException e) {
-            e.printStackTrace();
             return Response.status(Status.CONFLICT).build();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
             throw new RestInternalServerException(e.getMessage());
         }
     }
     
     
     private Response insertResource(String path, FileUploadForm form) {
+        // Create a new resource form a file uploaded.
         Resource resource;
         try {
             resource = new Resource();
@@ -181,11 +180,6 @@ public class CollectionService {
             resource.setContentFileName(form.getFilename());
             resource.setContentMimeType(form.getMimeType());
             resource.setContent(form.getFileData());
-            //resource.setContentUrl();
-            //resource.setCreationDate();
-            //resource.setCreator(creator);
-            //resource.setModificationDate();
-            //resource.setName("");
             if(RestHelper.isRDF(resource.getContentMimeType()))
             {
                 virtuosoResourceDAO.insertResource(path, resource.getContent().toString(),
@@ -193,19 +187,20 @@ public class CollectionService {
             }
             mongoResourceDAO.insertResource(resource);
             return Response.status(Status.CREATED).build();
-        } catch (DatasourceException e) {
-            throw new RestInternalServerException(e.getMessage());
-        } catch (SameIdException e) {
-            throw new RestConflictException(e.getMessage());
+        } catch (DatasourceException ex) {
+            throw new RestInternalServerException(ex.getMessage());
+        } catch (SameIdException ex) {
+            return Response.status(Status.CONFLICT).build();
         }
     }
     
-    private Response insertCollection(String path, AbstractResource absRes) {
-        ResourceCollection resourceCollection = (ResourceCollection) absRes;
+    private Response insertCollection(ResourceCollection resourceCollection) {
         try {
-            mongoCollectionDAO.updateCollection(path, resourceCollection);
+            mongoCollectionDAO.insertCollection(resourceCollection);
         } catch (DatasourceException ex) {
-            Logger.getLogger(CollectionService.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RestInternalServerException(ex.getMessage());
+        } catch (SameIdException ex) {
+            return Response.status(Status.CONFLICT).entity(ex.getMessage()).build();
         }
         return Response.status(Status.CREATED).build();
     }
@@ -240,19 +235,23 @@ public class CollectionService {
     
     @PUT
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response putResource(@HeaderParam("Accept") String accept,@HeaderParam("Content-Type") String contentType,  @PathParam("path") String path, String content/*, @MultipartForm FileUploadForm form*/) {
-        
-        if(path.startsWith("/")){
-            path = path.substring(1);
-        }
-        /*	if(accept.startsWith("multipart/form-data")){
-        return insertResourceContent(path, form);
-        }*/
+    public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, String content/*, @MultipartForm FileUploadForm form*/) {
         return updateResource(path, content, contentType);
-        
+    }
+    
+    @PUT
+    @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
+    public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, AbstractResource absRes) {
+        if(absRes.getClass().equals(Resource.class)) {
+            return updateResource(path, (Resource) absRes);
+        }
+        else {
+            return Response.status(Status.FORBIDDEN).build();
+        }
     }
     
     private Response updateResource(String path, String content, String type) {
+        // Update a resource content inserting in virtuoso triple store if content is RDF.
         Resource resource;
         try {
             resource = mongoResourceDAO.getResource(path);
@@ -264,43 +263,32 @@ public class CollectionService {
             }
             resource.setContent(content.getBytes());
             resource.setContentMimeType(type);
-            if(RestHelper.isRDF(resource.getContentMimeType())) {
+            if(RestHelper.isRDF(type)) {
                 virtuosoResourceDAO.updateResource(path, content,
                         RestHelper.typeMap.get(resource.getContentMimeType()));
             }
             mongoResourceDAO.updateResourceContent(resource);
             
-        } catch (DatasourceException e) {
-            e.printStackTrace();
-            throw new RestInternalServerException(e.getMessage());
-        } catch (SameIdException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (DatasourceException ex) {
+            throw new RestInternalServerException(ex.getMessage());
+        } catch (SameIdException ex) {
+            return Response.status(Status.CONFLICT).entity(ex.getMessage()).build();
         }
         return Response.status(Status.OK).build();
     }
     
-    private Response updateResource(String path, AbstractResource absRes) {
-        Resource resource;
-        ResourceCollection resourceCollection;
+    private Response updateResource(String path, Resource resource) {
+        //Update a resource metadata
         try {
-            if (absRes.getClass().equals(Resource.class))
-            {
-                resource = (Resource) absRes;
-                mongoResourceDAO.updateResource(path, resource);
-                if(RestHelper.isRDF(resource.getContentMimeType())) {
-                    virtuosoResourceDAO.updateResource(path, resource.getContent().toString(),
-                            RestHelper.typeMap.get(resource.getContentMimeType()));
-                }
-            }
-            else
-            {
-                resourceCollection = (ResourceCollection) absRes;
-                mongoCollectionDAO.updateCollection(path, resourceCollection);
-            }
-        } catch (DatasourceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Resource aux = mongoResourceDAO.getResourceContent(path);
+            resource.setId(aux.getId());
+            resource.setContentMimeType(aux.getContentMimeType());
+            resource.setContent(aux.getContent());
+            resource.setCreationDate(aux.getCreationDate());
+            resource.setContentUrl(aux.getContentUrl());
+            mongoResourceDAO.updateResource(path, resource);
+        } catch (DatasourceException ex) {
+            throw new RestInternalServerException(ex.getMessage());
         }
         return Response.status(Status.OK).build();
     }
@@ -325,7 +313,6 @@ public class CollectionService {
                 mongoCollectionDAO.deleteCollection(path);
             }
         } catch (DatasourceException e) {
-            e.printStackTrace();
             throw new RestInternalServerException(e.getMessage());
         }
         return Response.status(Status.ACCEPTED).build();

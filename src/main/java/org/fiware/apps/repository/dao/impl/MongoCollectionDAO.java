@@ -37,15 +37,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.fiware.apps.repository.dao.CollectionDAO;
-import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.MongoDAOFactory;
-import org.fiware.apps.repository.dao.ResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
-import org.fiware.apps.repository.exceptions.db.ParentNotExistsException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
-import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
-import org.fiware.apps.repository.model.ResourceFilter;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -227,11 +222,10 @@ public class MongoCollectionDAO implements CollectionDAO{
 	
 	@Override
 	public Boolean insertCollection(ResourceCollection r) throws DatasourceException, SameIdException {
-		
 		if (getCollection(r.getId()) != null){
 			throw new SameIdException(r.getId(), ResourceCollection.class);
-		}	
-		
+		}
+                
 		try{
 			db.requestStart();		
 			BasicDBObject obj = new BasicDBObject();
