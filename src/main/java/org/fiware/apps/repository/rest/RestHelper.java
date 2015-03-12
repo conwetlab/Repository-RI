@@ -286,7 +286,7 @@ public class RestHelper {
 			content.append("<th>Collection Id</th><th>Creation Date</th>");
 			for(ResourceCollection innerCol : col.getCollections()){
 				content.append("<tr>");
-				content.append("<td><a href=\"/FiwareRepository/v1/"+innerCol.getId()+"\">"+innerCol.getId()+"</a></td>");  
+				content.append("<td><a href=\"/FiwareRepository/v1/collec/"+innerCol.getId()+"\">"+innerCol.getId()+"</a></td>");  
 				content.append("<td>"+innerCol.getCreationDate()+"</td>");
 				content.append("</tr>");
 			}
@@ -296,8 +296,8 @@ public class RestHelper {
 			content.append("<th>Resource Id</th><th>Resource Meta Information</th><th>Creation Date</th><th>Modification Date</th><th>Filename</th><th>Mime Type</th>");
 			for(Resource res : col.getResources()){
 				content.append("<tr>");
-				content.append("<td><a href=\"/FiwareRepository/v1/"+res.getId()+"\">"+res.getId()+"</a></td>"); 
-				content.append("<td><a href=\"/FiwareRepository/v1/"+res.getId()+".meta\">Meta Information</a></td>"); 
+				content.append("<td><a href=\"/FiwareRepository/v1/collec/"+res.getId()+"\">"+res.getId()+"</a></td>"); 
+				content.append("<td><a href=\"/FiwareRepository/v1/collec/"+res.getId()+".meta\">Meta Information</a></td>"); 
 				content.append("<td>"+res.getCreationDate()+"</td>"); 
 				content.append("<td>"+res.getModificationDate()+"</td>"); 
 				content.append("<td>"+res.getContentFileName()+"</td>");
@@ -322,7 +322,7 @@ public class RestHelper {
 			content.append("<th>Resource Id</th><th>Creation Date</th><th>Modification Date</th><th>Filename</th><th>Mime Type</th>");
 
 			content.append("<tr>");
-			content.append("<td><a href=\"/FiwareRepository/v1/"+res.getId()+"\">"+res.getId()+"</a></td>"); 
+			content.append("<td><a href=\"/FiwareRepository/v1/collec/"+res.getId()+"\">"+res.getId()+"</a></td>"); 
 			content.append("<td>"+res.getCreationDate()+"</td>"); 
 			content.append("<td>"+res.getModificationDate()+"</td>"); 
 			content.append("<td>"+res.getContentFileName()+"</td>");

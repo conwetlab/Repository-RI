@@ -30,8 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -43,51 +41,55 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import org.fiware.apps.repository.dao.VirtModelFactory;
+import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
 
 
 
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
-import org.fiware.apps.repository.exceptions.db.BadQueryException;
-import org.fiware.apps.repository.exceptions.web.RestQueryBadConstruction;
+import org.fiware.apps.repository.settings.RepositorySettings;
+import virtuoso.jena.driver.VirtGraph;
 
 @Path("/services/query")
 public class QueryService {
-    
-    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
+    VirtGraph virtGraph = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, 
+                            RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO(new VirtModelFactory(virtGraph),
+            virtGraph, new VirtuosoQueryExecutionFactory());
     
     @Context
             UriInfo uriInfo;
     
     @GET
     public Response executeQuery(@HeaderParam("Accept") String accept, @QueryParam("query") String query) {
-        String result;
-        try {
-            result = virtuosoResourceDAO.executeQuery(query, RestHelper.typeMap.get(accept));
-        } catch (BadQueryException ex) {
-            throw new RestQueryBadConstruction(ex.getMessage());
-        }
-        if (result == "") {
-            return Response.status(Status.BAD_REQUEST).build();
-        }
-        else {
-            return Response.status(Status.OK).type(accept).entity(result).build();
-        }
+        return executeAnyQuery(query, accept);
     }
     
     @POST
     @Consumes("text/plain")
     public Response executeLongQuery(@HeaderParam("Accept") String accept, String content) {
-        String result;
+        return executeAnyQuery(content, accept);
+    }
+    
+    private Response executeAnyQuery(String query, String type) {
+        String result = "";
+        // Check type sparql query and execute the method
         try {
-            result = virtuosoResourceDAO.executeQuery(content, RestHelper.typeMap.get(accept));
-        } catch (BadQueryException ex) {
-            throw new RestQueryBadConstruction(ex.getMessage());
+            if (query.toLowerCase().contains("select")) {
+                return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+            }
+            if (query.toLowerCase().contains("construct")) {
+                result = virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(type));
+            }
+            if (query.toLowerCase().contains("describe")) {
+                result = virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(type));
+            }
+            if (query.toLowerCase().contains("ask")) {
+                result = (virtuosoResourceDAO.executeQueryAsk(query)) ? "true" : "false";
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        if (result == "") {
-            return Response.status(Status.BAD_REQUEST).build();
-        }
-        else {
-            return Response.status(Status.OK).type(accept).entity(result).build();
-        }
+        return Response.status(Status.OK).entity(result).build();
     }
 }

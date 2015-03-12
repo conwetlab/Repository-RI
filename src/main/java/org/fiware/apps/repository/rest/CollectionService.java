@@ -54,6 +54,8 @@ import javax.xml.bind.JAXBException;
 import org.fiware.apps.repository.dao.CollectionDAO;
 import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.ResourceDAO;
+import org.fiware.apps.repository.dao.VirtModelFactory;
+import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
@@ -65,14 +67,18 @@ import org.fiware.apps.repository.model.FileUploadForm;
 import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
+import org.fiware.apps.repository.settings.RepositorySettings;
+import virtuoso.jena.driver.VirtGraph;
 
 @Path("/collec")
 public class CollectionService {
     
-    DAOFactory mongoFactory = DAOFactory.getDAOFactory(DAOFactory.MONGO);
-    CollectionDAO mongoCollectionDAO = mongoFactory.getCollectionDAO();
-    ResourceDAO mongoResourceDAO = mongoFactory.getResourceDAO();
-    VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
+    private DAOFactory mongoFactory = DAOFactory.getDAOFactory(DAOFactory.MONGO);
+    private CollectionDAO mongoCollectionDAO = mongoFactory.getCollectionDAO();
+    private ResourceDAO mongoResourceDAO = mongoFactory.getResourceDAO();
+    private VirtGraph virtGraph = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, 
+            RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO(new VirtModelFactory(virtGraph), virtGraph, new VirtuosoQueryExecutionFactory());
     JAXBContext ctx;
     
     @Context
@@ -169,7 +175,6 @@ public class CollectionService {
             throw new RestInternalServerException(e.getMessage());
         }
     }
-    
     
     private Response insertResource(String path, FileUploadForm form) {
         // Create a new resource form a file uploaded.

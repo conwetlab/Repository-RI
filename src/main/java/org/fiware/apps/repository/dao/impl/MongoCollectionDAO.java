@@ -47,6 +47,11 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.ObjectId;
+import java.util.Objects;
+import org.fiware.apps.repository.dao.VirtModelFactory;
+import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
+import org.fiware.apps.repository.settings.RepositorySettings;
+import virtuoso.jena.driver.VirtGraph;
 
 public class MongoCollectionDAO implements CollectionDAO{
 
@@ -58,8 +63,16 @@ public class MongoCollectionDAO implements CollectionDAO{
 	public MongoCollectionDAO(){
 		db = MongoDAOFactory.createConnection();
 		mongoCollection = db.getCollection(MONGO_COLL_NAME);
-                virtuosoResourceDAO = new VirtuosoResourceDAO();
+                VirtGraph virtGraph = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, 
+                        RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+                virtuosoResourceDAO = new VirtuosoResourceDAO(new VirtModelFactory(virtGraph), virtGraph, new VirtuosoQueryExecutionFactory());
 	}
+        
+        public MongoCollectionDAO(DB dbIn, DBCollection dBCollectionIn, VirtuosoResourceDAO virtuosoResourceDAOIn) {
+               db = Objects.requireNonNull(dbIn);
+               mongoCollection = Objects.requireNonNull(dBCollectionIn);
+               virtuosoResourceDAO = Objects.requireNonNull(virtuosoResourceDAOIn);
+        }
 	
 
 
@@ -73,7 +86,7 @@ public class MongoCollectionDAO implements CollectionDAO{
 			BasicDBObject query = new BasicDBObject("id", pat);			
 			obj = mongoCollection.findOne(query);	
 
-		}catch (Exception e){
+		} catch (Exception e){
 			System.out.println(e.getMessage());
 			db.requestDone();	
 			throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), ResourceCollection.class );		
