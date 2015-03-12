@@ -162,7 +162,7 @@ public class VirtuosoResourceDAO {
         return true;
     }
     
-    public SelectQueryResponse executeQuerySelect(String query) {
+    public SelectQueryResponse executeQuerySelect(String query) throws QueryParseException {
         
         //Query sparql = QueryFactory.create(query);
         VirtuosoQueryExecution vqe = queryExecutionFactory.create(query, set);
