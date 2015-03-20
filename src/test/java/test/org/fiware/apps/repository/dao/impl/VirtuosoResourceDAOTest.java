@@ -19,6 +19,7 @@ import org.fiware.apps.repository.settings.RepositorySettings;
 import org.junit.Assert;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import virtuoso.jena.driver.VirtGraph;
@@ -63,7 +64,7 @@ public class VirtuosoResourceDAOTest {
         try {
             result = toTest.getResource(graph, type);
         } catch (DatasourceException ex) {
-            Assert.fail("exception not expected");
+            fail("exception not expected:\n" + ex.getLocalizedMessage());
         }
         
         verify(virtModelFactory).openDatabaseModel(eq(graph),
@@ -97,7 +98,7 @@ public class VirtuosoResourceDAOTest {
         try {
             toTest.insertResource(graph, content, type);
         } catch (DatasourceException ex) {
-            Assert.fail("exception not expected");
+            fail("exception not expected:\n" + ex.getLocalizedMessage());
         }
         verify(virtModelFactory).openDatabaseModel(eq(graph),
                 eq(RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT),
@@ -139,7 +140,7 @@ public class VirtuosoResourceDAOTest {
         try {
             toTest.updateResource(graph, content, type);
         } catch (DatasourceException ex) {
-            Assert.fail("exception not excepted");
+            fail("exception not expected:\n" + ex.getLocalizedMessage());
         }
         verify(virtModel).removeAll();
         verify(virtModel).read(any(InputStreamReader.class), isNull(String.class), eq(type));
@@ -170,7 +171,7 @@ public class VirtuosoResourceDAOTest {
         try {
             toTest.replaceResource(oldGraph, newGraph, type);
         } catch (DatasourceException ex) {
-            Assert.fail("exception not excepted");
+            fail("exception not expected:\n" + ex.getLocalizedMessage());
         }
         
         verify(virtModel).write(any(ByteArrayOutputStream.class), eq(type), isNull(String.class));

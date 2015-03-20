@@ -40,6 +40,9 @@ public class RepositorySettings {
 	public static Integer VIRTUOSO_PORT = 1111;
 	public static String VIRTUOSO_USER = "dba";
         public static String VIRTUOSO_PASSWORD = "dba";
+        
+        public final static String COLLECTION_SERVICE_NAME = "collec";
+        public final static String QUERY_SERVICE_NAME = "query";
 	
 
 }

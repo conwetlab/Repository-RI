@@ -56,12 +56,12 @@
 
 	<context-param>
 		<param-name>resteasy.resources</param-name>
-		<param-value>org.fiware.apps.repository.rest.ResourceService,org.fiware.apps.repository.rest.CollectionService,org.fiware.apps.repository.rest.BrowseService</param-value>
+		<param-value>org.fiware.apps.repository.rest.ResourceService,org.fiware.apps.repository.rest.QueryService,org.fiware.apps.repository.rest.CollectionService,org.fiware.apps.repository.rest.BrowseService</param-value>
 	</context-param>
 
 	<context-param>
 		<param-name>resteasy.servlet.mapping.prefix</param-name>
-		<param-value>/v1</param-value>
+		<param-value>/v2</param-value>
 	</context-param>
 
 	<listener>
@@ -76,7 +76,7 @@
 
 	<servlet-mapping>
 		<servlet-name>resteasy-servlet</servlet-name>
-		<url-pattern>/v1/*</url-pattern>
+		<url-pattern>/v2/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

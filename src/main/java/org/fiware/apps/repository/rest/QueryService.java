@@ -50,12 +50,9 @@ import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.settings.RepositorySettings;
 import virtuoso.jena.driver.VirtGraph;
 
-@Path("/services/query")
+@Path("/services/"+RepositorySettings.QUERY_SERVICE_NAME)
 public class QueryService {
-    VirtGraph virtGraph = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, 
-                            RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
-    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO(new VirtModelFactory(virtGraph),
-            virtGraph, new VirtuosoQueryExecutionFactory());
+    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
     
     @Context
             UriInfo uriInfo;

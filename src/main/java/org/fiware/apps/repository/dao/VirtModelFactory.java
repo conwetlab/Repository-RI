@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.dao;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import virtuoso.jdbc3.VirtuosoDataSource;
+import virtuoso.jdbc4.VirtuosoDataSource;
 import virtuoso.jena.driver.VirtGraph;
 import virtuoso.jena.driver.VirtModel;
 

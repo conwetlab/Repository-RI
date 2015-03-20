@@ -70,15 +70,13 @@ import org.fiware.apps.repository.model.ResourceCollection;
 import org.fiware.apps.repository.settings.RepositorySettings;
 import virtuoso.jena.driver.VirtGraph;
 
-@Path("/collec")
+@Path("/"+RepositorySettings.COLLECTION_SERVICE_NAME)
 public class CollectionService {
     
     private DAOFactory mongoFactory = DAOFactory.getDAOFactory(DAOFactory.MONGO);
     private CollectionDAO mongoCollectionDAO = mongoFactory.getCollectionDAO();
     private ResourceDAO mongoResourceDAO = mongoFactory.getResourceDAO();
-    private VirtGraph virtGraph = new VirtGraph (RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT, 
-            RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
-    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO(new VirtModelFactory(virtGraph), virtGraph, new VirtuosoQueryExecutionFactory());
+    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
     JAXBContext ctx;
     
     @Context
@@ -104,6 +102,7 @@ public class CollectionService {
     }
     
     private Response getResource(String path, boolean meta, String type) {
+        
         try {
             Resource resource = null;
             ResourceCollection resourceCollection = null;

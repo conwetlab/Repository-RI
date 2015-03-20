@@ -30,8 +30,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.dao.impl;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
+
+import com.github.jsonldjava.core.RDFParser;
+import static com.hp.hpl.jena.assembler.JA.Model;
+import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
@@ -41,13 +45,11 @@ import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
 
-
-import com.hp.hpl.jena.query.QueryParseException;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.Iterator;
 import java.util.Objects;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFParserRegistry;
 import org.fiware.apps.repository.dao.VirtModelFactory;
 import org.fiware.apps.repository.model.SelectQueryResponse;
 import virtuoso.jena.driver.VirtGraph;
@@ -60,10 +62,18 @@ public class VirtuosoResourceDAO {
     private VirtModelFactory modelFactory;
     private VirtuosoQueryExecutionFactory queryExecutionFactory;
     
+    public VirtuosoResourceDAO() {
+        this.set = new VirtGraph(RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
+                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        this.set.setReadFromAllGraphs(true);
+        this.modelFactory = new VirtModelFactory(set);
+        this.queryExecutionFactory = new VirtuosoQueryExecutionFactory();
+    }
+    
     public VirtuosoResourceDAO(VirtModelFactory factory, VirtGraph graph, VirtuosoQueryExecutionFactory queryExecutionFactory) {
-        this.modelFactory = Objects.requireNonNull(factory);
         this.set = Objects.requireNonNull(graph);
-        set.setReadFromAllGraphs(true);
+        this.set.setReadFromAllGraphs(true);
+        this.modelFactory = Objects.requireNonNull(factory);
         this.queryExecutionFactory = Objects.requireNonNull(queryExecutionFactory);
     }
     
@@ -77,8 +87,10 @@ public class VirtuosoResourceDAO {
         try {
             model.write(output, type, null);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new DatasourceException(e.getMessage(), Resource.class);
         }
+        
         model.close();
         
         res.setContent(output.toByteArray());
@@ -199,7 +211,7 @@ public class VirtuosoResourceDAO {
     }
     
     public boolean executeQueryAsk(String query) throws QueryParseException {
-        boolean response = false;
+        boolean response;
         
         VirtuosoQueryExecution vqe = queryExecutionFactory.create(query, set);
         response = vqe.execAsk();
