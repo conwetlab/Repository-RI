@@ -74,115 +74,11 @@ public class MongoResourceDAO implements ResourceDAO{
         this.collectionDAO = collectionDAO;
     }
     
-    
     @Override
     public List<Resource> getResources(String id) throws DatasourceException {
         return getResources (id,  new ResourceFilter (0, 0, ""));
         
     }
-    
-    
-    @Override
-    public Resource getResource(String id) throws DatasourceException{
-        Resource r = new Resource();
-        db.requestStart();
-        DBObject obj =null;
-        try{
-            
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            obj = mongoCollection.findOne(query);
-            
-        }catch (Exception e){
-            db.requestDone();
-            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
-        }
-        
-        if(obj == null){
-            return null;
-        }
-        
-        r.setId(obj.get("id").toString());
-        r.setName(obj.get("name").toString());
-        r.setCreator(obj.get("creator").toString());
-        r.setContentUrl(obj.get("contentUrl").toString());
-        r.setContentMimeType(obj.get("contentMimeType").toString());
-        r.setContentFileName(obj.get("contentFileName").toString());
-        
-        if(obj.get("creationDate")!=null){
-            r.setCreationDate((Date) obj.get("creationDate"));
-        }
-        if(obj.get("modificationDate")!=null){
-            r.setModificationDate((Date) obj.get("modificationDate"));
-        }
-        
-        
-        db.requestDone();
-        return r;
-    }
-    
-    
-    @Override
-    public Resource getResourceContent(String id) throws DatasourceException{
-        Resource r = new Resource();
-        db.requestStart();
-        DBObject obj =null;
-        try{
-            
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            obj = mongoCollection.findOne(query);
-            
-        }catch (Exception e){
-            db.requestDone();
-            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
-        }
-        
-        if(obj == null){
-            return null;
-        }
-        
-        r.setId(obj.get("id").toString());
-        r.setName(obj.get("name").toString());
-        r.setCreator(obj.get("creator").toString());
-        r.setContentUrl(obj.get("contentUrl").toString());
-        r.setContentMimeType(obj.get("contentMimeType").toString());
-        r.setContentFileName(obj.get("contentFileName").toString());
-        r.setContent((byte[]) obj.get("content"));
-        
-        if(obj.get("creationDate")!=null){
-            r.setCreationDate((Date) obj.get("creationDate"));
-        }
-        if(obj.get("modificationDate")!=null){
-            r.setModificationDate((Date) obj.get("modificationDate"));
-        }
-        
-        db.requestDone();
-        return r;
-    }
-    
-    public Boolean isResource (String id) throws DatasourceException{
-        
-        db.requestStart();
-        DBObject obj =null;
-        try{
-            
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            obj = mongoCollection.findOne(query);
-            
-        }catch (Exception e){
-            db.requestDone();
-            throw new DatasourceException("Error parsing " + id + " " + e.getMessage(), Resource.class );
-        }
-        db.requestDone();
-        if(obj == null){
-            return false;
-        }
-        
-        return true;
-    }
-    
     
     @Override
     public List<Resource> getResources(String path, ResourceFilter filter) throws DatasourceException {
@@ -228,21 +124,122 @@ public class MongoResourceDAO implements ResourceDAO{
         return resources;
     }
     
-    
-    
-    public Resource insertResource(Resource r)throws DatasourceException, SameIdException{
+    @Override
+    public Resource getResource(String id) throws DatasourceException{
+        Resource r = new Resource();
+        db.requestStart();
+        DBObject obj =null;
+        try{
+            
+            BasicDBObject query = new BasicDBObject();
+            query.put("id", id);
+            obj = mongoCollection.findOne(query);
+            
+        }catch (Exception e){
+            db.requestDone();
+            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
+        }
         
-        if (findResource(r.getId()) != null){
+        if(obj == null){
+            db.requestDone();
+            return null;
+        }
+        
+        r.setId(obj.get("id").toString());
+        r.setName(obj.get("name").toString());
+        r.setCreator(obj.get("creator").toString());
+        r.setContentUrl(obj.get("contentUrl").toString());
+        r.setContentMimeType(obj.get("contentMimeType").toString());
+        r.setContentFileName(obj.get("contentFileName").toString());
+        
+        if(obj.get("creationDate")!=null){
+            r.setCreationDate((Date) obj.get("creationDate"));
+        }
+        if(obj.get("modificationDate")!=null){
+            r.setModificationDate((Date) obj.get("modificationDate"));
+        }
+        
+        
+        db.requestDone();
+        return r;
+    }
+     
+    @Override
+    public Resource getResourceContent(String id) throws DatasourceException{
+        Resource r = new Resource();
+        db.requestStart();
+        DBObject obj =null;
+        try{
+            
+            BasicDBObject query = new BasicDBObject();
+            query.put("id", id);
+            obj = mongoCollection.findOne(query);
+            
+        }catch (Exception e){
+            db.requestDone();
+            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
+        }
+        
+        if(obj == null){
+            db.requestDone();
+            return null;
+        }
+        
+        r.setId(obj.get("id").toString());
+        r.setName(obj.get("name").toString());
+        r.setCreator(obj.get("creator").toString());
+        r.setContentUrl(obj.get("contentUrl").toString());
+        r.setContentMimeType(obj.get("contentMimeType").toString());
+        r.setContentFileName(obj.get("contentFileName").toString());
+        r.setContent((byte[]) obj.get("content"));
+        
+        if(obj.get("creationDate")!=null){
+            r.setCreationDate((Date) obj.get("creationDate"));
+        }
+        if(obj.get("modificationDate")!=null){
+            r.setModificationDate((Date) obj.get("modificationDate"));
+        }
+        
+        db.requestDone();
+        return r;
+    }
+    
+    public Boolean isResource (String id) throws DatasourceException{
+        
+        db.requestStart();
+        DBObject obj =null;
+        try{
+            
+            BasicDBObject query = new BasicDBObject();
+            query.put("id", id);
+            obj = mongoCollection.findOne(query);
+            
+        }catch (Exception e){
+            db.requestDone();
+            throw new DatasourceException("Error parsing " + id + " " + e.getMessage(), Resource.class );
+        }
+        db.requestDone();
+        if(obj == null){
+            return false;
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public Resource insertResource(Resource r)throws DatasourceException, SameIdException{
+        //Check if resource exist.
+        if (isResource(r.getId())){
             throw new SameIdException(r.getId(), Resource.class);
         }
         
+        //Insert collections if they do not exist.
         if(collectionDAO.getCollection(r.getId().substring(0, r.getId().lastIndexOf("/")))==null){
             ResourceCollection col = new ResourceCollection();
             col.setCreator(r.getCreator());
             col.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
             collectionDAO.insertCollection(col);
         }
-        
         
         try{
             db.requestStart();
@@ -266,54 +263,18 @@ public class MongoResourceDAO implements ResourceDAO{
             db.requestDone();
             return r;
         }catch (Exception e){
-            e.printStackTrace();
             db.requestDone();
             throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
         }
         
     }
-    
     
     @Override
     public Resource findResource(String id) throws DatasourceException {
-        Resource r = new Resource();
-        db.requestStart();
-        DBObject obj =null;
-        try{
-            
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            obj = mongoCollection.findOne(query);
-            
-        }catch (Exception e){
-            db.requestDone();
-            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
-        }
-        
-        if(obj == null){
-            return null;
-        }
-        
-        r.setId(obj.get("id").toString());
-        r.setName(obj.get("name").toString());
-        r.setCreator(obj.get("creator").toString());
-        r.setContentUrl(obj.get("contentUrl").toString());
-        r.setContentMimeType(obj.get("contentMimeType").toString());
-        r.setContentFileName(obj.get("contentFileName").toString());
-        
-        if(obj.get("creationDate")!=null){
-            r.setCreationDate((Date) obj.get("creationDate"));
-        }
-        if(obj.get("modificationDate")!=null){
-            r.setModificationDate((Date) obj.get("modificationDate"));
-        }
-        
-        
-        db.requestDone();
-        return r;
+        return getResource(id);
     }
     
-    public Boolean updateResource(String path, Resource r) throws DatasourceException{
+    public Boolean updateResource(String path, Resource r) throws DatasourceException {
         db.requestStart();
         BasicDBObject query = new BasicDBObject();
         query.put("id", path);
@@ -330,8 +291,9 @@ public class MongoResourceDAO implements ResourceDAO{
             col.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
             try {
                 collectionDAO.insertCollection(col);
-            } catch (SameIdException e) {
-                // should never happen
+            } catch (SameIdException ex) {
+                db.requestDone();
+                throw new DatasourceException(ex.getLocalizedMessage(), ResourceCollection.class);
             }
         }
         
