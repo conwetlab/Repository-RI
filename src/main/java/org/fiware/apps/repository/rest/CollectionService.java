@@ -45,6 +45,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -54,13 +55,9 @@ import javax.xml.bind.JAXBException;
 import org.fiware.apps.repository.dao.CollectionDAO;
 import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.ResourceDAO;
-import org.fiware.apps.repository.dao.VirtModelFactory;
-import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
-import org.fiware.apps.repository.exceptions.web.RestConflictException;
-import org.fiware.apps.repository.exceptions.web.RestInternalServerException;
 import org.fiware.apps.repository.exceptions.web.RestNotFoundException;
 import org.fiware.apps.repository.model.AbstractResource;
 import org.fiware.apps.repository.model.FileUploadForm;
@@ -68,7 +65,6 @@ import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 import org.fiware.apps.repository.settings.RepositorySettings;
-import virtuoso.jena.driver.VirtGraph;
 
 @Path("/"+RepositorySettings.COLLECTION_SERVICE_NAME)
 public class CollectionService {
@@ -78,7 +74,6 @@ public class CollectionService {
     private ResourceDAO mongoResourceDAO = mongoFactory.getResourceDAO();
     private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
     JAXBContext ctx;
-    
     @Context
             UriInfo uriInfo;
     
@@ -86,7 +81,7 @@ public class CollectionService {
     @Path("/")
     @Produces({"application/xml", "application/json"})
     public Response getResourceRoot() {
-        throw new RestNotFoundException("Please specify a collection");
+        throw new RestNotFoundException("Please specify a collection", new Exception());
     }
     
     @GET
@@ -107,7 +102,7 @@ public class CollectionService {
             Resource resource = null;
             ResourceCollection resourceCollection = null;
             
-            // Check, if the path is a resource or a collection or does not exists.
+            // Check, if the path is a resource or a collection or it does not exist.
             resource = mongoResourceDAO.getResource(path);
             if (resource == null)
             {
@@ -138,12 +133,9 @@ public class CollectionService {
             {
                 return RestHelper.multiFormatResponse(resource, Resource.class, type, uriInfo);
             }
-        } catch (DatasourceException ex) {
-            throw new RestInternalServerException("Error parsing content");
-        } catch (JAXBException ex) {
-            throw new RestInternalServerException(ex.getMessage());
+        } catch (DatasourceException | JAXBException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         }
-        
     }
     
     @POST
@@ -166,12 +158,10 @@ public class CollectionService {
         try {
             mongoResourceDAO.insertResource(resource);
             return Response.status(Status.CREATED).contentLocation(new URI(resource.getContentUrl())).build();
-        } catch (DatasourceException e) {
-            throw new RestInternalServerException(e.getMessage());
-        } catch (SameIdException e) {
-            return Response.status(Status.CONFLICT).build();
-        } catch (URISyntaxException e) {
-            throw new RestInternalServerException(e.getMessage());
+        } catch (DatasourceException | URISyntaxException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+        } catch (SameIdException ex) {
+            return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
         }
     }
     
@@ -192,9 +182,9 @@ public class CollectionService {
             mongoResourceDAO.insertResource(resource);
             return Response.status(Status.CREATED).build();
         } catch (DatasourceException ex) {
-            throw new RestInternalServerException(ex.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT).build();
+            return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
         }
     }
     
@@ -202,9 +192,9 @@ public class CollectionService {
         try {
             mongoCollectionDAO.insertCollection(resourceCollection);
         } catch (DatasourceException ex) {
-            throw new RestInternalServerException(ex.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT).entity(ex.getMessage()).build();
+            return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
         }
         return Response.status(Status.CREATED).build();
     }
@@ -217,7 +207,8 @@ public class CollectionService {
                 r.setId(path);
                 try {
                     mongoResourceDAO.insertResource(r);
-                } catch (SameIdException e) {
+                } catch (SameIdException ex) {
+                    return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
                 }
             }
             r.setContent(content.getBytes());
@@ -225,14 +216,13 @@ public class CollectionService {
             r.setContentMimeType(rdfType);
             try {
                 mongoResourceDAO.updateResourceContent(r);
-            } catch (DatasourceException e) {
-                throw new RestConflictException(e.getMessage());
+            } catch (DatasourceException ex) {
+                return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
             }
             return Response.status(Status.CREATED).build();
             
-        } catch (DatasourceException e) {
-            
-            throw new RestInternalServerException(e.getMessage());
+        } catch (DatasourceException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         }
     }
     
@@ -274,9 +264,9 @@ public class CollectionService {
             mongoResourceDAO.updateResourceContent(resource);
             
         } catch (DatasourceException ex) {
-            throw new RestInternalServerException(ex.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT).entity(ex.getMessage()).build();
+            return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
         }
         return Response.status(Status.OK).build();
     }
@@ -292,7 +282,7 @@ public class CollectionService {
             resource.setContentUrl(aux.getContentUrl());
             mongoResourceDAO.updateResource(path, resource);
         } catch (DatasourceException ex) {
-            throw new RestInternalServerException(ex.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         }
         return Response.status(Status.OK).build();
     }
@@ -316,8 +306,8 @@ public class CollectionService {
             {
                 mongoCollectionDAO.deleteCollection(path);
             }
-        } catch (DatasourceException e) {
-            throw new RestInternalServerException(e.getMessage());
+        } catch (DatasourceException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         }
         return Response.status(Status.ACCEPTED).build();
     }
