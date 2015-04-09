@@ -31,8 +31,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.dao.impl;
 
 
-import com.github.jsonldjava.core.RDFParser;
-import static com.hp.hpl.jena.assembler.JA.Model;
 import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
@@ -41,15 +39,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
-import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.Iterator;
 import java.util.Objects;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFParserRegistry;
 import org.fiware.apps.repository.dao.VirtModelFactory;
 import org.fiware.apps.repository.model.SelectQueryResponse;
 import virtuoso.jena.driver.VirtGraph;
@@ -87,7 +82,6 @@ public class VirtuosoResourceDAO {
         try {
             model.write(output, type, null);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new DatasourceException(e.getMessage(), Resource.class);
         }
         
