@@ -300,10 +300,8 @@ public class MongoResourceDAOTest {
         String string = "/string";
         Date date = new Date();
         Resource resource = generateResource(string, date, true);
-        List list = new LinkedList();
-        
-        list.add(dBObject);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
+
+        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
         when(mongoCollection.getCollection(anyString())).thenReturn(null);
         
         try {
@@ -318,11 +316,13 @@ public class MongoResourceDAOTest {
     
     @Test(expected = SameIdException.class)
     public void insertResourceSameIdExceptionTest() throws SameIdException, DatasourceException{
-        String string = "string";
+        String string = "/a/b/string";
         Date date = new Date();
         Resource resource = generateResource(string, date, true);
+        List list = new LinkedList();
         
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        list.add(dBObject);
+        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
         
         toTest.insertResource(resource);
         
@@ -334,14 +334,14 @@ public class MongoResourceDAOTest {
         String string = "/string";
         Date date = new Date();
         Resource resource = generateResource(string, date, false);
-        List list = new LinkedList();
-        
-        list.add(dBObject);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
+
+        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
         when(mongoCollection.getCollection(anyString())).thenReturn(null);
         doThrow(Exception.class).when(mongoCollection).insert(any(DBObject.class));
         
         toTest.insertResource(resource);
+        
+        //fail();
     }
     
     @Test
