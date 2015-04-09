@@ -55,10 +55,10 @@ import javax.xml.bind.JAXBException;
 import org.fiware.apps.repository.dao.CollectionDAO;
 import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.ResourceDAO;
+import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
-import org.fiware.apps.repository.exceptions.web.RestNotFoundException;
 import org.fiware.apps.repository.model.AbstractResource;
 import org.fiware.apps.repository.model.FileUploadForm;
 import org.fiware.apps.repository.model.RepositoryException;
@@ -72,7 +72,7 @@ public class CollectionService {
     private DAOFactory mongoFactory = DAOFactory.getDAOFactory(DAOFactory.MONGO);
     private CollectionDAO mongoCollectionDAO = mongoFactory.getCollectionDAO();
     private ResourceDAO mongoResourceDAO = mongoFactory.getResourceDAO();
-    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
+    private VirtuosoResourceDAO virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
     JAXBContext ctx;
     @Context
             UriInfo uriInfo;
@@ -81,7 +81,8 @@ public class CollectionService {
     @Path("/")
     @Produces({"application/xml", "application/json"})
     public Response getResourceRoot() {
-        throw new RestNotFoundException("Please specify a collection", new Exception());
+        return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
+        //throw new RestNotFoundException("Please specify a collection", new Exception());
     }
     
     @GET
@@ -116,7 +117,7 @@ public class CollectionService {
             if(!meta)
             {
                 // Obtain the resource content from virtuoso triple store.
-                if(!type.equalsIgnoreCase("application/rdf+xml") && RestHelper.isRDF(type)) {
+                if(!type.equalsIgnoreCase(resource.getContentMimeType()) && RestHelper.isRDF(type)) {
                     resource.setContent(virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(type)).getContent());
                 }
                 // Obtain the resource content mongo DB.
