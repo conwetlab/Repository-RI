@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.fiware.apps.repository.dao.VirtModelFactory;
+import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
 
 
@@ -52,7 +53,7 @@ import virtuoso.jena.driver.VirtGraph;
 
 @Path("/services/"+RepositorySettings.QUERY_SERVICE_NAME)
 public class QueryService {
-    private VirtuosoResourceDAO virtuosoResourceDAO = new VirtuosoResourceDAO();
+    private VirtuosoResourceDAO virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
     
     @Context
             UriInfo uriInfo;
@@ -71,22 +72,20 @@ public class QueryService {
     private Response executeAnyQuery(String query, String type) {
         String result = "";
         // Check type sparql query and execute the method
-        try {
-            if (query.toLowerCase().contains("select")) {
-                return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
-            }
-            if (query.toLowerCase().contains("construct")) {
-                result = virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(type));
-            }
-            if (query.toLowerCase().contains("describe")) {
-                result = virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(type));
-            }
-            if (query.toLowerCase().contains("ask")) {
-                result = (virtuosoResourceDAO.executeQueryAsk(query)) ? "true" : "false";
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        
+        if (query.toLowerCase().contains("select")) {
+            return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
         }
+        if (query.toLowerCase().contains("construct")) {
+            result = virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(type));
+        }
+        if (query.toLowerCase().contains("describe")) {
+            result = virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(type));
+        }
+        if (query.toLowerCase().contains("ask")) {
+            result = (virtuosoResourceDAO.executeQueryAsk(query)) ? "true" : "false";
+        }
+        
         return Response.status(Status.OK).entity(result).build();
     }
 }

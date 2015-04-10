@@ -74,8 +74,6 @@ public class CollectionService {
     private ResourceDAO mongoResourceDAO = mongoFactory.getResourceDAO();
     private VirtuosoResourceDAO virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
     JAXBContext ctx;
-    @Context
-            UriInfo uriInfo;
     
     @GET
     @Path("/")
@@ -87,17 +85,17 @@ public class CollectionService {
     
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response getResource(@HeaderParam("Accept") String accept, @PathParam("path") String path) {
-        return getResource(path, false, accept);
+    public Response getResource(@Context UriInfo uriInfo, @HeaderParam("Accept") String accept, @PathParam("path") String path) {
+        return getResource(path, false, accept, uriInfo);
     }
     
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
-    public Response getResourceMeta(@HeaderParam("Accept") String accept, @PathParam("path") String path) {
-        return getResource(path, true, accept);
+    public Response getResourceMeta(@Context UriInfo uriInfo, @HeaderParam("Accept") String accept, @PathParam("path") String path) {
+        return getResource(path, true, accept, uriInfo);
     }
     
-    private Response getResource(String path, boolean meta, String type) {
+    private Response getResource(String path, boolean meta, String type, UriInfo uriInfo) {
         
         try {
             Resource resource = null;
@@ -141,16 +139,16 @@ public class CollectionService {
     
     @POST
     @Consumes({"application/xml", "application/json"})
-    public Response postResource(AbstractResource absRes) {
+    public Response postResource(@Context UriInfo uriInfo, AbstractResource absRes) {
         if(absRes.getClass().equals(Resource.class)) {
-            return insertResource((Resource) absRes);
+            return insertResource((Resource) absRes, uriInfo);
         }
         else {
             return insertCollection((ResourceCollection) absRes);
         }
     }
     
-    private Response insertResource(Resource resource) {
+    private Response insertResource(Resource resource, UriInfo uriInfo) {
         // Create a new resource with the resource metadata given.
         // Some metadata can not be given by the user.
         resource.setContentMimeType("");
@@ -227,7 +225,6 @@ public class CollectionService {
         }
     }
     
-    
     @PUT
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
     public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, String content/*, @MultipartForm FileUploadForm form*/) {
@@ -267,6 +264,7 @@ public class CollectionService {
         } catch (DatasourceException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         } catch (SameIdException ex) {
+            //this case is posible if concurrency exist.??
             return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
         }
         return Response.status(Status.OK).build();

@@ -338,7 +338,7 @@ public class MongoResourceDAOTest {
         when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
         when(mongoCollection.getCollection(anyString())).thenReturn(null);
         doThrow(Exception.class).when(mongoCollection).insert(any(DBObject.class));
-        
+
         toTest.insertResource(resource);
         
         //fail();
