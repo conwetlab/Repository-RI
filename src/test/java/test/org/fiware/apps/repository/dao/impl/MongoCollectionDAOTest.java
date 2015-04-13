@@ -1,7 +1,31 @@
 /*
-* To change this license header, choose License Headers in Project Properties.
-* To change this template file, choose Tools | Templates
-* and open the template in the editor.
+Modified BSD License
+====================
+
+Copyright (c) 2015, CoNWeTLab, Universidad Politecnica Madrid
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+* Neither the name of the SAP AG nor the
+names of its contributors may be used to endorse or promote products
+derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL SAP AG BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package test.org.fiware.apps.repository.dao.impl;
 
@@ -14,6 +38,8 @@ import java.util.LinkedList;
 import java.util.List;
 import org.fiware.apps.repository.dao.CollectionDAO;
 import org.fiware.apps.repository.dao.DAOFactory;
+import org.fiware.apps.repository.dao.MongoDAOFactory;
+import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
 import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
@@ -34,7 +60,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DBCollection.class, DB.class})
+@PrepareForTest({DBCollection.class, DB.class, MongoDAOFactory.class, VirtuosoDAOFactory.class})
 public class MongoCollectionDAOTest {
     
     @Mock private DB db;
@@ -69,9 +95,25 @@ public class MongoCollectionDAOTest {
     
     @After
     public void tearDown() {
+        
     }
     
-    //Tests
+    //Tests 
+    @Test
+    public void voidConstructorTest()
+    {
+    /*    PowerMockito.mockStatic(MongoDAOFactory.class);
+        PowerMockito.mockStatic(DB.class);
+        PowerMockito.mockStatic(VirtuosoDAOFactory.class);
+        
+        PowerMockito.when(MongoDAOFactory.createConnection()).thenReturn(db);
+        when(db.getCollection(anyString())).thenReturn(mongoCollection);
+        PowerMockito.when(VirtuosoDAOFactory.getVirtuosoResourceDAO()).thenReturn(virtuosoResourceDAO);
+        
+        MongoCollectionDAO voidConstructor = new MongoCollectionDAO();
+        MongoCollectionDAO notVoidConstructor = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);*/
+    }
+    
     
     @Test
     public void findCollectionTest() {
@@ -147,7 +189,7 @@ public class MongoCollectionDAOTest {
     public void updateCollectionExceptionTest2() throws DatasourceException {
         String id = "/id";
         Date date = new Date();
-        ResourceCollection resourceCollection = generateResourceCollection(id, date, true);
+        ResourceCollection resourceCollection = generateResourceCollection(id, date, false);
         List list = new LinkedList();
         
         list.add(dBObject);
@@ -285,7 +327,7 @@ public class MongoCollectionDAOTest {
         ResourceCollection returned = null;
         
         list.add(dBObject);
-        rulesdbObjectCollection(id, date);
+        rulesdbObjectCollection(id, null);
         when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
         
         try {
@@ -295,7 +337,6 @@ public class MongoCollectionDAOTest {
         }
         
         assertEquals(id+"Id", returned.getId());
-        assertEquals(date, returned.getCreationDate());
         assertEquals(id+"Creator", returned.getCreator());
         verify(db, times(3)).requestStart();
         verify(db, times(3)).requestDone();
@@ -346,6 +387,26 @@ public class MongoCollectionDAOTest {
         } catch (Exception ex) {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
+        
+        assertTrue(returned);
+        verify(db, atLeast(1)).requestStart();
+        verify(db, atLeast(1)).requestDone();
+    }
+    
+    @Test(expected = DatasourceException.class)
+    public void insertCollectionRecursiveExceptionTest() throws DatasourceException, SameIdException {
+        String id = "/id/hola";
+        Date date = new Date();
+        ResourceCollection resourceCollection = generateResourceCollection(id, date, false);
+        boolean returned = false;
+        
+        rulesdbObjectCollection(id, null);
+        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        doNothing().doThrow(Exception.class).when(mongoCollection).insert(any(DBObject.class));
+        
+        
+        returned = toTest.insertCollection(resourceCollection);
+        
         
         assertTrue(returned);
         verify(db, atLeast(1)).requestStart();
@@ -405,6 +466,32 @@ public class MongoCollectionDAOTest {
         verify(db).requestDone();
     }
     
+    @Test
+    public void getCollectionsTest2() {
+        String id = "/id";
+        Date date = new Date();
+        DBCursor dBCursor = mock(DBCursor.class);
+        List list = new LinkedList();
+        
+        mongoCollection = PowerMockito.mock(DBCollection.class);
+        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        list.add(dBObject);
+        list.add(null);
+        
+        PowerMockito.when(mongoCollection.find(any())).thenReturn(dBCursor);
+        rulesdbObjectCollection(id, null);
+        when(dBCursor.toArray()).thenReturn(list);
+        
+        try {
+            toTest.getCollections(id);
+        } catch (DatasourceException ex) {
+            fail("Exception not expected:\n" + ex.getLocalizedMessage());
+        }
+        
+        verify(db).requestStart();
+        verify(db).requestDone();
+    }
+    
     @Test(expected = DatasourceException.class)
     public void getCollectionsExceptionTest() throws DatasourceException {
         String id = "/id";
@@ -422,7 +509,10 @@ public class MongoCollectionDAOTest {
     }
     
     private void rulesdbObjectCollection(String string, Date date) {
-        when(this.dBObject.get("creationDate")).thenReturn(date);
+        if(date != null)
+            when(this.dBObject.get("creationDate")).thenReturn(date);
+        else
+            when(this.dBObject.get("creationDate")).thenReturn(null);
         when(this.dBObject.get("id")).thenReturn(string + "Id");
         when(this.dBObject.get("_id")).thenReturn("507f1f77bcf86cd799439011");
         when(this.dBObject.get("creator")).thenReturn(string + "Creator");

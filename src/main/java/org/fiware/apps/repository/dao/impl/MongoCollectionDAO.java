@@ -51,6 +51,7 @@ import com.mongodb.ObjectId;
 import java.util.Objects;
 import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.VirtModelFactory;
+import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
 import org.fiware.apps.repository.settings.RepositorySettings;
 import virtuoso.jena.driver.VirtGraph;
@@ -65,7 +66,7 @@ public class MongoCollectionDAO implements CollectionDAO{
     public MongoCollectionDAO(){
         db = MongoDAOFactory.createConnection();
         mongoCollection = db.getCollection(MONGO_COLL_NAME);
-        virtuosoResourceDAO = new VirtuosoResourceDAO();
+        virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
     }
     
     public MongoCollectionDAO(DB dbIn, DBCollection dBCollectionIn, VirtuosoResourceDAO virtuosoResourceDAOIn) {

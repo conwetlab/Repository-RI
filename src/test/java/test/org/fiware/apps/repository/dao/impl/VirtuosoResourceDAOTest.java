@@ -1,3 +1,32 @@
+/*
+Modified BSD License
+====================
+
+Copyright (c) 2015, CoNWeTLab, Universidad Politecnica Madrid
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+* Neither the name of the SAP AG nor the
+names of its contributors may be used to endorse or promote products
+derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL SAP AG BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 package test.org.fiware.apps.repository.dao.impl;
 
 import com.hp.hpl.jena.query.QueryParseException;
@@ -17,6 +46,7 @@ import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
 import org.junit.Assert;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -120,13 +150,23 @@ public class VirtuosoResourceDAOTest {
     }
     
     @Test
-    public void isResourceTest() {
+    public void isResourceTrueTest() {
         String graph = "graph";
         
         when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT),
                 eq(RepositorySettings.VIRTUOSO_USER), eq(RepositorySettings.VIRTUOSO_PASSWORD))).thenReturn(virtModel);
         when(virtModel.isEmpty()).thenReturn(false);
         assertTrue(toTest.isResource(graph));
+    }
+    
+    @Test
+    public void isResourceFalseTest() {
+        String graph = "graph";
+        
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT),
+                eq(RepositorySettings.VIRTUOSO_USER), eq(RepositorySettings.VIRTUOSO_PASSWORD))).thenReturn(virtModel);
+        when(virtModel.isEmpty()).thenReturn(true);
+        assertFalse(toTest.isResource(graph));
     }
     
     @Test
@@ -226,15 +266,18 @@ public class VirtuosoResourceDAOTest {
         QuerySolution querySolution = mock(QuerySolution.class);
         RDFNode rDFNode = mock(RDFNode.class);
         List list = new LinkedList();
-        
         list.add("value1");
         list.add("value2");
+        
+        List list2 = new LinkedList();
+        list2.add("value1");
+        list2.add("value2");
         when(virtuosoQueryExecutionFactory.create(eq(query), eq(virtGraph))).thenReturn(vqe);
         when(vqe.execSelect()).thenReturn(resultSet);
-        when(resultSet.hasNext()).thenReturn(true, true, false);
+        when(resultSet.hasNext()).thenReturn(true, true, true, false);
         when(resultSet.next()).thenReturn(querySolution);
         when(querySolution.get(anyString())).thenReturn(rDFNode);
-        when(querySolution.varNames()).thenReturn(list.iterator());
+        when(querySolution.varNames()).thenReturn(list.iterator(), list2.iterator());
         when(rDFNode.toString()).thenReturn("string");
         
         toTest.executeQuerySelect(query);
