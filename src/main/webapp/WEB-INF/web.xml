@@ -56,7 +56,7 @@
 
 	<context-param>
 		<param-name>resteasy.resources</param-name>
-		<param-value>org.fiware.apps.repository.rest.QueryService,org.fiware.apps.repository.rest.CollectionService,org.fiware.apps.repository.rest.BrowseService</param-value>
+		<param-value>org.fiware.apps.repository.rest.QueryService,org.fiware.apps.repository.rest.CollectionService</param-value>
 	</context-param>
 
 	<context-param>
