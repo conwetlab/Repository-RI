@@ -12,18 +12,14 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import org.apache.commons.httpclient.HttpClient;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.FileEntity;
+
+
+
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 import org.jboss.resteasy.client.ClientRequest;
@@ -71,8 +67,9 @@ public class ResourceClient {
 	}
 
 	public Boolean insertResourceContent(String resourceId, String filename){
-		try {
-			HttpClient httpclient = new DefaultHttpClient();
+		/*try {
+			//HttpClient httpclient = new DefaultHttpClient();
+                        HttpClient httpclient = new HttpClient();
 			HttpPost httppost = new HttpPost(repositoryURL+resourceId);
 
 			MultipartEntity reqEntity = new MultipartEntity();
@@ -107,13 +104,13 @@ public class ResourceClient {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		return false;
 	}
 
 
 	public Boolean insertResourceContentRDF(String resourceId, String filename, String rdfType){
-		try {
+		/*try {
 			HttpClient httpclient = new DefaultHttpClient();
 			HttpPut httppost = new HttpPut(repositoryURL+resourceId);	
 			
@@ -138,7 +135,7 @@ public class ResourceClient {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		return false;
 	}
 

@@ -12,8 +12,8 @@ public class User {
 		this.username = username;
 	}
 
-	String username;
-	String password;
+	private String username;
+	private String password;
 
 	@XmlElement
 	public String getUsername() {
