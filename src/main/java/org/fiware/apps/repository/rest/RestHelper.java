@@ -318,7 +318,7 @@ public class RestHelper {
             Resource res = (Resource) obj;
             
             content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"><html><head><title>Resource: "+res.getId()+"</title>");
-            content.append("<link rel=\"stylesheet\" type=\"text/css\" href=\""+RepositorySettings.COLLECTION_SERVICE_NAME+"/"+"../style/style.css\"></head><body>");
+            content.append("<link rel=\"stylesheet\" type=\"text/css\" href=\""+uriInfo.getBaseUri()+"../style/style.css\"></head><body>");
             
             
             content.append("<h1>Resource: "+res.getId()+"</h1>");
