@@ -178,7 +178,11 @@ public class MongoCollectionDAO implements CollectionDAO{
         ResourceCollection r = new ResourceCollection();
         db.requestStart();
         DBObject obj =null;
-        MongoResourceDAO resourceDAO = new MongoResourceDAO(db, mongoCollection, new MongoDAOFactory(), this);
+        DB dbAux = MongoDAOFactory.createConnection();
+        MongoResourceDAO resourceDAO = new MongoResourceDAO(dbAux,
+                dbAux.getCollection(MongoResourceDAO.MONGO_COLL_NAME), 
+                new MongoDAOFactory(), 
+                this);
         try{
             Pattern pat = Pattern.compile(id);
             BasicDBObject query = new BasicDBObject("id", id);

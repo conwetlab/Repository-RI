@@ -338,8 +338,8 @@ public class MongoCollectionDAOTest {
         
         assertEquals(id+"Id", returned.getId());
         assertEquals(id+"Creator", returned.getCreator());
-        verify(db, times(3)).requestStart();
-        verify(db, times(3)).requestDone();
+        verify(db, times(2)).requestStart();
+        verify(db, times(2)).requestDone();
     }
     
     @Test
