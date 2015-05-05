@@ -25,6 +25,7 @@
 	 	
         <!-- Security rule for the rest of URLs -->
         <security:intercept-url pattern="/v2/collec/**" access="hasRole('ROLE_USER')" /> 
+        <security:intercept-url pattern="/v2/services/**" access="hasRole('ROLE_USER')" />
     </security:http>
 
     <!-- entry points -->
