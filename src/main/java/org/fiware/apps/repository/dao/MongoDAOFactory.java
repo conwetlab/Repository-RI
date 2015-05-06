@@ -27,9 +27,9 @@ public class MongoDAOFactory extends DAOFactory {
 		
 		Mongo m;
 		try {
-			m = new Mongo( RepositorySettings.MONGO_HOST , RepositorySettings.MONGO_PORT );
-			db = m.getDB( RepositorySettings.MONGO_DB);			
-		
+			m = new Mongo(RepositorySettings.getProperty("mongodb.host") , 
+                                Integer.parseInt(RepositorySettings.getProperty("mongodb.port")));
+                        db = m.getDB(RepositorySettings.getProperty("mongodb.db"));			
 
 		} catch (UnknownHostException e) {
 			System.out.println("Unknown Host: " + e.getMessage());

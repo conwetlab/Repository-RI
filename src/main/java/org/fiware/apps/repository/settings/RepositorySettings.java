@@ -31,18 +31,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.settings;
 
+import java.io.IOException;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class RepositorySettings {
-	public static String MONGO_HOST = "127.0.0.1";
-	public static String MONGO_DB = "test";
-	public static Integer MONGO_PORT = 27017;
+        private static Properties properties;
+    
 	public static String REPOSITORY_BASE_URL = "http://localhost:8080/FiwareRepository/";
-	public static String VIRTUOSO_HOST = "jdbc:virtuoso://localhost:";
-	public static Integer VIRTUOSO_PORT = 1111;
-	public static String VIRTUOSO_USER = "dba";
-        public static String VIRTUOSO_PASSWORD = "dba";
-        
         public final static String COLLECTION_SERVICE_NAME = "collec";
         public final static String QUERY_SERVICE_NAME = "query";
 	
-
+        public static String getProperty(String property) {
+            if(properties == null) {
+                try {
+                    properties = new Properties();
+                    properties.load(RepositorySettings.class.getClassLoader().getResourceAsStream("properties/repository.properties"));
+                } catch (IOException ex) {
+                    Logger.getLogger(RepositorySettings.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return properties.getProperty(property);
+        }
+        
 }

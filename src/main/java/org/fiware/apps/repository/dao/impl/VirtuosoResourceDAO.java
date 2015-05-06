@@ -58,8 +58,8 @@ public class VirtuosoResourceDAO {
     private VirtuosoQueryExecutionFactory queryExecutionFactory;
     
     public VirtuosoResourceDAO() {
-        this.set = new VirtGraph(RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        this.set = new VirtGraph(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         this.set.setReadFromAllGraphs(true);
         this.modelFactory = new VirtModelFactory(set);
         this.queryExecutionFactory = new VirtuosoQueryExecutionFactory();
@@ -76,8 +76,8 @@ public class VirtuosoResourceDAO {
         
         //Obtain the resource in the specified format.
         Resource res = new Resource();
-        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
             model.write(output, type, null);
@@ -94,8 +94,8 @@ public class VirtuosoResourceDAO {
     public Boolean insertResource(String graph, String content, String type) throws DatasourceException {
         
         //Insert the nodes in a graph.
-        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
         try
         {
@@ -110,16 +110,16 @@ public class VirtuosoResourceDAO {
     public Boolean isResource(String graph) {
         
         //Check if the graph exist and have any triple.
-        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         return !model.isEmpty();
     }
     
     public Boolean updateResource(String graph, String content, String type)
             throws DatasourceException {
         //Remove the content of the resource in the triple store, and insert the new content.
-        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
         model.removeAll();
         try {
@@ -134,8 +134,8 @@ public class VirtuosoResourceDAO {
     public Boolean replaceResource(String oldGraph, String newGraph, String type)
             throws DatasourceException {
         //
-        Model oldModel = modelFactory.openDatabaseModel(oldGraph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        Model oldModel = modelFactory.openDatabaseModel(oldGraph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
             oldModel.write(output, type, null);
@@ -145,8 +145,8 @@ public class VirtuosoResourceDAO {
         }
         oldModel.close();
         
-        Model newModel = modelFactory.openDatabaseModel(newGraph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        Model newModel = modelFactory.openDatabaseModel(newGraph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
         try {
             newModel.removeAll();
@@ -161,8 +161,8 @@ public class VirtuosoResourceDAO {
     public Boolean deleteResource(String graph) {
         
         //It is not necessary to check if "id" is a graph.
-        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.VIRTUOSO_HOST + RepositorySettings.VIRTUOSO_PORT,
-                RepositorySettings.VIRTUOSO_USER, RepositorySettings.VIRTUOSO_PASSWORD);
+        Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
+                RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         model.removeAll();
         model.close();
         return true;
