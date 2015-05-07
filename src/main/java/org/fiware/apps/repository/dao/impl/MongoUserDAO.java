@@ -41,22 +41,22 @@ import org.fiware.apps.repository.exceptions.db.NotFoundException;
 import org.fiware.apps.repository.model.User;
 
 public class MongoUserDAO implements UserDAO {
-
+    
     public static final String MONGO_USERS_NAME = "Users";
-
+    
     private DB db;
     private DBCollection mongoCollection;
-
+    
     public MongoUserDAO() {
         db = MongoDAOFactory.createConnection();
         mongoCollection = db.getCollection(MONGO_USERS_NAME);
     }
-
+    
     public MongoUserDAO(DB db, DBCollection mongoCollection) {
         this.db = db;
         this.mongoCollection = mongoCollection;
     }
-
+    
     @Override
     public User getUser(String username) {
         DBObject userObj;
@@ -74,13 +74,15 @@ public class MongoUserDAO implements UserDAO {
         }
         
         user = new User(userObj.get("userName").toString());
+        user.setDisplayName(userObj.get("displayName").toString());
+        user.setEmail(userObj.get("email").toString());
         user.setPassword(userObj.get("password").toString());
         user.setToken(userObj.get("token").toString());
         
         db.requestDone();
         return user;
     }
-
+    
     @Override
     public void createUser(String username) throws DatasourceException {
         
@@ -93,6 +95,8 @@ public class MongoUserDAO implements UserDAO {
                 newUserObj.put("userName", username);
                 newUserObj.put("password", "");
                 newUserObj.put("token", "");
+                newUserObj.put("displayName", "");
+                newUserObj.put("email", "");
                 
                 mongoCollection.insert(newUserObj);
             } catch (Exception ex) {
@@ -103,7 +107,7 @@ public class MongoUserDAO implements UserDAO {
             db.requestDone();
         }
     }
-
+    
     @Override
     public boolean isUser(String username) {
         User user = getUser(username);
@@ -113,7 +117,7 @@ public class MongoUserDAO implements UserDAO {
         else
             return true;
     }
-
+    
     @Override
     public void updateUser(User user) throws NotFoundException {
         DBObject userObj;
@@ -121,22 +125,25 @@ public class MongoUserDAO implements UserDAO {
         db.requestStart();
         
         BasicDBObject query = new BasicDBObject();
-        query.put("userName", user.getUsername());
+        query.put("userName", user.getUserName());
         userObj = mongoCollection.findOne(query);
         
         if (userObj == null) {
             db.requestDone();
-            throw new NotFoundException(user.getUsername(), User.class);
+            throw new NotFoundException(user.getUserName(), User.class);
         }
         
+        userObj.put("displayName", user.getDisplayName());
+        userObj.put("email", user.getEmail());
         userObj.put("password", user.getPassword());
         userObj.put("token", user.getToken());
+        
         
         mongoCollection.update(new BasicDBObject().append("_id", new ObjectId(userObj.get("_id").toString())), userObj, false,false);
         
         db.requestDone();
     }
-
+    
     @Override
     public boolean deleteUser(String username) {
         DBObject userObj;
