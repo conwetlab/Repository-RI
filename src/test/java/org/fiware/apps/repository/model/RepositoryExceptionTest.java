@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package test.org.fiware.apps.repository.model;
+package org.fiware.apps.repository.model;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;

@@ -28,7 +28,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package test.org.fiware.apps.repository.rest;
+package org.fiware.apps.repository.rest;
 
 import javax.ws.rs.core.Response;
 import org.fiware.apps.repository.dao.*;

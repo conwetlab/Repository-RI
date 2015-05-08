@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package test.org.fiware.apps.repository.model;
+package org.fiware.apps.repository.model;
 
 import org.fiware.apps.repository.model.User;
 import org.junit.Test;
@@ -20,16 +20,22 @@ public class UserTest {
     public void UserTotalTest() {
         String username = "userName";
         String newUsername = "newUserName";
+        String displayName = "displayName";
+        String email = "email";
         String password = "password";
+        String token = "token";
         
         toTest = new User(username);
         
-        assertEquals(toTest.getUsername(), username);
+        assertEquals(toTest.getUserName(), username);
         
-        toTest.setUsername(newUsername);
+        toTest.setUserName(newUsername);
         toTest.setPassword(password);
+        toTest.setDisplayName(displayName);
+        toTest.setEmail(email);
+        toTest.setToken(token);
         
-        assertEquals(toTest.getUsername(), newUsername);
+        assertEquals(toTest.getUserName(), newUsername);
         assertEquals(toTest.getPassword(), password);
     }
 }
