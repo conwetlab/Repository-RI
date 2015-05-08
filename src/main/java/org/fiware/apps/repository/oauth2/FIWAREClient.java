@@ -43,7 +43,6 @@ import org.pac4j.oauth.profile.JsonHelper;
 import org.scribe.model.OAuthConfig;
 import org.scribe.model.Token;
 import org.scribe.model.SignatureType;
-import org.scribe.oauth.ProxyOAuth20ServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.fiware.apps.repository.dao.impl.MongoUserDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
@@ -61,7 +60,7 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
         super.internalInit();
         
         this.scopeValue = "";
-        this.service = new ProxyOAuth20ServiceImpl(new FIWAREApi(),
+        this.service = new ProxyOAuthServiceImpl(new FIWAREApi(),
                 new OAuthConfig(this.key, this.secret,
                         this.callbackUrl,
                         SignatureType.Header,

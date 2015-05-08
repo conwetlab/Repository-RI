@@ -73,7 +73,7 @@ public class MongoUserDAO implements UserDAO {
             return null;
         }
         
-        user = new User(userObj.get("userName").toString());
+        user = new User(username);
         user.setDisplayName(userObj.get("displayName").toString());
         user.setEmail(userObj.get("email").toString());
         user.setPassword(userObj.get("password").toString());

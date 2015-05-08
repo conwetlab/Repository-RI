@@ -40,19 +40,19 @@ import org.scribe.utils.OAuthEncoder;
 
 public class FIWAREApi extends DefaultApi20 {
 
-	private static final String AUTHORIZATION_URL = "https://account.lab.fiware.org/authorize" + 
+	private static final String AUTHORIZATION_URL = "https://account.lab.fiware.org/oauth2/authorize" + 
 			"?client_id=%s&redirect_uri=%s&scope=%s&response_type=code";
 
 	@Override
 	public String getAccessTokenEndpoint() {
-		return "https://account.lab.fiware.org/token";
+		return "https://account.lab.fiware.org/oauth2/token";
 	}
 
 	@Override
 	public String getAuthorizationUrl(OAuthConfig config) 
         {
 		return String.format(AUTHORIZATION_URL, config.getApiKey(), 
-				/*OAuthEncoder.encode(*/config.getCallback()/*)*/, OAuthEncoder.encode(config.getScope()));
+				config.getCallback(), OAuthEncoder.encode(config.getScope()));
 	}
 
 	@Override
