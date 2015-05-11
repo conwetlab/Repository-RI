@@ -31,13 +31,14 @@ package org.fiware.apps.repository.dao;
 
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
+import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.User;
 
 public interface UserDAO {
 
-    public User getUser(String username);
-    public void createUser(String username) throws DatasourceException;
-    public boolean isUser(String username);
-    public void updateUser(User user) throws NotFoundException;
-    public boolean deleteUser(String username);
+    public User getUser(String username) throws DatasourceException;
+    public void createUser(String username) throws DatasourceException, SameIdException;
+    public boolean isUser(String username) throws DatasourceException;
+    public void updateUser(User user) throws DatasourceException, NotFoundException;
+    public void deleteUser(String username) throws DatasourceException, NotFoundException;
 }

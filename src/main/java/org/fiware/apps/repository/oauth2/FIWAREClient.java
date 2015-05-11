@@ -44,9 +44,12 @@ import org.scribe.model.OAuthConfig;
 import org.scribe.model.Token;
 import org.scribe.model.SignatureType;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.fiware.apps.repository.dao.impl.MongoUserDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
+import org.fiware.apps.repository.exceptions.db.SameIdException;
 
 public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
     
@@ -113,6 +116,8 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
                 
             } catch (NotFoundException ex) {
                 
+            } catch (SameIdException ex) {
+                Logger.getLogger(FIWAREClient.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             return profile;

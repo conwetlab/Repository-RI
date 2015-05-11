@@ -61,17 +61,20 @@ public class MongoCollectionDAO implements CollectionDAO{
     public static final String MONGO_COLL_NAME = "ResourceCollection";
     private DB db;
     private DBCollection mongoCollection;
+    private DBCollection mongoCollectionResources;
     private VirtuosoResourceDAO virtuosoResourceDAO;
     
     public MongoCollectionDAO(){
         db = MongoDAOFactory.createConnection();
         mongoCollection = db.getCollection(MONGO_COLL_NAME);
+        mongoCollectionResources = db.getCollection(MongoResourceDAO.MONGO_COLL_NAME);
         virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
     }
     
-    public MongoCollectionDAO(DB dbIn, DBCollection dBCollectionIn, VirtuosoResourceDAO virtuosoResourceDAOIn) {
+    public MongoCollectionDAO(DB dbIn, DBCollection collection, DBCollection collectionResources, VirtuosoResourceDAO virtuosoResourceDAOIn) {
         this.db = Objects.requireNonNull(dbIn);
-        this.mongoCollection = Objects.requireNonNull(dBCollectionIn);
+        this.mongoCollection = Objects.requireNonNull(collection);
+        this.mongoCollectionResources = Objects.requireNonNull(collectionResources);
         this.virtuosoResourceDAO = Objects.requireNonNull(virtuosoResourceDAOIn);
     }
     
@@ -178,9 +181,9 @@ public class MongoCollectionDAO implements CollectionDAO{
         ResourceCollection r = new ResourceCollection();
         db.requestStart();
         DBObject obj =null;
-        DB dbAux = MongoDAOFactory.createConnection();
-        MongoResourceDAO resourceDAO = new MongoResourceDAO(dbAux,
-                dbAux.getCollection(MongoResourceDAO.MONGO_COLL_NAME), 
+
+        MongoResourceDAO resourceDAO = new MongoResourceDAO(db,
+                mongoCollectionResources,
                 new MongoDAOFactory(), 
                 this);
         try{

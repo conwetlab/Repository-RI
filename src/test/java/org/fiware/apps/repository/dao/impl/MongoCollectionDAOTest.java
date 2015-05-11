@@ -40,9 +40,6 @@ import org.fiware.apps.repository.dao.CollectionDAO;
 import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
-import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
-import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
-import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.ResourceCollection;
@@ -90,7 +87,7 @@ public class MongoCollectionDAOTest {
         resourceDAO = mock(MongoResourceDAO.class);
         virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
         dBObject = mock(DBObject.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
     }
     
     @After
@@ -211,7 +208,7 @@ public class MongoCollectionDAOTest {
         DBCollection mongoResource = PowerMockito.mock(DBCollection.class);
         db = PowerMockito.mock(DB.class);
         mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
         
         list.add(dBObject);
         rulesdbObjectCollection(id, date);
@@ -247,7 +244,7 @@ public class MongoCollectionDAOTest {
         DBCollection mongoResource = PowerMockito.mock(DBCollection.class);
         db = PowerMockito.mock(DB.class);
         mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
         
         list.add(dBObject);
         rulesdbObjectCollection(id, date);
@@ -278,7 +275,7 @@ public class MongoCollectionDAOTest {
         Date date = new Date();
         
         db = PowerMockito.mock(DB.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
         
         rulesdbObjectCollection(id, date);
         PowerMockito.when(db.getCollection(anyString())).thenThrow(Exception.class);
@@ -298,7 +295,7 @@ public class MongoCollectionDAOTest {
         DBCollection mongoResource = PowerMockito.mock(DBCollection.class);
         db = PowerMockito.mock(DB.class);
         mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
         
         list.add(dBObject);
         rulesdbObjectCollection(id, date);
@@ -338,8 +335,8 @@ public class MongoCollectionDAOTest {
         
         assertEquals(id+"Id", returned.getId());
         assertEquals(id+"Creator", returned.getCreator());
-        verify(db, times(2)).requestStart();
-        verify(db, times(2)).requestDone();
+        verify(db, times(3)).requestStart();
+        verify(db, times(3)).requestDone();
     }
     
     @Test
@@ -449,7 +446,7 @@ public class MongoCollectionDAOTest {
         List list = new LinkedList();
         
         mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
         list.add(dBObject);
         
         PowerMockito.when(mongoCollection.find(any())).thenReturn(dBCursor);
@@ -474,7 +471,7 @@ public class MongoCollectionDAOTest {
         List list = new LinkedList();
         
         mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
         list.add(dBObject);
         list.add(null);
         
@@ -498,7 +495,7 @@ public class MongoCollectionDAOTest {
         Date date = new Date();
         
         mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
         
         PowerMockito.when(mongoCollection.find(any())).thenThrow(Exception.class);
         rulesdbObjectCollection(id, date);
