@@ -3,7 +3,7 @@
        xmlns:security="http://www.springframework.org/schema/security"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
           http://www.springframework.org/schema/security
           http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
@@ -36,8 +36,8 @@
 
     <!-- clients definition -->
     <bean id="fiwareClient" class="org.fiware.apps.repository.oauth2.FIWAREClient"> 
-        <property name="key" value="2724" />
-        <property name="secret" value="10d7897bcac3dc4c5aaf45b20872ff85626ccb9f8dbf7a3462afb5da25ee11c94f4e0d0f043d19e9039db5d0dbe304f1e3425994d43129eac0cb5879237d74cb" />
+        <property name="key" value="61686dc9f9734d0ba3237ae573c63a1c" />
+        <property name="secret" value="01c8253c51bc42e48561bbc6ded05a84" />
         <!--<property name="key" value="KEY" />
         <property name="secret" value="SECRET" />-->
     </bean>

@@ -45,16 +45,10 @@ import org.fiware.apps.repository.model.ResourceCollection;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.ObjectId;
 import java.util.Objects;
-import org.fiware.apps.repository.dao.DAOFactory;
-import org.fiware.apps.repository.dao.VirtModelFactory;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
-import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
-import org.fiware.apps.repository.settings.RepositorySettings;
-import virtuoso.jena.driver.VirtGraph;
 
 public class MongoCollectionDAO implements CollectionDAO{
     

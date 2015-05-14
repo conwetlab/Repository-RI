@@ -29,7 +29,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.oauth2;
 
-import org.apache.commons.codec.binary.Base64;
+//import org.apache.commons.codec.binary.Base64;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.scribe.builder.api.DefaultApi20;
 import org.scribe.model.OAuthConfig;
 import org.scribe.model.OAuthConstants;
@@ -61,7 +62,7 @@ public class ProxyOAuthServiceImpl extends ProxyOAuth20ServiceImpl {
                                                            this.readTimeout, this.proxyHost, this.proxyPort);
         
         String oauth2Header = this.config.getApiKey() + ":" + this.config.getApiSecret();
-        request.addHeader("Authorization", "Basic " + Base64.encodeBase64String(oauth2Header.getBytes()));
+        request.addHeader("Authorization", "Basic " + Base64.encode(oauth2Header.getBytes()));
         
         if (this.getParameter) {
             request.addQuerystringParameter(OAuthConstants.CLIENT_ID, this.config.getApiKey());

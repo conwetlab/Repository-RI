@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.jboss.resteasy.links.RESTServiceDiscovery;
+//import org.jboss.resteasy.links.RESTServiceDiscovery;
 
 @XmlRootElement(name = "collection")
 public class ResourceCollection extends AbstractResource{
@@ -19,8 +19,8 @@ public class ResourceCollection extends AbstractResource{
 	private List<Resource> resources=new ArrayList <Resource>();
 	
 
-	@XmlElementRef
-	private RESTServiceDiscovery rest;
+	//@XmlElementRef
+	//private RESTServiceDiscovery rest;
 	
 	
 	@XmlElementWrapper

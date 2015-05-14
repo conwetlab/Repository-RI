@@ -3,10 +3,8 @@ package org.fiware.apps.repository.dao;
 import java.util.List;
 
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
-import org.fiware.apps.repository.exceptions.db.ParentNotExistsException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.ResourceCollection;
-import org.fiware.apps.repository.model.ResourceFilter;
 
 
 public interface CollectionDAO {

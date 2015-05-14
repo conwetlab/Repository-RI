@@ -4,8 +4,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.jboss.resteasy.links.ParentResource;
-import org.jboss.resteasy.links.RESTServiceDiscovery;
+//import org.jboss.resteasy.links.ParentResource;
+//import org.jboss.resteasy.links.RESTServiceDiscovery;
 
 @XmlRootElement(name = "resource")
 public class Resource extends AbstractResource{
@@ -17,11 +17,11 @@ public class Resource extends AbstractResource{
     byte[] content;
     
     
-    @ParentResource
+    //@ParentResource
     private ResourceCollection collection;
     
-    @XmlElementRef
-    private RESTServiceDiscovery rest;
+    //@XmlElementRef
+    //private RESTServiceDiscovery rest;
     
     @XmlElement()
     public ResourceCollection getCollection() {
