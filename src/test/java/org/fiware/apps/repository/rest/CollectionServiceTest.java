@@ -32,7 +32,6 @@ package org.fiware.apps.repository.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.LinkedList;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
@@ -41,8 +40,7 @@ import org.fiware.apps.repository.dao.impl.*;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.*;
-import org.fiware.apps.repository.rest.CollectionService;
-import org.jboss.resteasy.specimpl.UriInfoImpl;
+import org.jboss.resteasy.spi.ResteasyUriInfo;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -112,8 +110,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType("text/n3");
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
@@ -129,8 +127,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType("text/n3");
         resource.setContent(null);
@@ -147,8 +145,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType(accept);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
@@ -164,8 +162,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType(accept);
         resource.setContent(null);
@@ -182,8 +180,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "text/plain";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         ResourceCollection collection = generateResourceCollection(path, null, true);
         resource.setContentMimeType(accept);
@@ -200,8 +198,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "text/plain";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType(accept);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
@@ -217,8 +215,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "text/plain";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType("text/n3");
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
@@ -233,8 +231,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "text/plain";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         ResourceCollection collection = generateResourceCollection(path, null, true);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
         when(mongoCollectionDAO.getCollection(eq(path))).thenReturn(collection);
@@ -249,8 +247,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a/b/c"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType(accept);
         resource.setContent(null);
@@ -266,8 +264,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
         
         returned = toTest.postResource(uriInfo, resource);
@@ -280,8 +278,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
         
         //doThrow(SameIdException.class);
@@ -297,8 +295,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
         
         //doThrow(SameIdException.class);
@@ -314,8 +312,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
         
         returned = toTest.postResource(uriInfo, resource);
@@ -328,8 +326,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
         
         doThrow(SameIdException.class).when(mongoCollectionDAO).insertCollection(eq((ResourceCollection) resource));
@@ -344,8 +342,8 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a";
         String accept = "application/rdf+xml";
-        UriInfo uriInfo = new UriInfoImpl(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"), "", null, new LinkedList());
+        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
+                new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
         
         doThrow(DatasourceException.class).when(mongoCollectionDAO).insertCollection(eq((ResourceCollection) resource));

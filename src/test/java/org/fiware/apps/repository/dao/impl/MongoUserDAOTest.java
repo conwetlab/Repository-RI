@@ -11,8 +11,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;

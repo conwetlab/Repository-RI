@@ -66,6 +66,7 @@ public class SelectQueryResponseTest {
             assertEquals(list.get(i).getName(), name+i);
             for (int j = 0; j<jLimit; j++) {
                 assertEquals(list.get(i).get(j), name+j+"."+i);
+                assertEquals(toTest.getValue(i, j), name+j+"."+i);
             }
         }
     }

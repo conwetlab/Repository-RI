@@ -36,8 +36,6 @@ import com.mongodb.DBObject;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.fiware.apps.repository.dao.CollectionDAO;
-import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
@@ -64,9 +62,6 @@ public class MongoCollectionDAOTest {
     @Mock private DBCollection mongoCollection;
     @Mock private VirtuosoResourceDAO virtuosoResourceDAO;
     @Mock private DBObject dBObject;
-    @Mock private DAOFactory mongoFactory;
-    @Mock private CollectionDAO collectionDAO;
-    @Mock private MongoResourceDAO resourceDAO;
     private MongoCollectionDAO toTest;
     
     public MongoCollectionDAOTest() {
@@ -84,7 +79,6 @@ public class MongoCollectionDAOTest {
     public void setUp() {
         db = mock(DB.class);
         mongoCollection = mock(DBCollection.class);
-        resourceDAO = mock(MongoResourceDAO.class);
         virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
         dBObject = mock(DBObject.class);
         toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);

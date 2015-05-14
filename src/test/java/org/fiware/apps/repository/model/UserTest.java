@@ -37,5 +37,8 @@ public class UserTest {
         
         assertEquals(toTest.getUserName(), newUsername);
         assertEquals(toTest.getPassword(), password);
+        assertEquals(toTest.getDisplayName(), displayName);
+        assertEquals(toTest.getEmail(), email);
+        assertEquals(toTest.getToken(), token);
     }
 }

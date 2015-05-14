@@ -46,13 +46,23 @@ public class ResourceFilterTest {
     @Test
     public void ResourceFilterNullTest() {
         int offset = 1;
+        int offset2 = 3;
         int limit = 2;
+        int limit2 = 4;
         
         toTest = new ResourceFilter(offset, limit, null);
         
         assertEquals(toTest.getOffset(), offset);
         assertEquals(toTest.getLimit(), limit);
         assertEquals(toTest.getFilter(), "");
+        
+        toTest.setFilter("CASA");
+        toTest.setLimit(limit2);
+        toTest.setOffset(offset2);
+        
+        assertEquals(toTest.getOffset(), offset2);
+        assertEquals(toTest.getLimit(), limit2);
+        assertEquals(toTest.getFilter(), "CASA");
         
         toTest.parseFilter();
     }
