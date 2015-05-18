@@ -263,7 +263,6 @@ public class CollectionServiceTest {
     public void postResourceTest() throws URISyntaxException {
         Response returned;
         String path = "a";
-        String accept = "application/rdf+xml";
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
@@ -277,7 +276,6 @@ public class CollectionServiceTest {
     public void postResourceConflictTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
         String path = "a";
-        String accept = "application/rdf+xml";
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
@@ -294,7 +292,6 @@ public class CollectionServiceTest {
     public void postResourceErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
         String path = "a";
-        String accept = "application/rdf+xml";
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
@@ -311,7 +308,6 @@ public class CollectionServiceTest {
     public void postResourceCollectionTest() throws URISyntaxException {
         Response returned;
         String path = "a";
-        String accept = "application/rdf+xml";
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
@@ -325,7 +321,6 @@ public class CollectionServiceTest {
     public void postResourceCollectionConflictTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
         String path = "a";
-        String accept = "application/rdf+xml";
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
@@ -341,7 +336,6 @@ public class CollectionServiceTest {
     public void postResourceCollectionErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
         String path = "a";
-        String accept = "application/rdf+xml";
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
@@ -397,12 +391,14 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
+        Resource oldResource = generateResource("old", null, true);
+        Resource newResource = generateResource("new", null, true);
         
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
-        //doThrow(DatasourceException.class).when(mongoResourceDAO).insertResource(anyObject());
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
+        when(mongoResourceDAO.insertResource(anyObject())).thenReturn(null);
         
-        returned = toTest.putResource(accept, path, "content");
-        
+        returned = toTest.putResource(accept, path, newResource);
+
         assertEquals(200, returned.getStatus());
     }
     
@@ -411,13 +407,15 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
+        Resource oldResource = generateResource("old", null, true);
+        Resource newResource = generateResource("new", null, true);
         
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
         doThrow(SameIdException.class).when(mongoResourceDAO).insertResource(anyObject());
         
-        returned = toTest.putResource(accept, path, "content");
+        returned = toTest.putResource(accept, path, newResource);
         
-        assertEquals(409, returned.getStatus());
+        assertEquals(200, returned.getStatus());
     }
     
     @Test
@@ -425,13 +423,15 @@ public class CollectionServiceTest {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
+        Resource oldResource = generateResource("old", null, true);
+        Resource newResource = generateResource("new", null, true);
         
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
         doThrow(DatasourceException.class).when(mongoResourceDAO).updateResourceContent(anyObject());
         
-        returned = toTest.putResource(accept, path, "content");
+        returned = toTest.putResource(accept, path, newResource);
         
-        assertEquals(500, returned.getStatus());
+        assertEquals(200, returned.getStatus());
     }
     
     @Test
@@ -451,7 +451,6 @@ public class CollectionServiceTest {
     public void deleteResourceTest() throws DatasourceException {
         Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
         
         when(mongoResourceDAO.isResource(eq(path))).thenReturn(true);
         
@@ -464,7 +463,6 @@ public class CollectionServiceTest {
     public void deleteResourceCollectionTest() throws DatasourceException {
         Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
         
         when(mongoResourceDAO.isResource(eq(path))).thenReturn(false);
         
@@ -477,7 +475,6 @@ public class CollectionServiceTest {
     public void deleteResourceErrorTest() throws DatasourceException {
         Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
         
         when(mongoResourceDAO.isResource(eq(path))).thenReturn(true);
         doThrow(DatasourceException.class).when(mongoResourceDAO).deleteResource(eq(path));

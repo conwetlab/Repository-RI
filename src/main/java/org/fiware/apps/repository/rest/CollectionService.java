@@ -164,29 +164,6 @@ public class CollectionService {
         }
     }
     
-    private Response insertResource(String path, FileUploadForm form) {
-        // Create a new resource form a file uploaded.
-        Resource resource;
-        try {
-            resource = new Resource();
-            resource.setId(path);
-            resource.setContentFileName(form.getFilename());
-            resource.setContentMimeType(form.getMimeType());
-            resource.setContent(form.getFileData());
-            if(RestHelper.isRDF(resource.getContentMimeType()))
-            {
-                virtuosoResourceDAO.insertResource(path, resource.getContent().toString(),
-                        RestHelper.typeMap.get(resource.getContentMimeType()));
-            }
-            mongoResourceDAO.insertResource(resource);
-            return Response.status(Status.CREATED).build();
-        } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
-        } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
-        }
-    }
-    
     private Response insertCollection(ResourceCollection resourceCollection) {
         try {
             mongoCollectionDAO.insertCollection(resourceCollection);
@@ -196,33 +173,6 @@ public class CollectionService {
             return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
         }
         return Response.status(Status.CREATED).build();
-    }
-    
-    private Response insertResourceContentRdfGeneric(String path, String content, String rdfType) {
-        try {
-            Resource r = mongoResourceDAO.getResource(path);
-            if(r==null){
-                r= new Resource();
-                r.setId(path);
-                try {
-                    mongoResourceDAO.insertResource(r);
-                } catch (SameIdException ex) {
-                    return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
-                }
-            }
-            r.setContent(content.getBytes());
-            r.setContentFileName("filename");
-            r.setContentMimeType(rdfType);
-            try {
-                mongoResourceDAO.updateResourceContent(r);
-            } catch (DatasourceException ex) {
-                return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
-            }
-            return Response.status(Status.CREATED).build();
-            
-        } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
-        }
     }
     
     @PUT

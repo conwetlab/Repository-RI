@@ -34,17 +34,15 @@ import javax.ws.rs.core.Response;
 import org.fiware.apps.repository.dao.*;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.model.SelectQueryResponse;
-import org.fiware.apps.repository.rest.QueryService;
 import org.junit.*;
-import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
-import static org.mockito.Matchers.eq;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(VirtuosoDAOFactory.class)
@@ -55,18 +53,8 @@ public class QueryServiceTest {
     private SelectQueryResponse querySelect = new SelectQueryResponse();
     private String queryConstruct = "Construct query";
     private String queryDescribe = "Describe query";
-    private String queryAsk = "true";
-    
     
     public QueryServiceTest() {
-    }
-    
-    @BeforeClass
-    public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
     }
     
     @Before
@@ -77,14 +65,9 @@ public class QueryServiceTest {
         when(virtuosoResourceDAO.executeQuerySelect(anyString())).thenReturn(querySelect);
         when(virtuosoResourceDAO.executeQueryConstruct(anyString(), anyString())).thenReturn(queryConstruct);
         when(virtuosoResourceDAO.executeQueryDescribe(anyString(), anyString())).thenReturn(queryDescribe);
-        when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(true);
+        
         
         toTest = new QueryService();
-    }
-    
-    @After
-    public void tearDown() {
-        
     }
     
     @Test
@@ -128,11 +111,13 @@ public class QueryServiceTest {
         Response returned;
         String accept = "";
         String query = "ask";
+
+        when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(true);
         
         returned = toTest.executeQuery(accept, query);
         
         assertEquals(200, returned.getStatus());
-        assertEquals(queryAsk, returned.getEntity());
+        assertEquals("true", returned.getEntity());
     }
 
     @Test
@@ -176,10 +161,12 @@ public class QueryServiceTest {
         Response returned;
         String accept = "";
         String query = "ask";
+
+        when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(false);
         
         returned = toTest.executeLongQuery(accept, query);
         
         assertEquals(200, returned.getStatus());
-        assertEquals(queryAsk, returned.getEntity());
+        assertEquals("false", returned.getEntity());
     }
 }
