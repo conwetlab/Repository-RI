@@ -117,7 +117,6 @@ public class MongoResourceDAO implements ResourceDAO{
         }
         catch (Exception e){
             db.requestDone();
-            e.printStackTrace();
             throw new DatasourceException(e.getMessage(), Resource.class );
         }
         db.requestDone();

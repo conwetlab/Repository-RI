@@ -144,7 +144,6 @@ public class MongoCollectionDAO implements CollectionDAO{
         }
         catch (Exception e){
             db.requestDone();
-            e.printStackTrace();
             throw new DatasourceException(e.getMessage(), ResourceCollection.class );
         }
         
@@ -164,7 +163,6 @@ public class MongoCollectionDAO implements CollectionDAO{
             return true;
             
         }catch (IllegalArgumentException e){
-            e.printStackTrace();
             db.requestDone();
             throw new DatasourceException("Error deleting Collection with ID " + id + " " + e.getMessage(), ResourceCollection.class );
         }
@@ -291,7 +289,6 @@ public class MongoCollectionDAO implements CollectionDAO{
         }
         catch (Exception e){
             db.requestDone();
-            e.printStackTrace();
             throw new DatasourceException(e.getMessage(), ResourceCollection.class );
         }
         db.requestDone();
