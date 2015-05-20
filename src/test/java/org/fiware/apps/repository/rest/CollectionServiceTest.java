@@ -56,27 +56,27 @@ import static org.junit.Assert.*;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DAOFactory.class, VirtuosoDAOFactory.class})
 public class CollectionServiceTest {
-    
+
     @Mock private MongoDAOFactory mongoFactory;
     @Mock private MongoCollectionDAO mongoCollectionDAO;
     @Mock private MongoResourceDAO mongoResourceDAO;
     @Mock private VirtuosoResourceDAO virtuosoResourceDAO;
     private CollectionService toTest;
-    
+
     public CollectionServiceTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() throws Exception {
-        
+
         PowerMockito.mockStatic(DAOFactory.class);
         PowerMockito.mockStatic(VirtuosoDAOFactory.class);
         mongoFactory = mock(MongoDAOFactory.class);
@@ -89,22 +89,22 @@ public class CollectionServiceTest {
         when(mongoFactory.getCollectionDAO()).thenReturn(mongoCollectionDAO);
         PowerMockito.whenNew(VirtuosoResourceDAO.class).withNoArguments().thenReturn(virtuosoResourceDAO);
         toTest = new CollectionService();
-        
+
     }
-    
+
     @After
     public void tearDown() {
     }
-    
+
     @Test
     public void getResourceRootTest() {
         Response returned;
-        
+
         returned = toTest.getResourceRoot();
-        
+
         assertEquals(returned.getStatus(), 404);
     }
-    
+
     @Test
     public void getResourceVirtuosoTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -115,13 +115,13 @@ public class CollectionServiceTest {
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType("text/n3");
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
-        when(virtuosoResourceDAO.getResource(eq(path), anyString())).thenReturn(resource);
-        
+        when(virtuosoResourceDAO.getResource(eq(resource.getContentUrl()), anyString())).thenReturn(resource);
+
         returned = toTest.getResource(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 200);
     }
-    
+
     @Test
     public void getResourceVirtuosoNoContentTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -133,13 +133,13 @@ public class CollectionServiceTest {
         resource.setContentMimeType("text/n3");
         resource.setContent(null);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
-        when(virtuosoResourceDAO.getResource(eq(path), anyString())).thenReturn(resource);
-        
+        when(virtuosoResourceDAO.getResource(eq(resource.getContentUrl()), anyString())).thenReturn(resource);
+
         returned = toTest.getResource(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 204);
     }
-    
+
     @Test
     public void getResourceMongoTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -151,12 +151,12 @@ public class CollectionServiceTest {
         resource.setContentMimeType(accept);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
-        
+
         returned = toTest.getResource(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 200);
     }
-    
+
     @Test
     public void getResourceMongoNoContentTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -169,12 +169,12 @@ public class CollectionServiceTest {
         resource.setContent(null);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
-        
+
         returned = toTest.getResource(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 204);
     }
-    
+
     @Test
     public void getResourceCollectionTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -187,12 +187,12 @@ public class CollectionServiceTest {
         resource.setContentMimeType(accept);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
         when(mongoCollectionDAO.getCollection(eq(path))).thenReturn(collection);
-        
+
         returned = toTest.getResource(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 200);
     }
-    
+
     @Test
     public void getResourceCollectionNullTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -204,12 +204,12 @@ public class CollectionServiceTest {
         resource.setContentMimeType(accept);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
         when(mongoCollectionDAO.getCollection(eq(path))).thenReturn(null);
-        
+
         returned = toTest.getResource(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 404);
     }
-    
+
     @Test
     public void getResourceMetaTest() throws DatasourceException, JAXBException, URISyntaxException{
         Response returned;
@@ -220,12 +220,12 @@ public class CollectionServiceTest {
         Resource resource = generateResource(path, null, true);
         resource.setContentMimeType("text/n3");
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
-        
+
         returned = toTest.getResourceMeta(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 200);
     }
-    
+
     @Test
     public void getResourceCollectionMetaTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -236,12 +236,12 @@ public class CollectionServiceTest {
         ResourceCollection collection = generateResourceCollection(path, null, true);
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
         when(mongoCollectionDAO.getCollection(eq(path))).thenReturn(collection);
-        
+
         returned = toTest.getResourceMeta(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 404);
     }
-    
+
     @Test
     public void getResourceMetaExceptionTest() throws DatasourceException, URISyntaxException{
         Response returned;
@@ -253,12 +253,12 @@ public class CollectionServiceTest {
         resource.setContentMimeType(accept);
         resource.setContent(null);
         when(mongoResourceDAO.getResource(eq(path))).thenThrow(DatasourceException.class);
-        
+
         returned = toTest.getResourceMeta(uriInfo, accept, path);
-        
+
         assertEquals(returned.getStatus(), 500);
     }
-    
+
     @Test
     public void postResourceTest() throws URISyntaxException {
         Response returned;
@@ -266,12 +266,12 @@ public class CollectionServiceTest {
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
-        
+
         returned = toTest.postResource(uriInfo, resource);
-        
+
         assertEquals(returned.getStatus(), 201);
     }
-    
+
     @Test
     public void postResourceConflictTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
@@ -279,15 +279,15 @@ public class CollectionServiceTest {
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
-        
+
         //doThrow(SameIdException.class);
         doThrow(SameIdException.class).when(mongoResourceDAO).insertResource(eq((Resource) resource));
-        
+
         returned = toTest.postResource(uriInfo, resource);
-        
+
         assertEquals(returned.getStatus(), 409);
     }
-    
+
     @Test
     public void postResourceErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
@@ -295,15 +295,15 @@ public class CollectionServiceTest {
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResource(path, null, true);
-        
+
         //doThrow(SameIdException.class);
         doThrow(DatasourceException.class).when(mongoResourceDAO).insertResource(eq((Resource) resource));
-        
+
         returned = toTest.postResource(uriInfo, resource);
-        
+
         assertEquals(returned.getStatus(), 500);
     }
-    
+
     @Test
     public void postResourceCollectionTest() throws URISyntaxException {
         Response returned;
@@ -311,12 +311,12 @@ public class CollectionServiceTest {
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
-        
+
         returned = toTest.postResource(uriInfo, resource);
-        
+
         assertEquals(returned.getStatus(), 201);
     }
-    
+
     @Test
     public void postResourceCollectionConflictTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
@@ -324,14 +324,14 @@ public class CollectionServiceTest {
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
-        
+
         doThrow(SameIdException.class).when(mongoCollectionDAO).insertCollection(eq((ResourceCollection) resource));
-        
+
         returned = toTest.postResource(uriInfo, resource);
-        
+
         assertEquals(409, returned.getStatus());
     }
-    
+
     @Test
     public void postResourceCollectionErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
@@ -339,53 +339,68 @@ public class CollectionServiceTest {
         UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
                 new URI("http://localhost:8080/FiwareRepository/v2/"));
         AbstractResource resource = generateResourceCollection(path, null, true);
-        
+
         doThrow(DatasourceException.class).when(mongoCollectionDAO).insertCollection(eq((ResourceCollection) resource));
-        
+
         returned = toTest.postResource(uriInfo, resource);
-        
+
         assertEquals(500, returned.getStatus());
     }
-    
+
     @Test
     public void putResourceTest() throws URISyntaxException, DatasourceException {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
-        
+        Resource resource = generateResource(accept, null, true);
+
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
+
         returned = toTest.putResource(accept, path, "content");
-        
+
         assertEquals(200, returned.getStatus());
     }
-    
+
     @Test
-    public void putResourceConflictTest() throws URISyntaxException, DatasourceException, SameIdException {
+    public void putResourceNotRDFTest() throws URISyntaxException, DatasourceException {
+        Response returned;
+        String path = "a/b/c";
+        String accept = "accept";
+        Resource resource = generateResource(accept, null, true);
+
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
+
+        returned = toTest.putResource(accept, path, "content");
+
+        assertEquals(200, returned.getStatus());
+    }
+
+    @Test
+    public void putResourceNullTest() throws URISyntaxException, DatasourceException {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        
-        doThrow(SameIdException.class).when(mongoResourceDAO).insertResource(anyObject());
-        
+
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
+
         returned = toTest.putResource(accept, path, "content");
-        
-        assertEquals(409, returned.getStatus());
+
+        assertEquals(404, returned.getStatus());
     }
-    
+
     @Test
     public void putResourceErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
-        
-        doThrow(DatasourceException.class).when(mongoResourceDAO).insertResource(anyObject());
-        
+
+        doThrow(DatasourceException.class).when(mongoResourceDAO).getResource(path);
+
         returned = toTest.putResource(accept, path, "content");
-        
+
         assertEquals(500, returned.getStatus());
     }
-    
+
     @Test
     public void putResourceMetaTest() throws DatasourceException, SameIdException {
         Response returned;
@@ -393,97 +408,119 @@ public class CollectionServiceTest {
         String accept = "application/rdf+xml";
         Resource oldResource = generateResource("old", null, true);
         Resource newResource = generateResource("new", null, true);
-        
+        newResource.setContentMimeType(oldResource.getContentMimeType());
+        newResource.setContentUrl(oldResource.getContentUrl());
+
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
         when(mongoResourceDAO.insertResource(anyObject())).thenReturn(null);
-        
+
         returned = toTest.putResource(accept, path, newResource);
 
         assertEquals(200, returned.getStatus());
     }
-    
+
     @Test
-    public void putResourceMetaConflictTest() throws DatasourceException, SameIdException {
+    public void putResourceMetaMimeErrorTest() throws DatasourceException, SameIdException {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
         Resource oldResource = generateResource("old", null, true);
         Resource newResource = generateResource("new", null, true);
-        
+        newResource.setContentUrl(oldResource.getContentUrl());
+
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
-        doThrow(SameIdException.class).when(mongoResourceDAO).insertResource(anyObject());
-        
+
         returned = toTest.putResource(accept, path, newResource);
-        
-        assertEquals(200, returned.getStatus());
+
+        assertEquals(403, returned.getStatus());
     }
-    
+
     @Test
-    public void putResourceMetaErrorTest() throws DatasourceException, SameIdException {
+    public void putResourceMetaUrlErrorTest() throws DatasourceException, SameIdException {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
         Resource oldResource = generateResource("old", null, true);
         Resource newResource = generateResource("new", null, true);
-        
+        newResource.setContentMimeType(oldResource.getContentMimeType());
+
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
-        doThrow(DatasourceException.class).when(mongoResourceDAO).updateResourceContent(anyObject());
-        
+
         returned = toTest.putResource(accept, path, newResource);
-        
-        assertEquals(200, returned.getStatus());
+
+        assertEquals(403, returned.getStatus());
     }
-    
+
+    @Test
+    public void putResourceMetaErrorTest() throws DatasourceException {
+        Response returned;
+        String path = "a/b/c";
+        String accept = "application/rdf+xml";
+        Resource oldResource = generateResource("old", null, true);
+        Resource newResource = generateResource("new", null, true);
+        newResource.setContentMimeType(oldResource.getContentMimeType());
+        newResource.setContentUrl(oldResource.getContentUrl());
+
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
+        doThrow(DatasourceException.class).when(mongoResourceDAO).updateResource(eq(path), anyObject());
+
+        returned = toTest.putResource(accept, path, newResource);
+
+        assertEquals(500, returned.getStatus());
+    }
+
     @Test
     public void putResourceCollectionMetaTest() {
         Response returned;
         String path = "a/b/c";
         String accept = "application/rdf+xml";
         AbstractResource collection = generateResourceCollection(path, null, true);
-        
+
         returned = toTest.putResource(accept, path, collection);
-        
+
         assertEquals(403, returned.getStatus());
     }
-    
-    
+
+
     @Test
     public void deleteResourceTest() throws DatasourceException {
         Response returned;
         String path = "a/b/c";
-        
-        when(mongoResourceDAO.isResource(eq(path))).thenReturn(true);
-        
+        Resource resource = generateResource(path, null, true);
+
+        when(mongoResourceDAO.getResource(path)).thenReturn(resource);
+
         returned = toTest.delete(path);
-        
+
         assertEquals(202, returned.getStatus());
     }
-    
+
     @Test
     public void deleteResourceCollectionTest() throws DatasourceException {
         Response returned;
         String path = "a/b/c";
-        
-        when(mongoResourceDAO.isResource(eq(path))).thenReturn(false);
-        
+
+        when(mongoResourceDAO.getResource(path)).thenReturn(null);
+
         returned = toTest.delete(path);
-        
+
         assertEquals(202, returned.getStatus());
     }
-    
+
     @Test
     public void deleteResourceErrorTest() throws DatasourceException {
         Response returned;
         String path = "a/b/c";
-        
-        when(mongoResourceDAO.isResource(eq(path))).thenReturn(true);
+        Resource resource = generateResource(path, null, true);
+
+        when(mongoResourceDAO.getResource(path)).thenReturn(resource);
         doThrow(DatasourceException.class).when(mongoResourceDAO).deleteResource(eq(path));
-        
+
         returned = toTest.delete(path);
-        
+
         assertEquals(500, returned.getStatus());
     }
-    
+
     private Resource generateResource(String string, Date date, boolean creationDate) {
         Resource resource = new Resource();
         if (string == null)
@@ -492,7 +529,7 @@ public class CollectionServiceTest {
             date = new Date();
         if (creationDate)
             resource.setCreationDate(date);
-        
+
         resource.setCreator(string + "Creator");
         resource.setModificationDate(date);
         resource.setContent(string.getBytes());
@@ -501,10 +538,10 @@ public class CollectionServiceTest {
         resource.setContentUrl(string + "ContentUrl");
         resource.setId(string + "Id");
         resource.setName(string + "Name");
-        
+
         return resource;
     }
-    
+
     private ResourceCollection generateResourceCollection(String string, Date date, boolean creationDate) {
         ResourceCollection collection = new ResourceCollection();
         if (string == null)
@@ -513,12 +550,12 @@ public class CollectionServiceTest {
             date = new Date();
         if (creationDate)
             collection.setCreationDate(date);
-        
+
         collection.setCreator(string + "Creator");
         collection.setModificationDate(date);
         collection.setId(string + "Id");
-        
+
         return collection;
     }
-    
+
 }
