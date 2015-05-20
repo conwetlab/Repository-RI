@@ -30,11 +30,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -48,31 +51,50 @@ import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
 
 
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
+import org.fiware.apps.repository.exceptions.db.DatasourceException;
+import org.fiware.apps.repository.model.RepositoryException;
+import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
 import virtuoso.jena.driver.VirtGraph;
 
 @Path("/services/"+RepositorySettings.QUERY_SERVICE_NAME)
 public class QueryService {
     private VirtuosoResourceDAO virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
-    
+
     @Context
             UriInfo uriInfo;
-    
+
     @GET
     public Response executeQuery(@HeaderParam("Accept") String accept, @QueryParam("query") String query) {
         return executeAnyQuery(query, accept);
     }
-    
+
     @POST
     @Consumes("text/plain")
     public Response executeLongQuery(@HeaderParam("Accept") String accept, String content) {
         return executeAnyQuery(content, accept);
     }
-    
+
+    @GET
+    @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
+    public Response obtainResource(@HeaderParam("Accept") String accept, @PathParam("path") String path) {
+        Resource resource;
+        try {
+            resource = virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(accept));
+        } catch (DatasourceException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+        }
+
+        if (resource != null)
+            return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(accept).build();
+        else
+            return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"MENSAJE")).build();
+    }
+
     private Response executeAnyQuery(String query, String type) {
         String result = "";
-        // Check type sparql query and execute the method
-        
+        // Check type sparql query and execute the method.
+
         if (query.toLowerCase().contains("select")) {
             return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
         }
@@ -85,7 +107,7 @@ public class QueryService {
         if (query.toLowerCase().contains("ask")) {
             result = (virtuosoResourceDAO.executeQueryAsk(query)) ? "true" : "false";
         }
-        
+
         return Response.status(Status.OK).entity(result).build();
     }
 }

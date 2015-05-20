@@ -30,9 +30,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import org.fiware.apps.repository.dao.*;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
+import org.fiware.apps.repository.exceptions.db.DatasourceException;
+import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.SelectQueryResponse;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -47,16 +51,16 @@ import static org.mockito.Mockito.*;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(VirtuosoDAOFactory.class)
 public class QueryServiceTest {
-    
+
     @Mock private VirtuosoResourceDAO virtuosoResourceDAO;
     private QueryService toTest;
     private SelectQueryResponse querySelect = new SelectQueryResponse();
     private String queryConstruct = "Construct query";
     private String queryDescribe = "Describe query";
-    
+
     public QueryServiceTest() {
     }
-    
+
     @Before
     public void setUp() {
         PowerMockito.mockStatic(VirtuosoDAOFactory.class);
@@ -65,108 +69,163 @@ public class QueryServiceTest {
         when(virtuosoResourceDAO.executeQuerySelect(anyString())).thenReturn(querySelect);
         when(virtuosoResourceDAO.executeQueryConstruct(anyString(), anyString())).thenReturn(queryConstruct);
         when(virtuosoResourceDAO.executeQueryDescribe(anyString(), anyString())).thenReturn(queryDescribe);
-        
-        
+
+
         toTest = new QueryService();
     }
-    
+
     @Test
-    public void getSelect() {
+    public void getSelectTest() {
         Response returned;
         String accept = "";
         String query = "select";
-        
+
         returned = toTest.executeQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals(querySelect, returned.getEntity());
     }
-    
+
     @Test
-    public void getConstruct() {
+    public void getConstructTest() {
         Response returned;
         String accept = "";
         String query = "construct";
-        
+
         returned = toTest.executeQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals(queryConstruct, returned.getEntity());
     }
-    
+
     @Test
-    public void getDescribe() {
+    public void getDescribeTest() {
         Response returned;
         String accept = "";
         String query = "describe";
-        
+
         returned = toTest.executeQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals(queryDescribe, returned.getEntity());
     }
-    
+
     @Test
-    public void getAsk() {
+    public void getAskTest() {
         Response returned;
         String accept = "";
         String query = "ask";
 
         when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(true);
-        
+
         returned = toTest.executeQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals("true", returned.getEntity());
     }
 
     @Test
-    public void postSelect() {
+    public void postSelectTest() {
         Response returned;
         String accept = "";
         String query = "select";
-        
+
         returned = toTest.executeLongQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals(querySelect, returned.getEntity());
     }
-    
+
     @Test
-    public void postConstruct() {
+    public void postConstructTest() {
         Response returned;
         String accept = "";
         String query = "construct";
-        
+
         returned = toTest.executeLongQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals(queryConstruct, returned.getEntity());
     }
-    
+
     @Test
-    public void postDescribe() {
+    public void postDescribeTest() {
         Response returned;
         String accept = "";
         String query = "describe";
-        
+
         returned = toTest.executeLongQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals(queryDescribe, returned.getEntity());
     }
-    
+
     @Test
-    public void postAsk() {
+    public void postAskTest() {
         Response returned;
         String accept = "";
         String query = "ask";
 
         when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(false);
-        
+
         returned = toTest.executeLongQuery(accept, query);
-        
+
         assertEquals(200, returned.getStatus());
         assertEquals("false", returned.getEntity());
     }
+
+    @Test
+    public void executeAnyQueryTest() {
+        Response returned;
+        String path = "path";
+        String type = "application/rdf+xml";
+        Resource resource = new Resource();
+        resource.setContent("resourceContent".getBytes());
+
+        try {
+            when(virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(type))).thenReturn(resource);
+        } catch (DatasourceException ex) {
+            fail(ex.getLocalizedMessage());
+        }
+
+        returned = toTest.obtainResource(type, path);
+
+        assertEquals(200, returned.getStatus());
+        assertEquals(resource.getContent(), returned.getEntity());
+    }
+
+    @Test
+    public void executeAnyQueryNullTest() {
+        Response returned;
+        String path = "path";
+        String type = "application/rdf+xml";
+
+        try {
+            when(virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(type))).thenReturn(null);
+        } catch (DatasourceException ex) {
+            fail(ex.getLocalizedMessage());
+        }
+
+        returned = toTest.obtainResource(type, path);
+
+        assertEquals(404, returned.getStatus());
+    }
+
+    @Test
+    public void executeAnyQueryErrorTest() {
+        Response returned;
+        String path = "path";
+        String type = "application/rdf+xml";
+
+        try {
+            when(virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(type))).thenThrow(DatasourceException.class);
+        } catch (DatasourceException ex) {
+            fail(ex.getLocalizedMessage());
+        }
+
+        returned = toTest.obtainResource(type, path);
+
+        assertEquals(500, returned.getStatus());
+    }
+
 }
