@@ -196,7 +196,7 @@ public class CollectionService {
         Resource resource;
         try {
             resource = mongoResourceDAO.getResource(path);
-            if (resource == null)//Puede pasar??
+            if (resource == null)
             {
                 return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
             }
@@ -205,6 +205,9 @@ public class CollectionService {
             if(RestHelper.isRDF(type)) {
                 virtuosoResourceDAO.updateResource(resource.getContentUrl(), content,
                         RestHelper.typeMap.get(resource.getContentMimeType()));
+            }
+            else {
+                virtuosoResourceDAO.deleteResource(resource.getContentUrl());
             }
             mongoResourceDAO.updateResourceContent(resource);
 
