@@ -14,7 +14,19 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
+    
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/${security.type}.xml
+        </param-value>
+    </context-param>
+    <!-- End of Spring Security -->
+    
     <context-param>
         <param-name>resteasy.resources</param-name>
         <param-value>
@@ -28,21 +40,14 @@
         <param-value>/v2</param-value>
     </context-param>
 
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>
-            /WEB-INF/securityOAuth2.xml
-        </param-value>
-    </context-param>
+    
     
     <!--<context-param>
         <param-name>repositoryProperties</param-name>    
         <param-value>/WEB-INF/classes/properties/repository.properties</param-value>
     </context-param>-->
 
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
+    
 
     <listener>
         <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
