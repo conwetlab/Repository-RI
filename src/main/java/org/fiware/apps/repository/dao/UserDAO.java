@@ -1,5 +1,5 @@
 /*
-Modified BSD License  
+Modified BSD License
 ====================
 
 Copyright (c) 2015, CoNWeTLab, Universidad Politecnica Madrid

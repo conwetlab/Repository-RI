@@ -6,19 +6,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "exception")
 public class RepositoryException {
-	private int errorCode;	
+	private int errorCode;
 	private String description;
 	private String reasonPhrase;
-	
+
 	public RepositoryException() {
-	
+
 	}
-	
+
 	public RepositoryException(Status status, String message) {
 		this.description = message;
 		this.errorCode = status.getStatusCode();
 		this.reasonPhrase =	status.getReasonPhrase();
-	
+
 	}
 	@XmlElement
 	public int getErrorCode() {
@@ -27,7 +27,7 @@ public class RepositoryException {
 	public void setErrorCode(int errorCode) {
 		this.errorCode = errorCode;
 	}
-	
+
 	@XmlElement
 	public String getDescription() {
 		return description;
@@ -35,7 +35,7 @@ public class RepositoryException {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 	@XmlElement
 	public String getReasonPhrase() {
 		return reasonPhrase;
@@ -43,5 +43,5 @@ public class RepositoryException {
 	public void setReasonPhrase(String reasonPhrase) {
 		this.reasonPhrase = reasonPhrase;
 	}
-	
+
 }

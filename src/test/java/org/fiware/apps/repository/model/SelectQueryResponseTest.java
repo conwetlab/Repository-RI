@@ -36,32 +36,32 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class SelectQueryResponseTest {
-    
+
     private SelectQueryResponse toTest;
-    
+
     public SelectQueryResponseTest() {
     }
-    
+
     @Test
     public void SelectQueryResponseTotalTest() {
         String name = "string";
         int iLimit = 50;
         int jLimit = 50;
         List <Column> list;
-        
+
         toTest = new SelectQueryResponse();
-        
+
         for (int i = 0; i<iLimit; i++) {
             toTest.addColumn(name+i);
             for (int j = 0; j<jLimit; j++) {
                 toTest.addValue(i, name+j+"."+i);
             }
         }
-        
+
         list = toTest.getColumns();
-        
+
         assertEquals(iLimit, toTest.getVars());
-        
+
         for (int i = 0; i<iLimit; i++) {
             assertEquals(list.get(i).getName(), name+i);
             for (int j = 0; j<jLimit; j++) {

@@ -8,16 +8,16 @@ package org.fiware.apps.repository.oauth2;
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. Neither the name of copyright holders nor the names of its contributors
- *    may be used to endorse or promote products derived from this software 
+ *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,32 +42,32 @@ import org.scribe.model.Verb;
 import org.scribe.utils.OAuthEncoder;
 
 public class FIWAREApiTest {
-	
+
 	private FIWAREApi api = new FIWAREApi();
-	
+
 	@Test
 	public void testGetAuthorizationUrl() {
 		String clientId = "1";
 		String redirectURI = "http://fi-ware.org";
 		String scope = "profile,store";
-		OAuthConfig config = new OAuthConfig(clientId, null, redirectURI, null, scope, null);		
-		String expectedURL = "https://account.lab.fiware.org/oauth2/authorize?client_id=" + clientId + 
-				"&redirect_uri=" + redirectURI + "&scope=" + 
+		OAuthConfig config = new OAuthConfig(clientId, null, redirectURI, null, scope, null);
+		String expectedURL = "https://account.lab.fiware.org/oauth2/authorize?client_id=" + clientId +
+				"&redirect_uri=" + redirectURI + "&scope=" +
 				OAuthEncoder.encode(scope) + "&response_type=code";
-		
+
 		assertEquals(expectedURL, api.getAuthorizationUrl(config));
 	}
-	
+
 	@Test
 	public void testGetAccessTokenEndpoint() {
 		assertEquals(api.getAccessTokenEndpoint(),"https://account.lab.fiware.org/oauth2/token");
 	}
-	
+
 	@Test
 	public void testGetAccessTokenVerb() {
 		assertEquals(api.getAccessTokenVerb(),Verb.POST);
 	}
-	
+
 	@Test
 	public void testGetAccessTokenExtractor() {
 		assertEquals(api.getAccessTokenExtractor().getClass(),JsonTokenExtractor.class);

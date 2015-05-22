@@ -35,29 +35,29 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class ColumnTest {
-    
+
     private Column toTest;
-    
+
     @Test
     public void ColumnTotalTest() {
         String name = "name";
         String name2 = "name2";
-        
+
         toTest = new Column(name);
-        
+
         assertEquals(toTest.getName(), name);
-        
+
         toTest.setName(name2);
-        
+
         assertEquals(toTest.getName(), name2);
-        
+
         for (int i = 0; i<50; i++)
         {
             toTest.add(name+i);
         }
-        
+
         List <String> list = toTest.getValues();
-        
+
         for (int i = 0; i<50; i++)
         {
             assertEquals(toTest.get(i), name+i);

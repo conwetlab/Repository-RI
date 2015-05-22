@@ -57,85 +57,85 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 
 public class FIWAREHeaderAuthenticationFilterTest {
-    
+
     private static final String BASE_URL = "/system/";
     private static final String HEADER_NAME = "Auth-Tkt";
     private FIWAREHeaderAuthenticationFilter filter =
             new FIWAREHeaderAuthenticationFilter(BASE_URL, HEADER_NAME);
-    
-    
+
+
     public void testAttemptAuthentication(List<GrantedAuthority> roles)  {
         String authToken = "authTokenSimulation";
-        
+
         // Profile
         FIWAREProfile profile = new FIWAREProfile();
         profile.addAttribute("nickName", "exampleNickName");
         profile.addAttribute("displayName", "EXAMPLE DISPLAY NAME");
         profile.addAttribute("email", "example@example.com");
-        
+
         for (GrantedAuthority authority: roles) {
             profile.addRole(authority.getAuthority());
         }
-        
+
         // Set the client
         FIWAREClient client = mock(FIWAREClient.class);
         when(client.getUserProfile(authToken)).thenReturn(profile);
         filter.setClient(client);
-        
+
         // Set the HTTPRequest
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader(HEADER_NAME)).thenReturn(authToken);
-        
+
         // Call the method
         try {
             Authentication auth = filter.attemptAuthentication(request, null);
             assertEquals(auth.getClass(),ClientAuthenticationToken.class);
             assertEquals(auth.getAuthorities(),roles);
-            
+
             ClientAuthenticationToken castedAuth = (ClientAuthenticationToken) auth;
             assertEquals(castedAuth.getUserProfile(),profile);
         } catch (Exception ex) {
             fail("Exception " + ex + " not expected");
         }
     }
-    
+
     @Test
     public void testAttemptAuthenticationNoRoles() throws AuthenticationException, IOException, ServletException {
         testAttemptAuthentication(new ArrayList<GrantedAuthority>());
     }
-    
+
     @Test
     public void testAttemptAuthenticationOneRol() throws AuthenticationException, IOException, ServletException {
         List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        
+
         testAttemptAuthentication(authorities);
     }
-    
+
     @Test
     public void testAttemptAuthenticationSomeRoles() throws AuthenticationException, IOException, ServletException {
         List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         authorities.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
-        
+
         testAttemptAuthentication(authorities);
     }
-    
+
     @Test (expected = BadCredentialsException.class)
     public void testExceptionRisenOnAuthError() throws BadCredentialsException, AuthenticationException, IOException, ServletException{
         String authToken = "authTokenSimulation";
-        
+
         // FIWARE Client
         FIWAREClient client = mock(FIWAREClient.class);
         doThrow(new RuntimeException("Exception Message")).when(client).getUserProfile(authToken);
-        
+
         // Set the HTTPRequest
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader(HEADER_NAME)).thenReturn(authToken);
-        
+
         // Call the method
         filter.attemptAuthentication(request, null);
     }
-    
+
 }

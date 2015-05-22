@@ -30,15 +30,15 @@ public class ResourceFilter {
 	public String getFilter() {
 		return filter;
 	}
-	
+
 	public void setFilter(String filter) {
 		this.filter = filter;
 	}
-	
-	public BasicDBObject parseFilter(){		
+
+	public BasicDBObject parseFilter(){
 
 		BasicDBObject query = new BasicDBObject();
-		String[] filterStrings = this.filter.split(",");	
+		String[] filterStrings = this.filter.split(",");
 		boolean added = false;
 
 		for (int i=0; i<filterStrings.length; i++) {
@@ -46,7 +46,7 @@ public class ResourceFilter {
 
 			String[] filter = filterStrings[i].split(":");
 			if(filter.length==2){
-				Pattern p = Pattern.compile(filter[1], Pattern.CASE_INSENSITIVE);					
+				Pattern p = Pattern.compile(filter[1], Pattern.CASE_INSENSITIVE);
 				query.append(filter[0], p);
 				added=true;
 			}
@@ -54,7 +54,7 @@ public class ResourceFilter {
 
 
 		if(!added){
-			Pattern pat = Pattern.compile("");				
+			Pattern pat = Pattern.compile("");
 			query.append("id", pat);
 		}
 		return query;

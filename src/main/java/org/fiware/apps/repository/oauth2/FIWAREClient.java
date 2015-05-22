@@ -52,16 +52,16 @@ import org.fiware.apps.repository.exceptions.db.NotFoundException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 
 public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
-    
+
     // To store users information
     private MongoUserDAO userDAO = new MongoUserDAO();
-    
+
     private String scopeValue = "";
-    
+
     @Override
     protected void internalInit() {
         super.internalInit();
-        
+
         this.scopeValue = "";
         this.service = new ProxyOAuthServiceImpl(new FIWAREApi(),
                 new OAuthConfig(this.key, this.secret,
@@ -71,12 +71,12 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
                 this.connectTimeout, this.readTimeout, this.proxyHost,
                 this.proxyPort, false, true);
     }
-    
+
     @Override
     protected boolean requiresStateParameter() {
         return false;
     }
-    
+
     @Override
     protected FIWAREProfile extractUserProfile(String body) {
         FIWAREProfile profile = new FIWAREProfile();
@@ -86,16 +86,16 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
             for (final String attribute : new FIWAREAttributesDefinition().getPrincipalAttributes()) {
                 profile.addAttribute(attribute, JsonHelper.get(json, attribute));
             }
-            
+
             // FIXME: By default, we are adding the default Role...
             profile.addRole("ROLE_USER");
-            
+
             // User information should be stored in the local users table //
             User user;
             String username = (String) profile.getUsername();
             String email = (String) profile.getEmail();
             String displayName = (String) profile.getDisplayName();
-            
+
             try {
                 // Modify the existing user
                 user = userDAO.getUser(username);
@@ -103,38 +103,38 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
                     userDAO.createUser(username);
                     user = userDAO.getUser(username);
                 }
-                
+
                 // Set field values
                 user.setUserName(username);
                 user.setDisplayName(displayName);
                 user.setEmail(email);
                 user.setPassword("");// Password cannot be NULL
-                
+
                 // Save the new user
                 userDAO.updateUser(user);
             } catch (DatasourceException ex) {
-                
+
             } catch (NotFoundException ex) {
-                
+
             } catch (SameIdException ex) {
                 Logger.getLogger(FIWAREClient.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
             return profile;
         } else {
             return null;
         }
     }
-    
+
     @Override
     protected String getProfileUrl(Token arg0) {
         return "https://account.lab.fiware.org/user";
     }
-    
+
     @Override
     protected boolean hasBeenCancelled(WebContext context) {
         final String error = context.getRequestParameter(OAuthCredentialsException.ERROR);
-        
+
         // user has denied permissions
         if ("access_denied".equals(error)) {
             return true;
@@ -142,7 +142,7 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
             return false;
         }
     }
-    
+
     @Override
     protected BaseClient<OAuthCredentials, FIWAREProfile> newClient() {
         FIWAREClient newClient = new FIWAREClient();

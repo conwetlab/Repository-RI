@@ -47,8 +47,8 @@ import org.scribe.model.*;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ProxyOAuthRequest.class, ProxyOAuthServiceImpl.class, Request.class})
 public class ProxyOAuthServiceImplTest {
-    
-    
+
+
     ProxyOAuthServiceImpl toTest;
     @Mock DefaultApi20 api;
     @Mock OAuthConfig config;
@@ -56,10 +56,10 @@ public class ProxyOAuthServiceImplTest {
     @Mock Response response;
     @Mock Verifier verifier;
     @Mock AccessTokenExtractor tokenExtractor;
-    
+
     public ProxyOAuthServiceImplTest() {
     }
-    
+
     @Before
     public void setUp() {
         try {
@@ -69,19 +69,19 @@ public class ProxyOAuthServiceImplTest {
             response = mock(Response.class);
             tokenExtractor = mock(AccessTokenExtractor.class);
             verifier = mock(Verifier.class);
-            
+
             when(api.getAccessTokenExtractor()).thenReturn(tokenExtractor);
             when(request.send()).thenReturn(response);
             when(response.getBody()).thenReturn("body");
             when(verifier.getValue()).thenReturn("value");
-            
+
             PowerMockito.whenNew(ProxyOAuthRequest.class).withAnyArguments().thenReturn(request);
-            
+
         } catch (Exception ex) {
             Logger.getLogger(ProxyOAuthServiceImplTest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -97,23 +97,23 @@ public class ProxyOAuthServiceImplTest {
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
         toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50, true, true);
-        
+
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);
-        
+
         when(config.getApiKey()).thenReturn(apiKey);
         when(config.getApiSecret()).thenReturn(apiSecret);
         when(config.getScope()).thenReturn(scope);
         when(config.hasScope()).thenReturn(true);
-        
+
         when(tokenExtractor.extract(anyString())).thenReturn(new Token(token, secret));
-        
+
         returned = toTest.getAccessToken(new Token("", ""), new Verifier(verif));
-        
+
         assertEquals(returned.getToken(), token);
         assertEquals(returned.getSecret(), secret);
     }
-    
+
     @Test
     public void getAccessTokenGetParameter2Test() {
         Token returned;
@@ -125,23 +125,23 @@ public class ProxyOAuthServiceImplTest {
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
         toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50);
-        
+
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);
-        
+
         when(config.getApiKey()).thenReturn(apiKey);
         when(config.getApiSecret()).thenReturn(apiSecret);
         when(config.getScope()).thenReturn(scope);
         when(config.hasScope()).thenReturn(false);
-        
+
         when(tokenExtractor.extract(anyString())).thenReturn(new Token(token, secret));
-        
+
         returned = toTest.getAccessToken(new Token("", ""), new Verifier(verif));
-        
+
         assertEquals(returned.getToken(), token);
         assertEquals(returned.getSecret(), secret);
     }
-    
+
     @Test
     public void getAccessTokenNotGetParameterTest() {
         Token returned;
@@ -153,23 +153,23 @@ public class ProxyOAuthServiceImplTest {
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
         toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50, false, true);
-        
+
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);
-        
+
         when(config.getApiKey()).thenReturn(apiKey);
         when(config.getApiSecret()).thenReturn(apiSecret);
         when(config.getScope()).thenReturn(scope);
         when(config.hasScope()).thenReturn(true);
-        
+
         when(tokenExtractor.extract(anyString())).thenReturn(new Token(token, secret));
-        
+
         returned = toTest.getAccessToken(new Token("", ""), new Verifier(verif));
-        
+
         assertEquals(returned.getToken(), token);
         assertEquals(returned.getSecret(), secret);
     }
-    
+
     @Test
     public void getAccessTokenNotGetParameter2Test() {
         Token returned;
@@ -181,19 +181,19 @@ public class ProxyOAuthServiceImplTest {
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
         toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50, false, false);
-        
+
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);
-        
+
         when(config.getApiKey()).thenReturn(apiKey);
         when(config.getApiSecret()).thenReturn(apiSecret);
         when(config.getScope()).thenReturn(scope);
         when(config.hasScope()).thenReturn(false);
-        
+
         when(tokenExtractor.extract(anyString())).thenReturn(new Token(token, secret));
-        
+
         returned = toTest.getAccessToken(new Token("", ""), new Verifier(verif));
-        
+
         assertEquals(returned.getToken(), token);
         assertEquals(returned.getSecret(), secret);
     }

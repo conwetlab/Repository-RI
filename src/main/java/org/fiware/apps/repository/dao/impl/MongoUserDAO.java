@@ -42,29 +42,29 @@ import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.User;
 
 public class MongoUserDAO implements UserDAO {
-    
+
     public static final String MONGO_USERS_NAME = "Users";
-    
+
     private DB db;
     private DBCollection mongoCollection;
-    
+
     public MongoUserDAO() {
         db = MongoDAOFactory.createConnection();
         mongoCollection = db.getCollection(MONGO_USERS_NAME);
     }
-    
+
     public MongoUserDAO(DB db, DBCollection mongoCollection) {
         this.db = db;
         this.mongoCollection = mongoCollection;
     }
-    
+
     @Override
     public User getUser(String username) throws DatasourceException {
         DBObject userObj;
         User user;
-        
+
         db.requestStart();
-        
+
         try {
             BasicDBObject query = new BasicDBObject();
             query.put("userName", username);
@@ -73,29 +73,29 @@ public class MongoUserDAO implements UserDAO {
             db.requestDone();
             throw new DatasourceException(ex.getMessage(), User.class);
         }
-        
+
         if (userObj == null) {
             db.requestDone();
             return null;
         }
-        
+
         user = new User(username);
         user.setDisplayName(userObj.get("displayName").toString());
         user.setEmail(userObj.get("email").toString());
         user.setPassword(userObj.get("password").toString());
         user.setToken(userObj.get("token").toString());
-        
+
         db.requestDone();
         return user;
     }
-    
+
     @Override
     public void createUser(String username) throws DatasourceException, SameIdException {
-        
+
         if (!isUser(username)) {
-            
+
             db.requestStart();
-            
+
             try {
                 BasicDBObject newUserObj = new BasicDBObject();
                 newUserObj.put("userName", username);
@@ -103,36 +103,36 @@ public class MongoUserDAO implements UserDAO {
                 newUserObj.put("token", "");
                 newUserObj.put("displayName", "");
                 newUserObj.put("email", "");
-                
+
                 mongoCollection.insert(newUserObj);
             } catch (Exception ex) {
                 db.requestDone();
                 throw new DatasourceException(ex.getMessage(), User.class);
             }
-            
+
             db.requestDone();
         }
         else {
             throw new SameIdException(username, User.class);
         }
     }
-    
+
     @Override
     public boolean isUser(String username) throws DatasourceException{
         User user = getUser(username);
-        
+
         if (user == null)
             return false;
         else
             return true;
     }
-    
+
     @Override
     public void updateUser(User user) throws DatasourceException, NotFoundException {
         DBObject userObj;
-        
+
         db.requestStart();
-        
+
         try {
             BasicDBObject query = new BasicDBObject();
             query.put("userName", user.getUserName());
@@ -141,33 +141,33 @@ public class MongoUserDAO implements UserDAO {
             db.requestDone();
             throw new DatasourceException(ex.getMessage(), User.class);
         }
-        
+
         if (userObj == null) {
             db.requestDone();
             throw new NotFoundException(user.getUserName(), User.class);
         }
-        
+
         userObj.put("displayName", user.getDisplayName());
         userObj.put("email", user.getEmail());
         userObj.put("password", user.getPassword());
         userObj.put("token", user.getToken());
-        
+
         try {
             mongoCollection.update(new BasicDBObject().append("_id", new ObjectId(userObj.get("_id").toString())), userObj, false,false);
         } catch (Exception ex) {
             db.requestDone();
             throw new DatasourceException(ex.getMessage(), User.class);
         }
-        
+
         db.requestDone();
     }
-    
+
     @Override
     public void deleteUser(String username) throws DatasourceException, NotFoundException {
         DBObject userObj;
-        
+
         db.requestStart();
-        
+
         try {
             BasicDBObject query = new BasicDBObject();
             query.put("userName", username);
@@ -176,19 +176,19 @@ public class MongoUserDAO implements UserDAO {
             db.requestDone();
             throw new DatasourceException(ex.getMessage(), User.class);
         }
-        
+
         if (userObj == null) {
             db.requestDone();
             throw new NotFoundException(username, User.class);
         }
-        
+
         try {
             mongoCollection.remove(userObj);
         } catch (Exception ex) {
             db.requestDone();
             throw new DatasourceException(ex.getMessage(), User.class);
         }
-        
+
         db.requestDone();
     }
 }

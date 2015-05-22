@@ -10,10 +10,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class UserTest {
-    
+
     public UserTest() {
     }
-    
+
     private User toTest;
 
     @Test
@@ -24,17 +24,17 @@ public class UserTest {
         String email = "email";
         String password = "password";
         String token = "token";
-        
+
         toTest = new User(username);
-        
+
         assertEquals(toTest.getUserName(), username);
-        
+
         toTest.setUserName(newUsername);
         toTest.setPassword(password);
         toTest.setDisplayName(displayName);
         toTest.setEmail(email);
         toTest.setToken(token);
-        
+
         assertEquals(toTest.getUserName(), newUsername);
         assertEquals(toTest.getPassword(), password);
         assertEquals(toTest.getDisplayName(), displayName);

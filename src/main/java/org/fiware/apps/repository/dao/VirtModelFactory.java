@@ -35,54 +35,54 @@ import virtuoso.jena.driver.VirtGraph;
 import virtuoso.jena.driver.VirtModel;
 
 public class VirtModelFactory {
-    
+
     VirtModel virtModel;
-    
+
     public VirtModelFactory() {
         virtModel = new VirtModel(new VirtGraph());
     }
-    
+
     public VirtModelFactory(VirtGraph virtGraph)
     {
         virtModel = new VirtModel(virtGraph);
     }
-    
+
     public VirtModel openDefaultModel(VirtuosoDataSource ds) {
         return VirtModel.openDefaultModel(ds);
     }
-    
+
     public VirtModel openDatabaseModel(String graphName, VirtuosoDataSource ds) {
         return VirtModel.openDatabaseModel(graphName, ds);
     }
-    
+
     public VirtModel openDefaultModel(String url, String user,
             String password) {
         return VirtModel.openDefaultModel(url, user, password);
     }
-    
+
     public VirtModel openDatabaseModel(String graphName, String url,
             String user, String password) {
         return VirtModel.openDatabaseModel(graphName, url, user, password);
     }
-    
+
     public Model removeAll() {
         return virtModel.removeAll();
     }
-    
+
     public void createRuleSet(String ruleSetName, String uriGraphRuleSet) {
         virtModel.createRuleSet(ruleSetName, uriGraphRuleSet);
     }
-    
+
     public void removeRuleSet(String ruleSetName, String uriGraphRuleSet) {
         virtModel.removeRuleSet(ruleSetName, uriGraphRuleSet);
     }
-    
+
     public void setRuleSet(String _ruleSet) {
         virtModel.setRuleSet(_ruleSet);
     }
-    
+
     public void setSameAs(boolean _sameAs) {
         virtModel.setSameAs(_sameAs);
     }
-    
+
 }

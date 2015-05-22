@@ -16,31 +16,31 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class RepositoryExceptionTest {
-    
+
     private RepositoryException toTest, toTest2;
-    
+
     public RepositoryExceptionTest() {
     }
-    
+
     @Test
     public void RespositoryExceptionTotalTest() {
         Status status = Status.ACCEPTED;
         String message = "message";
-        
+
         toTest = new RepositoryException();
         toTest.setDescription(message);
         toTest.setErrorCode(status.getStatusCode());
         toTest.setReasonPhrase(status.getReasonPhrase());
-        
+
         toTest2 = new RepositoryException(status, message);
-        
+
         assertEquals(toTest.getDescription(), message);
         assertEquals(toTest.getErrorCode(), status.getStatusCode());
         assertEquals(toTest.getReasonPhrase(), status.getReasonPhrase());
-        
+
         assertEquals(toTest.getDescription(), toTest2.getDescription());
         assertEquals(toTest.getDescription(), toTest2.getDescription());
         assertEquals(toTest.getDescription(), toTest2.getDescription());
     }
-    
+
 }

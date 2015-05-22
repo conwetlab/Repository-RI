@@ -18,12 +18,12 @@ import static org.junit.Assert.*;
  * @author jortiz
  */
 public class FileUploadFormTest {
-    
+
     private FileUploadForm toTest;
-    
+
     public FileUploadFormTest() {
     }
-    
+
 
     @Test
     public void FileUploadFormTotalTest()
@@ -31,18 +31,18 @@ public class FileUploadFormTest {
         byte data[] = "data".getBytes();
         String mimeType = "mimeType";
         String fileName = "fileName";
-        
+
         toTest = new FileUploadForm();
-        
+
         toTest.setFileData(data);
-        
+
         toTest.setMimeType(mimeType);
-        
+
         toTest.setFilename(fileName);
-        
+
         assertEquals(data, toTest.getFileData());
         assertEquals(mimeType, toTest.getMimeType());
         assertEquals(fileName, toTest.getFilename());
-        
+
     }
 }

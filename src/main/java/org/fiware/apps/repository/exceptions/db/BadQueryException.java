@@ -1,5 +1,5 @@
 /*
-Modified BSD License  
+Modified BSD License
 ====================
 
 Copyright (c) 2015, CoNWeTLab, Universidad Politecnica Madrid
@@ -35,6 +35,6 @@ public class BadQueryException extends Exception {
 	private static final long serialVersionUID = -3526457037580321983L;
 
 	public BadQueryException(String query){
-		super("The request cannot be fulfilled due to bad syntax in query:\n" + query);	
+		super("The request cannot be fulfilled due to bad syntax in query:\n" + query);
 	}
 }

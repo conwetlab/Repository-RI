@@ -14,12 +14,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class ResourceCollectionTest {
-    
+
     private ResourceCollection toTest;
-    
+
     public ResourceCollectionTest() {
     }
-    
+
     @Test
     public void ResourceCollectionTotalTest() {
         ResourceCollection collectionAux = new ResourceCollection();
@@ -28,29 +28,29 @@ public class ResourceCollectionTest {
         Date date2 = new Date();
         String creator = "creator";
         String id = "id";
-        
+
         List collections = new LinkedList();
         collections.add(collectionAux);
         List resources = new LinkedList();
         resources.add(resourceAux);
-        
+
         toTest = new ResourceCollection();
-        
+
         toTest.setCollections(collections);
         toTest.setResources(resources);
-        
+
         assertEquals(toTest.getCollections(), collections);
         assertEquals(toTest.getResources(), resources);
-        
+
         toTest.setCreationDate(date1);
         toTest.setCreator(creator);
         toTest.setId(id);
         toTest.setModificationDate(date2);
-        
+
         assertEquals(toTest.getCreationDate(), date1);
         assertEquals(toTest.getCreator(), creator);
         assertEquals(toTest.getId(), id);
         assertEquals(toTest.getModificationDate(), date2);
-        
+
     }
 }

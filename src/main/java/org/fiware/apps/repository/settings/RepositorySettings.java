@@ -1,5 +1,5 @@
 /*
-Modified BSD License  
+Modified BSD License
 ====================
 
 Copyright (c) 2012, SAP AG
@@ -38,11 +38,11 @@ import java.util.logging.Logger;
 
 public class RepositorySettings {
         private static Properties properties;
-    
+
 	public static String REPOSITORY_BASE_URL = "http://localhost:8080/FiwareRepository/";
         public final static String COLLECTION_SERVICE_NAME = "collec";
         public final static String QUERY_SERVICE_NAME = "query";
-	
+
         public static String getProperty(String property) {
             if(properties == null) {
                 try {
@@ -54,5 +54,5 @@ public class RepositorySettings {
             }
             return properties.getProperty(property);
         }
-        
+
 }

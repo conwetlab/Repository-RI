@@ -1,5 +1,5 @@
 /*
-Modified BSD License  
+Modified BSD License
 ====================
 
 Copyright (c) 2015, CoNWeTLab, UPM
@@ -50,12 +50,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RepositorySettings.class, Properties.class})
 public class RepositorySettingsTest {
-    
+
     Properties properties;
-    
+
     public RepositorySettingsTest() {
     }
-    
+
     @Before
     public void setUp() {
         properties = mock(Properties.class);
@@ -75,8 +75,8 @@ public class RepositorySettingsTest {
         }
         assertNull(RepositorySettings.getProperty("hola"));
     }
-    
-    @Test 
+
+    @Test
     public void RepositorySettingsConstructorTest() {
         new RepositorySettings();
     }

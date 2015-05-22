@@ -41,12 +41,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({VirtuosoDAOFactory.class})
 public class VirtuosoDAOFactoryTest {
-    
+
     VirtuosoDAOFactory toTest;
-    
+
     public VirtuosoDAOFactoryTest() {
     }
-    
+
     @Test
     public void getVirtuosoResourceDAO() {
         VirtuosoResourceDAO virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);

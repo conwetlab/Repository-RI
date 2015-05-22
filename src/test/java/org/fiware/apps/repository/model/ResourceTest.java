@@ -12,12 +12,12 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class ResourceTest {
-    
+
     private Resource toTest;
-    
+
     public ResourceTest() {
     }
-    
+
     @Test
     public void ResourceTotalTest()
     {
@@ -31,33 +31,33 @@ public class ResourceTest {
         Date date2 = new Date();
         String creator = "creator";
         String id = "id";
-        
-        
+
+
         toTest = new Resource();
-        
+
         toTest.setCollection(resourceCollection);
         toTest.setContent(bytes);
         toTest.setContentFileName(fileName);
         toTest.setContentMimeType(mimeName);
         toTest.setContentUrl(url);
         toTest.setName(name);
-        
+
         toTest.setCreationDate(date);
         toTest.setCreator(creator);
         toTest.setId(id);
         toTest.setModificationDate(date2);
-        
+
         assertEquals(toTest.getCollection(), resourceCollection);
         assertEquals(toTest.getContent(), bytes);
         assertEquals(toTest.getContentFileName(), fileName);
         assertEquals(toTest.getContentMimeType(), mimeName);
         assertEquals(toTest.getContentUrl(), url);
         assertEquals(toTest.getName(), name);
-        
+
         assertEquals(toTest.getCreationDate(), date);
         assertEquals(toTest.getCreator(), creator);
         assertEquals(toTest.getId(), id);
         assertEquals(toTest.getModificationDate(), date2);
-        
+
     }
 }

@@ -24,7 +24,7 @@ public class User {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
-        
+
         @XmlElement
         public String getDisplayName() {
             return displayName;
@@ -32,7 +32,7 @@ public class User {
         public void setDisplayName(String displayName) {
             this.displayName = displayName;
         }
-        
+
         @XmlElement
         public String getEmail() {
             return email;

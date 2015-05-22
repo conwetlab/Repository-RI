@@ -37,14 +37,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement (name = "selectQueryResponse")
 public class SelectQueryResponse {
-    
+
     private int vars;
     List<Column> columns = new LinkedList<>();
-    
+
     public SelectQueryResponse() {
         super();
     }
-    
+
     @XmlElementWrapper
     public List<Column> getColumns() {
         return columns;
@@ -54,19 +54,19 @@ public class SelectQueryResponse {
         columns.add(new Column(name));
         vars++;
     }
-    
+
     public void addValue(int column, String value) {
         columns.get(column).add(value);
     }
-    
+
     public String getValue(int column, int row) {
         return (String) columns.get(column).get(row);
     }
-    
+
     public int getVars() {
         return vars;
     }
-    
-    
-    
+
+
+
 }

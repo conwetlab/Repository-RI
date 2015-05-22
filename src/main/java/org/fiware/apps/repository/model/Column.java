@@ -1,5 +1,5 @@
 /*
-Modified BSD License  
+Modified BSD License
 ====================
 
 Copyright (c) 2015, CoNWeTLab, Universidad Politecnica Madrid
@@ -37,16 +37,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement (name = "column")
 public class Column {
-    
+
     String varName;
-    List<String> list; 
-    
+    List<String> list;
+
     public Column(String name) {
         super();
         varName = name;
         list = new LinkedList<>();
     }
-    
+
     @XmlElement
     public String getName() {
         return varName;
@@ -54,20 +54,20 @@ public class Column {
     public void setName(String name) {
         varName = name;
     }
-    
+
     @XmlElementWrapper
     public List<String> getValues() {
         return list;
     }
-    
-    
-    
+
+
+
     public void add(String value) {
         list.add(value);
     }
-    
+
     public String get(int row) {
         return list.get(row);
     }
-    
+
 }

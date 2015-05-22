@@ -1,4 +1,4 @@
-package org.fiware.apps.repository.dao;
+package org.fiware.apps.repository.dao; 
 
 public abstract class DAOFactory {
 
@@ -11,9 +11,9 @@ public abstract class DAOFactory {
 			int factory) {
 
 		switch (factory) {
-		case MONGO: 
+		case MONGO:
 			return new MongoDAOFactory();
-		default: 
+		default:
 			return null;
 		}
 	}

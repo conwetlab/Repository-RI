@@ -46,7 +46,7 @@ import org.scribe.oauth.ProxyOAuth20ServiceImpl;
  * @author jortiz
  */
 public class ProxyOAuthServiceImpl extends ProxyOAuth20ServiceImpl {
-    
+
     public ProxyOAuthServiceImpl(DefaultApi20 api, OAuthConfig config, int connectTimeout, int readTimeout, String proxyHost, int proxyPort) {
         super(api, config, connectTimeout, readTimeout, proxyHost, proxyPort);
     }
@@ -60,10 +60,10 @@ public class ProxyOAuthServiceImpl extends ProxyOAuth20ServiceImpl {
         final OAuthRequest request = new ProxyOAuthRequest(this.api.getAccessTokenVerb(),
                                                            this.api.getAccessTokenEndpoint(), this.connectTimeout,
                                                            this.readTimeout, this.proxyHost, this.proxyPort);
-        
+
         String oauth2Header = this.config.getApiKey() + ":" + this.config.getApiSecret();
         request.addHeader("Authorization", "Basic " + Base64.encode(oauth2Header.getBytes()));
-        
+
         if (this.getParameter) {
             request.addQuerystringParameter(OAuthConstants.CLIENT_ID, this.config.getApiKey());
             request.addQuerystringParameter(OAuthConstants.CLIENT_SECRET, this.config.getApiSecret());
@@ -90,5 +90,5 @@ public class ProxyOAuthServiceImpl extends ProxyOAuth20ServiceImpl {
         final Response response = request.send();
         return this.api.getAccessTokenExtractor().extract(response.getBody());
     }
-    
+
 }

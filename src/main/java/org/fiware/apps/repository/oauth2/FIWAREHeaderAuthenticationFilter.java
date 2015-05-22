@@ -62,72 +62,72 @@ import org.springframework.util.StringUtils;
  *
  */
 public class FIWAREHeaderAuthenticationFilter extends AbstractAuthenticationProcessingFilter{
-    
+
     private String headerName;
     private FIWAREClient client;
-    
+
     protected FIWAREHeaderAuthenticationFilter() {
         this("/api/", "X-Auth-Token");
     }
-    
+
     protected FIWAREHeaderAuthenticationFilter(String baseUrl, String headerName) {
         // Super class constructor must be called.
         super(new FIWAREHeaderAuthenticationRequestMatcher(baseUrl, headerName));
-        
+
         // Store header name
         this.headerName = headerName;
-        
+
         // Needed to continue with the process of the request
         setContinueChainBeforeSuccessfulAuthentication(true);
-        
+
         // Set the authentication in the context
         setSessionAuthenticationStrategy(new FIWAREHeaderAuthenticationStrategy());
-        
+
         // This handler doesn't do anything but it's required to replace the default one
         setAuthenticationSuccessHandler(new FIWAREHeaderAuthenticationSuccessHandler());
     }
-    
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
             HttpServletResponse response) throws AuthenticationException,
             IOException, ServletException {
-        
+
         Authentication auth = null;
         String authToken = request.getHeader(headerName);
-        
+
         try {
             // This method can return an exception when the Token is invalid
             // In this case, the exception is caught and the correct exceptions is thrown...
             UserProfile profile = client.getUserProfile(authToken);
-            
+
             // Define authorities
             Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
             for (String role: profile.getRoles()) {
                 authorities.add(new SimpleGrantedAuthority(role));
             }
-            
+
             // new token with credentials (like previously) and user profile and authorities
             OAuthCredentials credentials = new OAuthCredentials(null, authToken, "", client.getName());
             auth = new ClientAuthenticationToken(credentials, client.getName(), profile, authorities);
-            
+
         } catch (Exception ex) {
             // This exception should be risen in order to return a 401
             throw new BadCredentialsException("The provided token is invalid or the system was not able to check it");
         }
-        
+
         return auth;
     }
-    
+
     public FIWAREClient getClient() {
         return this.client;
     }
-    
+
     public void setClient(FIWAREClient client) {
         this.client = client;
     }
-    
+
     // AUXILIAR CLASSES //
-    
+
     /**
      * Request Matcher that specifies when the filter should be executed. In this case we
      * want the filter to be executed when the following two conditions are true:
@@ -137,42 +137,42 @@ public class FIWAREHeaderAuthenticationFilter extends AbstractAuthenticationProc
      *
      */
     static class FIWAREHeaderAuthenticationRequestMatcher implements RequestMatcher {
-        
+
         private String baseUrl;
         private String headerName;
-        
+
         public FIWAREHeaderAuthenticationRequestMatcher(String baseUrl, String headerName) {
             this.baseUrl = baseUrl;
             this.headerName = headerName;
         }
-        
+
         @Override
         public boolean matches(HttpServletRequest request) {
-            
+
             String authToken = request.getHeader(headerName);
-            
+
             // Get path
             String url = request.getServletPath();
             String pathInfo = request.getPathInfo();
             String query = request.getQueryString();
-            
+
             if (pathInfo != null || query != null) {
                 StringBuilder sb = new StringBuilder(url);
-                
+
                 if (pathInfo != null) {
                     sb.append(pathInfo);
                 }
-                
+
                 if (query != null) {
                     sb.append('?').append(query);
                 }
                 url = sb.toString();
             }
-            
+
             return url.startsWith(baseUrl) && authToken != null && StringUtils.hasText(authToken);
         }
     }
-    
+
     /**
      * Actions to be carried out when the authentication is successful. In this case
      * no actions are required.
@@ -180,7 +180,7 @@ public class FIWAREHeaderAuthenticationFilter extends AbstractAuthenticationProc
      *
      */
     static class FIWAREHeaderAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-        
+
         @Override
         public void onAuthenticationSuccess(HttpServletRequest request,
                 HttpServletResponse response, Authentication authentication)
@@ -188,14 +188,14 @@ public class FIWAREHeaderAuthenticationFilter extends AbstractAuthenticationProc
             // Nothing to do... The chain will continue
         }
     }
-    
+
     /**
      * Set the Session in the Security Context when the Authorization token is valid
      * @author aitor
      *
      */
     static class FIWAREHeaderAuthenticationStrategy implements SessionAuthenticationStrategy {
-        
+
         @Override
         public void onAuthentication(Authentication authentication,
                 HttpServletRequest request, HttpServletResponse response)
@@ -203,6 +203,6 @@ public class FIWAREHeaderAuthenticationFilter extends AbstractAuthenticationProc
             // Set the authentication in the current context
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        
+
     }
 }

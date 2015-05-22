@@ -51,34 +51,34 @@ import java.util.Objects;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 
 public class MongoCollectionDAO implements CollectionDAO{
-    
+
     public static final String MONGO_COLL_NAME = "ResourceCollection";
     private DB db;
     private DBCollection mongoCollection;
     private DBCollection mongoCollectionResources;
     private VirtuosoResourceDAO virtuosoResourceDAO;
-    
+
     public MongoCollectionDAO(){
         db = MongoDAOFactory.createConnection();
         mongoCollection = db.getCollection(MONGO_COLL_NAME);
         mongoCollectionResources = db.getCollection(MongoResourceDAO.MONGO_COLL_NAME);
         virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
     }
-    
+
     public MongoCollectionDAO(DB dbIn, DBCollection collection, DBCollection collectionResources, VirtuosoResourceDAO virtuosoResourceDAOIn) {
         this.db = Objects.requireNonNull(dbIn);
         this.mongoCollection = Objects.requireNonNull(collection);
         this.mongoCollectionResources = Objects.requireNonNull(collectionResources);
         this.virtuosoResourceDAO = Objects.requireNonNull(virtuosoResourceDAOIn);
     }
-    
-    
-    
+
+
+
     @Override
     public ResourceCollection findCollection(String id) throws DatasourceException {
         return getCollection(id);
     }
-    
+
     @Override
     public Boolean updateCollection(String id, ResourceCollection r) throws DatasourceException {
         db.requestStart();
@@ -86,12 +86,12 @@ public class MongoCollectionDAO implements CollectionDAO{
             Pattern pat = Pattern.compile(id);
             BasicDBObject query = new BasicDBObject("id", pat);
             DBObject obj = mongoCollection.findOne(query);
-            
+
             if(obj==null){
                 db.requestDone();
                 return false;
             }
-            
+
             obj.put("creator", r.getCreator());
             obj.put("id", r.getId());
             if(r.getCreationDate()!=null){
@@ -100,25 +100,25 @@ public class MongoCollectionDAO implements CollectionDAO{
                 obj.put("creationDate", new Date());
             }
             String internalId = obj.get("_id").toString();
-            
-            
+
+
             mongoCollection.update(new BasicDBObject().append("_id", new ObjectId(internalId)), obj, false,false);
             db.requestDone();
             return true;
-            
+
         }catch (Exception e){
             db.requestDone();
             throw new DatasourceException("Error updating Collection with ID " + r.getId() + " " + e.getMessage(), ResourceCollection.class );
         }
-        
-        
+
+
     }
-    
+
     @Override
     public Boolean deleteCollection(String id) throws DatasourceException {
-        
+
         db.requestStart();
-        
+
         try{
             //delete Resources
             DBCollection mongoResource = db.getCollection(MongoResourceDAO.MONGO_COLL_NAME);
@@ -126,18 +126,18 @@ public class MongoCollectionDAO implements CollectionDAO{
             Pattern p = Pattern.compile("^"+id+"/[a-zA-Z0-9_\\.\\-\\+]*");
             query.put("id", p);
             List <DBObject> objs = mongoResource.find(query).toArray();
-            
+
             for(DBObject obj : objs){
                 virtuosoResourceDAO.deleteResource(obj.get("id").toString());
                 mongoResource.remove(obj);
             }
-            
+
             //delete Collections
             BasicDBObject queryC = new BasicDBObject();
             Pattern pC = Pattern.compile("^"+id+"/[a-zA-Z0-9_\\.\\-\\+]*");
             queryC.put("id", pC);
             List <DBObject> objsC = mongoCollection.find(queryC).toArray();
-            
+
             for(DBObject obj : objsC){
                 mongoCollection.remove(obj);
             }
@@ -146,9 +146,9 @@ public class MongoCollectionDAO implements CollectionDAO{
             db.requestDone();
             throw new DatasourceException(e.getMessage(), ResourceCollection.class );
         }
-        
+
         db.requestDone();
-        
+
         try{
             db.requestStart();
             Pattern pat = Pattern.compile(id);
@@ -161,13 +161,13 @@ public class MongoCollectionDAO implements CollectionDAO{
             mongoCollection.remove(obj);
             db.requestDone();
             return true;
-            
+
         }catch (IllegalArgumentException e){
             db.requestDone();
             throw new DatasourceException("Error deleting Collection with ID " + id + " " + e.getMessage(), ResourceCollection.class );
         }
     }
-    
+
     @Override
     public ResourceCollection getCollection(String id) throws DatasourceException{
         ResourceCollection r = new ResourceCollection();
@@ -176,7 +176,7 @@ public class MongoCollectionDAO implements CollectionDAO{
 
         MongoResourceDAO resourceDAO = new MongoResourceDAO(db,
                 mongoCollectionResources,
-                new MongoDAOFactory(), 
+                new MongoDAOFactory(),
                 this);
         try{
             Pattern pat = Pattern.compile(id);
@@ -186,12 +186,12 @@ public class MongoCollectionDAO implements CollectionDAO{
             db.requestDone();
             throw new DatasourceException("Error parsing " + id + " " + e.getMessage(), ResourceCollection.class );
         }
-        
+
         if(obj == null){
             db.requestDone();
             return null;
         }
-        
+
         r.setId(obj.get("id").toString());
         r.setCreator(obj.get("creator").toString());
         if(obj.get("creationDate")!=null){
@@ -202,14 +202,14 @@ public class MongoCollectionDAO implements CollectionDAO{
         db.requestDone();
         return r;
     }
-    
-    
+
+
     @Override
     public Boolean insertCollection(ResourceCollection r) throws DatasourceException, SameIdException {
         if (getCollection(r.getId()) != null){
             throw new SameIdException(r.getId(), ResourceCollection.class);
         }
-        
+
         try{
             db.requestStart();
             BasicDBObject obj = new BasicDBObject();
@@ -222,18 +222,18 @@ public class MongoCollectionDAO implements CollectionDAO{
             }
             mongoCollection.insert(obj);
             insertCollectionRecursive(r);
-            
+
             db.requestDone();
             return true;
         }catch (Exception e){
             db.requestDone();
             throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), ResourceCollection.class );
         }
-        
+
     }
-    
+
     private Boolean insertCollectionRecursive(ResourceCollection r) throws DatasourceException{
-        
+
         if((r.getId().contains("/"))&&(getCollection(r.getId().substring(0, r.getId().lastIndexOf("/"))) == null)){
             r.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
             try{
@@ -257,24 +257,24 @@ public class MongoCollectionDAO implements CollectionDAO{
             return true;
         }
     }
-    
-    
+
+
     @Override
     public List<ResourceCollection> getCollections(String path) throws DatasourceException {
-        
+
         List <ResourceCollection> resourceCollections = new ArrayList<ResourceCollection>();
         db.requestStart();
-        
-        
+
+
         try{
             BasicDBObject query = new BasicDBObject();
             Pattern p = Pattern.compile("^"+path+"/[a-zA-Z0-9_\\.\\-\\+]*$");
-            
+
             query.put("id", p);
-            
+
             List <DBObject> objs = mongoCollection.find(query).toArray();
-            
-            
+
+
             for(DBObject obj : objs){
                 if((obj!=null)&&(obj.get("id")!=null)){
                     ResourceCollection rcol = new ResourceCollection();
@@ -294,5 +294,5 @@ public class MongoCollectionDAO implements CollectionDAO{
         db.requestDone();
         return resourceCollections;
     }
-    
+
 }

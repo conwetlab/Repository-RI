@@ -16,7 +16,7 @@ public class FileUploadForm {
 	private byte[] filedata;
 	private String mimeType;
 	private String filename;
-	
+
 
 	public FileUploadForm() {}
 
@@ -25,28 +25,28 @@ public class FileUploadForm {
 	}
 
 	@FormParam("filedata")
-	public void setFileData(final byte[] filedata) {		
+	public void setFileData(final byte[] filedata) {
 
 		this.filedata = filedata;
 	}
-	
+
 	@FormParam("mimeType")
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
 	}
-	
+
 	public String getMimeType() {
 		return mimeType;
 	}
-	
+
 	@FormParam("filename")
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
-	
+
 	public String getFilename() {
 		return filename;
 	}
 
-	
+
 }

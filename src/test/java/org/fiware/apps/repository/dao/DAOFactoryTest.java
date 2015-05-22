@@ -33,15 +33,15 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class DAOFactoryTest {
-    
+
     public DAOFactoryTest() {
     }
-    
+
     @Test
     public void getDAOFactoryMongoTest() {
         assertEquals(DAOFactory.getDAOFactory(DAOFactory.MONGO).getClass(), MongoDAOFactory.class);
     }
-    
+
     @Test
     public void getDAOFactoryNullTest() {
         assertNull(DAOFactory.getDAOFactory(0));

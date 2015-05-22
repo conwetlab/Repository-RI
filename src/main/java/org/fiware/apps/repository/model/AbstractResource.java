@@ -13,12 +13,12 @@ public abstract class AbstractResource {
 	private String id;
 	private Date creationDate;
 	private Date modificationDate;
-	private String creator="";	
-	
+	private String creator="";
+
 
 
 	@XmlID
-	@XmlAttribute 
+	@XmlAttribute
 	public String getId() {
 		return id;
 	}
@@ -35,7 +35,7 @@ public abstract class AbstractResource {
 	public void setCreator(String creator) {
 		this.creator = creator;
 	}
-	
+
 	@XmlElement
 	public Date getCreationDate() {
 		return creationDate;
@@ -43,8 +43,8 @@ public abstract class AbstractResource {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	} 
-	
+	}
+
 	@XmlElement
 	public Date getModificationDate() {
 		return modificationDate;
@@ -53,5 +53,5 @@ public abstract class AbstractResource {
 	public void setModificationDate(Date modificationDate) {
 		this.modificationDate = modificationDate;
 	}
-	
+
 }

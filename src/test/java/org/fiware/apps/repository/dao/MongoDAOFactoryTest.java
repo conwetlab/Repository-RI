@@ -50,33 +50,33 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({MongoDAOFactory.class, Mongo.class, MongoCollectionDAO.class, MongoResourceDAO.class})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MongoDAOFactoryTest {
-    
+
     MongoDAOFactory toTest;
     @Mock Mongo mongo;
     @Mock MongoResourceDAO mongoResourceDAO;
     @Mock MongoCollectionDAO mongoCollectionDAO;
-    
+
     public MongoDAOFactoryTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
         mongo = mock(Mongo.class);
-        
+
     }
-    
+
     @After
     public void tearDown() {
     }
-    
+
     @Test (expected = MongoException.class)
     public void createConnection1Test() {
         try {
@@ -87,7 +87,7 @@ public class MongoDAOFactoryTest {
         }
         MongoDAOFactory.createConnection();
     }
-    
+
     @Test (expected = MongoException.class)
     public void createConnection2Test() {
         try {
@@ -98,7 +98,7 @@ public class MongoDAOFactoryTest {
         }
         MongoDAOFactory.createConnection();
     }
-    
+
     @Test
     public void createConnection3Test() {
         try {
@@ -109,14 +109,14 @@ public class MongoDAOFactoryTest {
         MongoDAOFactory.createConnection();
         verify(mongo).getDB(anyString());
     }
-    
+
     @Test
     public void createConnection4Test() {
-        
+
         MongoDAOFactory.createConnection();
         verify(mongo, times(0)).getDB(anyString());
     }
-    
+
     @Test
     public void getResourceDAOTest() {
         mongoResourceDAO = mock(MongoResourceDAO.class);
@@ -128,7 +128,7 @@ public class MongoDAOFactoryTest {
         toTest = new MongoDAOFactory();
         toTest.getResourceDAO();
     }
-    
+
     @Test
     public void getCollectionDAOTest() {
         mongoCollectionDAO = mock(MongoCollectionDAO.class);
