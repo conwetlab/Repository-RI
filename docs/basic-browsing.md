@@ -32,4 +32,16 @@
 <img class="im" src="images/resourcemeta.png"/>
 
 Depending on the configuration of the Repository RI instance, you may be redirected to the FIWARE Lab login page in order to be authenticated 
+
 ---
+
+.fx: back-cover
+
+Thanks!
+
+FIWARE                                FIWARE Lab
+OPEN APIs FOR OPEN MINDS              Spark your imagination
+
+         www.fiware.org               FIWARE Ops
+twitter: @Fiware                      Easing your operations
+

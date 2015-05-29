@@ -367,3 +367,14 @@ You should receive meta information about the implicit created collection in tex
 You may use curl to also test the other supported content types (''application/json,application/rdf+xml,text/turtle,text/n3,text/html,text/plain,application/xml'')
 
 ---
+
+.fx: back-cover
+
+Thanks!
+
+FIWARE                                FIWARE Lab
+OPEN APIs FOR OPEN MINDS              Spark your imagination
+
+         www.fiware.org               FIWARE Ops
+twitter: @Fiware                      Easing your operations
+
