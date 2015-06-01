@@ -1,12 +1,12 @@
-For development in Eclipse use " mvn eclipse:eclipse -Dwtpversion=2.0 "
+#Repository-RI
 
-Repository-RI
-=============
+The Repository GE  is a core enabler of the FIWARE Business Framework (together with the Store GE and the Marketplace GE). The Repository GE and it reference implementation provide a consistent uniform API to access USDL service descriptions and associated media files for applications of the business framework. A service provider can use the Repository GE to publish the description of various aspects of the service according to a unified description language.
 
-New features V2.00:
+Moreover, the Repository provides a uniform API to perform smart searches over the published descriptions. This API is oriented to service descriptions and media files serialized in RDF formats (e.g a Linked-USDL document) and allows the usage of SPARQL as query language.
 
-- Content Header Negotiation
-	Supported Types for reading Resource Meta Information or Collection Information:
+## New features V4.3.3:
+
+- Content Header Negotiation Supported Types for reading Resource Meta Information or Collection Information:
 	- application/json
 	- application/rdf+xml
 	- text/turtle
@@ -15,165 +15,247 @@ New features V2.00:
 	- application/x-ms-application"
 	- text/plain
 	- application/xml
+	
+- Virtuoso as "triple store" to store RDF data.
+ 	
+- Endpoint to execute Sparql queries on resources content.
 
-___________________________________________________________
+- Supported to get a resource by its content-url.
 
+- Added suport to use FIWARE IdM OAtuh2 authentication.
+	
+## Prerequisites
 
-1) Install Mongodb and create a database "test".
+- Tomcat 8
+- MongoDB
+- Virtuoso 7
+- Java 8
+- Maven
 
-2) Start Mongo DB:
-service mongodb start
+## Installation
+You can install Repository-RI using the installation script <code>install.sh</code> or  by following these steps:
 
-3) Start Virtuoso:
-cd PATH_TO_VIRTUOSO/var/lib/virtuoso/db/
-PATH_TO_VIRTUOSO/bin/virtuoso-t -f &
+1. Install the prerequisites.
 
-4)Deploy FiwareRepository.war to a Tomcat 8.x:
-PATH_TO_TOMCAT/bin/startup.sh
-cp FirewareRepository.war PATH_TO_TOMCAT/webapps/FirewareRepository.war
+2. Create a database for the Repository-RI in MongoDB. By default, Repository-RI uses the database <code>test</code>.
 
-5) Create a Resource
-[PUT] http://[SYSTEM:PORT]/FiwareRepository/v1/collectionA/collectionB/ResourceName
+3. Create a user database for the Repository-RI in Virtuoso. By default, Repository-RI uses user <code>dba</code> and password <code>dba</code>.
 
-6) Read the Resource
-[GET] http://[SYSTEM:PORT]/FiwareRepository/v1/collectionA/collectionB/ResourceName
+4. Update <code>src/main/resources/properties/repository.properties<code> to set the preferences of your databases (MongoDB and Virtuoso).
 
+5. Configure the security:
 
-#### Create Resource
+    a. If you do not want to use FIWARE IdM OAtuh2 authentication to manage users, ensure that the file <code>noSecurity.xml</code> is imported in the web.xml file.
+    
+    b. If you want to use FIWARE IdM OAtuh2 authentication to manage users, ensure that the file <code>securityOAuth2.xml</code> is imported in the web.xml file and modify <code>src/main/resources/properties/repository.properties<code> to set your OAuth2 configuration.
+    
+6. If you want to generate the WAR file for the source code, run <code>mvn install</code>.
 
-Create Resource Request:
-	URL:	[POST] http://[SYSTEM:PORT]/FiwareRepository/v2/collec/
-	Header:	{Accept=*}
-	Body:	content
+7. Copy the generated WAR file into the webapps folder of your Tomcat instance.
 
-Create Resource Response:
-	Response Status:
-	201
+If you need help with the Repository-RI installation, you can find more accurate instructions in the installation guide in the folder <code>Repository-RI/docs/installation-guide.md</code>.
+
+## API Reference
+Here you have a basic reference of all the status codes that you can get when you are dealing with Repository-RI API:
+
+| HTTP Code | Type | Description |
+| --------- | ---- | ----------- |
+| 200 | OK | Your request has been properly completed. |
+| 201 | Created | The request has been fulfilled and resulted in a new resource being created. |
+| 202 | Accepted | The request has been accepted for processing, but the processing has not been completed.  |
+| 204 | No Content | The server successfully processed the request, but is not returning any content. |
+| 403 | Forbidden | The request was a valid request, but the server is refusing to respond to it. |
+| 404 | Not Found | The requested resource could not be found but may be available again in the future.  |
+| 409 | Conflict | Indicates that the request could not be processed because of conflict in the request, such as an edit conflict in the case of multiple updates. |
+| 500 | Internal Server Error | A generic error message, given when an unexpected condition was encountered and no more specific message is suitable. |
+
+## Users Management API
+
+### Resources API
+
+#### Create a Resource
+
+- **Path**: /FiwareRepository/v2/collec/
+- **Method**: POST
+- **Content-Type**: <code>application/json</code> or <code>application/xml</code>
+- **Body**:
+	<pre>
+	&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+    &lt;resource id="collectionA/collectionB/resource"&gt;
+	    &lt;creator&gt;Creator&lt;/creator&gt;
+        &lt;creationDate&gt;&lt;/creationDate&gt;
+        &lt;modificationDate&gt;&lt;/modificationDate&gt;
+	    &lt;name&gt;Test resource&lt;/name&gt;
+        &lt;contentUrl&gt;http://testresourceurl.com/resource&lt;/contentUrl&gt;
+	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
+    &lt;/resource&gt;
+	</pre>
+
+- **Response**:
+    - **Status**: 201
 ____________________________________________________________
 
-#### Update Resource Meta Data
+#### Update Resource Metadata
 
-Create Resource Request:
-	URL:	[PUT] http://[SYSTEM:PORT]/FiwareRepository/v2/collec/collectionA/collectionB/ResourceName.meta
-	Header:	{Accept=[application/xml],[application/json]}
-	Body:	content
-
-Create Resource Response:
-	Response Status:
-	200
+- **Path**: /FiwareRepository/v2/collec/collectionA/collectionB/ResourceName.meta
+- **Method**: PUT
+- **Content-Type**: <code>application/json</code> or <code>application/xml</code>
+- **Body**:
+    <pre>
+    &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+    &lt;resource id="collectionA/collectionB/resource"&gt;
+	    &lt;creator&gt;Creator&lt;/creator&gt;
+        &lt;creationDate&gt;&lt;/creationDate&gt;
+        &lt;modificationDate&gt;&lt;/modificationDate&gt;
+	    &lt;name&gt;Test resource&lt;/name&gt;
+	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
+    &lt;/resource&gt;
+    </pre>
+    
+- **Response**:
+    - **Status**: 200
 ____________________________________________________________
 
 #### Update Resource Content
 
-Create Resource Request:
-	URL:	[PUT] http://[SYSTEM:PORT]/FiwareRepository/v2/collec/collectionA/collectionB/ResourceName
-	Header:	{Accept=[application/xml],[application/json]}
-	Body:	content
+- **Path**: /FiwareRepository/v2/collec/collectionA/collectionB/ResourceName
+- **Method**: PUT
+- **Content-Type**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
+- **Body**:
+    <pre>
+    &lt;rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:app="http://www.app.fake/app#"&gt;
 
-Create Resource Response:
-	Response Status:
-	200
+    &lt;rdf:Description
+   rdf:about="http://www.app.fake/app/App1"&gt;
+      &lt;app:name&gt;App1&lt;/app:name&gt;
+      &lt;app:country&gt;USA&lt;/app:country&gt;
+      &lt;app:company&gt;Company1&lt;/app:company&gt;
+      &lt;app:price&gt;0.99&lt;/app:price&gt;
+      &lt;app:year&gt;2010&lt;/app:year&gt;
+    &lt;/rdf:Description&gt;
+
+    &lt;rdf:Description
+    rdf:about="http://www.app.fake/app/App2"&gt;
+      &lt;app:name&gt;App2&lt;/app:name&gt;
+      &lt;app:country&gt;Spain&lt;/app:country&gt;
+      &lt;app:company&gt;Company2&lt;/app:company&gt;
+      &lt;app:price&gt;0.99&lt;/app:price&gt;
+      &lt;app:year&gt;2010&lt;/app:year&gt;
+    &lt;/rdf:Description&gt;
+
+    &lt;/rdf:RDF&gt;
+    </pre>
+
+- **Response**:
+    - **Status**: 200
 ____________________________________________________________
 
 #### Get Resource 
 
-Get Resource Request:
-	URL:	[GET] http://[SYSTEM:PORT]/FiwareRepository/v2/collec/collectionA/collectionB/ResourceName
-	Header:	{Accept=*}
-
+- **Path**: /FiwareRepository/v2/collec/collectionA/collectionB/ResourceName
+- **Method**: GET
+- **Accept**: <code>text/plain</code>, <code>text/html</code>, <code>application/json</code> or <code>application/xml</code>
 	
-Get Resource Response:
-	Response Status:
-	200
+- **Response**:
+    - **Status**: 200
+    - **Body**: [Resource Metadata]
 ____________________________________________________________
 
-#### Get Resource Meta Data
+#### Get Resource Metadata
 
-Get Resource Meta Data Request:
-	URL:	[GET] http://[SYSTEM:PORT]/FiwareRepository/v1/collectionA/collectionB/ResourceName.meta
-	Header:	{Accept=[application/xml],[application/json]}
+- **Path**: /FiwareRepository/v1/collectionA/collectionB/ResourceName.meta
+- **Method**: GET
+- **Accept**: <code>text/plain</code>, <code>text/html</code>, <code>application/json</code> or <code>application/xml</code>
 	
-Get Resource Meta Data Response:
-	Response Status:
-	200
+- **Response**:
+    - **Status**: 200
+    - **Body**: [Resource Content]
 ____________________________________________________________
 
 #### Delete Resource
 
-Delete Resource Request:
-	URL:	[DELETE] http://[SYSTEM:PORT]/FiwareRepository/v1/collectionA/collectionB/ResourceName
-	Header:	{Accept=*}
+- **Path**: /FiwareRepository/v1/collectionA/collectionB/ResourceName
+- **Method**: DELETE
 	
-Delete Resource Response:
-	Response Status:
-	204
+- **Response**:
+    - **Status**: 204
 ____________________________________________________________
+
+### Collection API
 
 #### Create Collection
 
-Update Collection Request:
-	URL:	[POST] http://[SYSTEM:PORT]/FiwareRepository/v2/collec/
-	Header:	{Accept=[application/xml],[application/json]}
-	Body:	<?xml version="1.0" encoding="UTF-8" standalone="yes"?><collection xmlns:atom="http://www.w3.org/2005/Atom"><creator>CreatornameUpdate</creator><collections/><resources/></collection>
+- **Path**: /FiwareRepository/v2/collec/
+- **Method**: POST
+- **Content-Type**: <code>application/json</code> or <code>application/xml</code>
+- **Body**:
+	<pre>
+	&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+	&lt;collection xmlns:atom="http://www.w3.org/2005/Atom"&gt;
+	       &lt;creator&gt;CreatornameUpdate&lt;/creator&gt;
+	       &lt;collections/&gt;
+	       &lt;resources/&gt;
+	&lt;/collection&gt;
+	</pre>
 
-#### Update Collection Response:
-	Response Status:
-	201
+- **Response**:
+    - **Status**: 201
 ____________________________________________________________
 
 #### Get Collection
 
-Get Collection Request:
-	URL:	[GET] http://[SYSTEM:PORT]/FiwareRepository/v2/collec/collectionA/collectionB
-	Header:	Accept=[application/xml],[application/json]}
+- **Path**: /FiwareRepository/v1/collectionA
+- **Method**: GET
+- **Accept**: <code>text/plain</code>, <code>text/html</code>, <code>application/json</code> or <code>application/xml</code>
 
-Get Collection Response:
-	Response Status:
-	200
+- **Response**:
+    - **Status**: 200
+    - **Body**: [Collection]
 ____________________________________________________________
 
 #### Delete Collection
 
-Delete CollectionRequest:
-	URL:	[DELETE] http://[SYSTEM:PORT]/FiwareRepository/v2/collec/collectionA
-	Header:	{Accept=*}
+- **Path**: /FiwareRepository/v1/collectionA
+- **Method**: DELETE
 	
-Delete Collection Response:
-	Response Status:
-	204
+- **Response**:
+    - **Status**: 204
 ____________________________________________________________
+
+### Query API
 
 #### Execute Short Query 
 
-Delete CollectionRequest:
-	URL:	[GET] http://[SYSTEM:PORT]/FiwareRepository/v2/services/query?query=[QUERY]
-	Header:	{Accept=*}
+- **Path**: /FiwareRepository/v2/services/query?query=[QUERY]
+- **Method**: GET
+- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
 	
-Delete Collection Response:
-	Response Status:
-	200
+- **Response**: 
+    - **Status**: 200
+    - **Body**: [Query Response]
 ____________________________________________________________
 
 #### Execute Long Query  
 
-Delete CollectionRequest:
-	URL:	[POST] http://[SYSTEM:PORT]/FiwareRepository/v2/services/query?query=[QUERY]
-	Header:	{Accept=*}
-	Body:   [QUERY]
+- **Path**: /FiwareRepository/v2/services/query
+- **Method**: POST
+- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
+- **Body**:   [QUERY]
 	
-Delete Collection Response:
-	Response Status:
-	200
+- **Response**: 
+    - **Status**: 200
+    - **Body**: [Query Response]
 ____________________________________________________________	
 
 #### Get Resource by URL Content
 
-Delete CollectionRequest:
-	URL:	[POST] http://[SYSTEM:PORT]/FiwareRepository/v2/services/query/urlContent
-	Header:	{Accept=*}
-	Body:   [QUERY]
+- **Path**: /FiwareRepository/v2/services/query/urlContent
+- **Method**: GET
+- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
 	
-Delete Collection Response:
-	Response Status:
-	200
-____________________________________________________________	
+- **Response**:
+    - **Status**: 200
+    - **Body**: [Resource Metadata]
+__________________________________________________________	
