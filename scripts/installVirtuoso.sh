@@ -33,3 +33,4 @@ fi
 	
 cd ..
 sudo rm -r virtuoso-opensource-stable-7
+sudo rm 7.zip

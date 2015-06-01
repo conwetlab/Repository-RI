@@ -3,30 +3,32 @@
 sudo apt-get update
 sudo apt-get install unzip
 
-unzip Repository-RI-3.2.2.zip
-
 set +e
 # Install java 8
-./installJavaDebian.sh
+./scripts/installJavaDebian.sh
    
 # Install tomcat 8
-./installTomcat8.sh
+./scripts/installTomcat8.sh
 
 # Install mongodb
 sudo apt-get install -y mongodb
 
 # PreInstallVirtuoso
-sudo ./preVirtuosoDebian.sh
+sudo ./scripts/preVirtuosoDebian.sh
 
 # Install virtuoso
-./installVirtuoso.sh
+./scripts/installVirtuoso.sh
 
 # Deploy the war file
-cp ./Repository-RI-3.2.2/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
-cd $INSPWD
+if [ -f "./Repository-RI/target/FiwareRepository.war" ]; then
+    cp ./FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+else
+    cp ./Repository-RI/target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+fi
+
 
 #Modify Repository OAuth2
-./oAuthConfig.sh
+./scripts/oAuthConfig.sh
 
 #Start Virtuoso
 cd $INSPWD/virtuoso7/var/lib/virtuoso/db/
@@ -40,4 +42,4 @@ cd $INSPWD/apache-tomcat-8.0.22/bin/
 cd
 
 #Create taks
-sudo ./startup.sh
+sudo ./scripts/startupDebian.sh

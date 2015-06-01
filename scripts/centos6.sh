@@ -2,8 +2,6 @@
 
 sudo yum update
 sudo yum -y install unzip
-   
-unzip Repository-RI-3.2.2.zip
     
 set +e
 # Install java 8
@@ -11,27 +9,30 @@ wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2F
 sudo rpm -ivh jdk-8u25-linux-x64.rpm
 
 # Install tomcat 8
-./installTomcat8.sh
+./scripts/installTomcat8.sh
 
 # PreInstall Virtuoso
-sudo ./preVirtuosoCentos.sh
+sudo ./scripts/preVirtuosoCentos.sh
 
 # Install virtuoso
-./installVirtuoso.sh
+./scripts/installVirtuoso.sh
 
 set -e
 
 # Install mongodb
-sudo ./installMongoCentos.sh
+sudo ./scripts/installMongoCentos.sh
 
 sudo yum install -y mongodb-org
     
 # Deploy the war file
-cp ./Repository-RI-3.2.2/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
-cd $INSPWD
+if [ -f "./Repository-RI/target/FiwareRepository.war" ]; then
+    cp ./FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+else
+    cp ./Repository-RI/target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+fi
 
 #Modify Repository OAuth2
-./oAuthConfig.sh
+./scripts/oAuthConfig.sh
 
 #Start Virtuoso
 cd $INSPWD/virtuoso7/var/lib/virtuoso/db/
@@ -45,5 +46,5 @@ cd $INSPWD/apache-tomcat-8.0.21/bin/
 cd $INSPWD
 
 #Create taks
-sudo ./startup.sh
+sudo ./scripts/startupCentos.sh
 
