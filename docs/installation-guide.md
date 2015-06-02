@@ -157,9 +157,9 @@ All the mandatory dependencies can be easily installed on a debian based Linux d
 
 <pre>
  # export INSPWD=$PWD
- # ./installTomcat8.sh
- # ./installJavaDebian.sh
- # ./installVirtuoso.sh
+ # ./scripts/installTomcat8.sh
+ # ./scripts/installJavaDebian.sh
+ # ./scripts/installVirtuoso.sh
  # apt-get install mongodb
 </pre>
 
@@ -174,11 +174,11 @@ The different dependencies can be installed in CentOS/RedHat using *yum*.
 
 <pre>
 # export INSPWD=$PWD
-# ./installTomcat8.sh
+# ./scripts/installTomcat8.sh
 # wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jdk-8u25-linux-x64.rpm"
 # sudo rpm -ivh jdk-8u25-linux-x64.rpm
-# ./installVirtuoso.sh
-# ./installMongoCentos.sh
+# ./scripts/installVirtuoso.sh
+# ./scripts/installMongoCentos.sh
 </pre>
 
 ---
