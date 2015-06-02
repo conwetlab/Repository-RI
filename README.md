@@ -20,9 +20,9 @@ Moreover, the Repository provides a uniform API to perform smart searches over t
  	
 - Endpoint to execute Sparql queries on resources content.
 
-- Supported to get a resource by its content-url.
+- Endpoint for retrieving resources by its content-url.
 
-- Added suport to use FIWARE IdM OAtuh2 authentication.
+- Support for IdM OAtuh2 authentication.
 	
 ## Prerequisites
 
@@ -33,7 +33,8 @@ Moreover, the Repository provides a uniform API to perform smart searches over t
 - Maven
 
 ## Installation
-If you need more accurate instructions to install the Repository-RI, you can find it in the installation guide in the file <code>Repository-RI/docs/installation-guide.md</code>.
+
+This section give a brief explanation on how to install the Repository. If you need more accurate instructions, you can find them in the installation guide in the file <code>Repository-RI/docs/installation-guide.md</code>.
 
 You can install Repository-RI using the installation script <code>install.sh</code> or by following these steps:
 
@@ -43,7 +44,7 @@ You can install Repository-RI using the installation script <code>install.sh</co
 
 3. Create a user database for the Repository-RI in Virtuoso. By default, Repository-RI uses user <code>dba</code> and password <code>dba</code>.
 
-4. Update <code>src/main/resources/properties/repository.properties<code> to set the preferences of your databases (MongoDB and Virtuoso).
+4. Update <code>src/main/resources/properties/repository.properties</code> to set the preferences of your databases (MongoDB and Virtuoso).
 
 5. Configure the security:
 
