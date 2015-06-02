@@ -33,7 +33,9 @@ Moreover, the Repository provides a uniform API to perform smart searches over t
 - Maven
 
 ## Installation
-You can install Repository-RI using the installation script <code>install.sh</code> or  by following these steps:
+If you need more accurate instructions to install the Repository-RI, you can find it in the installation guide in the file <code>Repository-RI/docs/installation-guide.md</code>.
+
+You can install Repository-RI using the installation script <code>install.sh</code> or by following these steps:
 
 1. Install the prerequisites.
 
@@ -47,13 +49,11 @@ You can install Repository-RI using the installation script <code>install.sh</co
 
     a. If you do not want to use FIWARE IdM OAtuh2 authentication to manage users, ensure that the file <code>noSecurity.xml</code> is imported in the web.xml file.
     
-    b. If you want to use FIWARE IdM OAtuh2 authentication to manage users, ensure that the file <code>securityOAuth2.xml</code> is imported in the web.xml file and modify <code>src/main/resources/properties/repository.properties<code> to set your OAuth2 configuration.
+    b. If you want to use FIWARE IdM OAtuh2 authentication to manage users, ensure that the file <code>securityOAuth2.xml</code> is imported in the web.xml file and modify <code>src/main/resources/properties/repository.properties</code> to set your OAuth2 configuration.
     
 6. If you want to generate the WAR file for the source code, run <code>mvn install</code>.
 
 7. Copy the generated WAR file into the webapps folder of your Tomcat instance.
-
-If you need help with the Repository-RI installation, you can find more accurate instructions in the installation guide in the folder <code>Repository-RI/docs/installation-guide.md</code>.
 
 ## API Reference
 Here you have a basic reference of all the status codes that you can get when you are dealing with Repository-RI API:
