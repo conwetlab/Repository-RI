@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "-------------------------------------------------"
 echo "Some packages are needed for installing Virtuoso: autoconf, automake, libtoo, flex, bison, gperf, gawk, m4, make, openssl, openssl-devel"
 echo "Do you want to install them? Y/N"
 read X
