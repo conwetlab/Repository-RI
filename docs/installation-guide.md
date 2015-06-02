@@ -61,7 +61,7 @@ To install the required version of Virtuoso, it is needed to compile it from its
 
 The packaged version of the Repository software can be downloaded from: 
 * The FIWARE Files page (https://forge.fiware.org/frs/?group_id=7)
-*The FIWARE catalgue (http://catalogue.fiware.org/enablers/downloads-10).
+* The FIWARE catalgue (http://catalogue.fiware.org/enablers/downloads-10).
 
 This package contains the war file of the Repository as well as the intallation scripts used in this document.
 
@@ -89,7 +89,20 @@ To download the source code usig git, execute the following command:
 
 ---
 ## Getting the Repository software
-After compiling the code, is necesary to install Java 8. You can find how to do that in the section *Manually installing the Repository*. Once the Repository sources have been downloaded, go to <code>Repository-RI</code> folder, and execute:
+Before compiling the code, is necesary to install Java 8. This can be achieved using the script provided with the source code as follows:
+
+<pre>
+# Ubuntu/Debian
+# export INSPWD=$PWD
+# ./scripts/installJavaDebian.sh
+
+# CentOS
+# export INSPWD=$PWD
+# # wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jdk-8u25-linux-x64.rpm"
+# sudo rpm -ivh jdk-8u25-linux-x64.rpm
+</pre>
+
+Once the Repository sources have been downloaded, go to <code>Repository-RI</code> folder, and execute:
 
 <pre>
 # mvn clean install
