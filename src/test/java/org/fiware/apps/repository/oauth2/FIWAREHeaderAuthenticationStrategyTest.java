@@ -32,9 +32,10 @@ package org.fiware.apps.repository.oauth2;
  * #L%
  */
 
+import org.fiware.apps.repository.oauth2.FIWAREHeaderAuthenticationFilter.FIWAREHeaderAuthenticationStrategy;
 import static org.mockito.Mockito.*;
 
-import org.fiware.apps.repository.oauth2.FIWAREHeaderAuthenticationFilter.FIWAREHeaderAuthenticationStrategy;
+
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;

@@ -1,8 +1,10 @@
+package org.fiware.apps.repository.oauth2;
+
 /*
  * #%L
  * FiwareMarketplace
  * %%
- * Copyright (C) 2014 CoNWeT Lab, Universidad Politécnica de Madrid
+ * Copyright (C) 2014-2015 CoNWeT Lab, Universidad Politécnica de Madrid
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +31,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.fiware.apps.repository.oauth2;
 
 import org.scribe.builder.api.DefaultApi20;
 import org.scribe.extractors.AccessTokenExtractor;
@@ -40,19 +41,24 @@ import org.scribe.utils.OAuthEncoder;
 
 public class FIWAREApi extends DefaultApi20 {
 
-	private static final String AUTHORIZATION_URL = "https://account.lab.fiware.org/oauth2/authorize" +
+	private final String SERVER_URL;
+
+	public FIWAREApi(String serverURL) {
+		this.SERVER_URL = serverURL;
+	}
+
+	private static final String AUTHORIZATION_URL = "%s/oauth2/authorize" +
 			"?client_id=%s&redirect_uri=%s&scope=%s&response_type=code";
 
 	@Override
 	public String getAccessTokenEndpoint() {
-		return "https://account.lab.fiware.org/oauth2/token";
+		return String.format("%s/oauth2/token", this.SERVER_URL);
 	}
 
 	@Override
-	public String getAuthorizationUrl(OAuthConfig config)
-        {
-		return String.format(AUTHORIZATION_URL, config.getApiKey(),
-				config.getCallback(), OAuthEncoder.encode(config.getScope()));
+	public String getAuthorizationUrl(OAuthConfig config) {
+		return String.format(AUTHORIZATION_URL, this.SERVER_URL, config.getApiKey(),
+				OAuthEncoder.encode(config.getCallback()), OAuthEncoder.encode(config.getScope()));
 	}
 
 	@Override

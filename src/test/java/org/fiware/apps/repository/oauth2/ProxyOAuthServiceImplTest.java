@@ -45,11 +45,11 @@ import org.scribe.extractors.AccessTokenExtractor;
 import org.scribe.model.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ProxyOAuthRequest.class, ProxyOAuthServiceImpl.class, Request.class})
+@PrepareForTest({ProxyOAuthRequest.class, ProxyOAuthFIWARE.class, Request.class})
 public class ProxyOAuthServiceImplTest {
 
 
-    ProxyOAuthServiceImpl toTest;
+    ProxyOAuthFIWARE toTest;
     @Mock DefaultApi20 api;
     @Mock OAuthConfig config;
     @Mock ProxyOAuthRequest request;
@@ -96,7 +96,7 @@ public class ProxyOAuthServiceImplTest {
         String scope = "scope";
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
-        toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50, true, true);
+        toTest = new ProxyOAuthFIWARE(api, config, 100, 100, "proxyhost", 50, true, true);
 
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);
@@ -124,7 +124,7 @@ public class ProxyOAuthServiceImplTest {
         String scope = "scope";
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
-        toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50);
+        toTest = new ProxyOAuthFIWARE(api, config, 100, 100, "proxyhost", 50);
 
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);
@@ -152,7 +152,7 @@ public class ProxyOAuthServiceImplTest {
         String scope = "scope";
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
-        toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50, false, true);
+        toTest = new ProxyOAuthFIWARE(api, config, 100, 100, "proxyhost", 50, false, true);
 
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);
@@ -180,7 +180,7 @@ public class ProxyOAuthServiceImplTest {
         String scope = "scope";
         String accesTokenEndPoint = "endPoint";
         String verif = "verifier";
-        toTest = new ProxyOAuthServiceImpl(api, config, 100, 100, "proxyhost", 50, false, false);
+        toTest = new ProxyOAuthFIWARE(api, config, 100, 100, "proxyhost", 50, false, false);
 
         when(api.getAccessTokenVerb()).thenReturn(Verb.GET);
         when(api.getAccessTokenEndpoint()).thenReturn(accesTokenEndPoint);

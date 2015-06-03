@@ -32,9 +32,8 @@ package org.fiware.apps.repository.oauth2;
  * #L%
  */
 
-import org.fiware.apps.repository.oauth2.FIWAREApi;
-import static org.junit.Assert.assertEquals;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.scribe.extractors.JsonTokenExtractor;
 import org.scribe.model.OAuthConfig;
@@ -43,7 +42,8 @@ import org.scribe.utils.OAuthEncoder;
 
 public class FIWAREApiTest {
 
-	private FIWAREApi api = new FIWAREApi();
+	private static final String SERVER_URL = "https://account.lab.fiware.org";
+	private FIWAREApi api = new FIWAREApi(SERVER_URL);
 
 	@Test
 	public void testGetAuthorizationUrl() {
@@ -51,16 +51,16 @@ public class FIWAREApiTest {
 		String redirectURI = "http://fi-ware.org";
 		String scope = "profile,store";
 		OAuthConfig config = new OAuthConfig(clientId, null, redirectURI, null, scope, null);
-		String expectedURL = "https://account.lab.fiware.org/oauth2/authorize?client_id=" + clientId +
-				"&redirect_uri=" + redirectURI + "&scope=" +
+		String expectedURL = SERVER_URL + "/oauth2/authorize?client_id=" + clientId +
+				"&redirect_uri=" + OAuthEncoder.encode(redirectURI) + "&scope=" +
 				OAuthEncoder.encode(scope) + "&response_type=code";
 
-		assertEquals(expectedURL, api.getAuthorizationUrl(config));
+		assertEquals(api.getAuthorizationUrl(config),expectedURL);
 	}
 
 	@Test
 	public void testGetAccessTokenEndpoint() {
-		assertEquals(api.getAccessTokenEndpoint(),"https://account.lab.fiware.org/oauth2/token");
+		assertEquals(api.getAccessTokenEndpoint(),SERVER_URL + "/oauth2/token");
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class FIWAREApiTest {
 
 	@Test
 	public void testGetAccessTokenExtractor() {
-		assertEquals(api.getAccessTokenExtractor().getClass(),JsonTokenExtractor.class);
+		assertEquals(api.getAccessTokenExtractor().getClass(), JsonTokenExtractor.class);
 	}
 
 }

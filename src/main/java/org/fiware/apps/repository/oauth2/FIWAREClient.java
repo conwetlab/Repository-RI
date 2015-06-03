@@ -57,13 +57,30 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
     private MongoUserDAO userDAO = new MongoUserDAO();
 
     private String scopeValue = "";
+    private String serverURL;
+
+	/**
+	 * Method to get the FIWARE IdM that is being in used
+	 * @return The FIWARE IdM that is being used to authenticate the users
+	 */
+	public String getServerURL() {
+		return this.serverURL;
+	}
+
+	/**
+	 * Method to set the FIWARE IdM that will be use to authenticate the users
+	 * @param serverURL The FIWARE IdM that will be use to authenticate the users
+	 */
+	public void setServerURL(String serverURL) {
+		this.serverURL = serverURL;
+	}
 
     @Override
     protected void internalInit() {
         super.internalInit();
 
         this.scopeValue = "";
-        this.service = new ProxyOAuthServiceImpl(new FIWAREApi(),
+        this.service = new ProxyOAuthFIWARE(new FIWAREApi(this.serverURL),
                 new OAuthConfig(this.key, this.secret,
                         this.callbackUrl,
                         SignatureType.Header,

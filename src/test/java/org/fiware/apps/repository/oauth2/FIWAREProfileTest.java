@@ -33,8 +33,6 @@ package org.fiware.apps.repository.oauth2;
  */
 
 
-
-import org.fiware.apps.repository.oauth2.FIWAREProfile;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -49,15 +47,15 @@ public class FIWAREProfileTest {
 	public void testGetDisplayName() {
 		String displayName = "Display Name";
 		when(profile.getAttribute(anyString())).thenReturn(displayName);
-		assertEquals(profile.getDisplayName(),displayName);
+		assertEquals(profile.getDisplayName(), displayName);
 		verify(profile).getAttribute("displayName");
 	}
 
 	@Test
 	public void testUserName() {
 		String userName = "userName";
-		when(profile.getAttribute(anyString())).thenReturn(userName);
+		when(profile.getId()).thenReturn(userName);
 		assertEquals(profile.getUsername(),userName);
-		verify(profile).getAttribute("nickName");
+		verify(profile).getId();
 	}
 }

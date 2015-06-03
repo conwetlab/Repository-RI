@@ -1,40 +1,42 @@
 package org.fiware.apps.repository.oauth2;
 
 /*
-* #%L
-* FiwareMarketplace
-* %%
-* Copyright (C) 2014-2015 CoNWeT Lab, Universidad Politécnica de Madrid
-* %%
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* 1. Redistributions of source code must retain the above copyright notice,
-*    this list of conditions and the following disclaimer.
-* 2. Redistributions in binary form must reproduce the above copyright notice,
-*    this list of conditions and the following disclaimer in the documentation
-*    and/or other materials provided with the distribution.
-* 3. Neither the name of copyright holders nor the names of its contributors
-*    may be used to endorse or promote products derived from this software
-*    without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-* #L%
-*/
+ * #%L
+ * FiwareMarketplace
+ * %%
+ * Copyright (C) 2014-2015 CoNWeT Lab, Universidad Politécnica de Madrid
+ * %%
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of copyright holders nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -54,155 +56,168 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.util.StringUtils;
 
 /**
- * Filter that will identify a user when the X-Auth-Header is specified in a request to the API
+ * Filter that will identify a user when the Authorization header is specified in a request to the API
  * @author aitor
  *
  */
-public class FIWAREHeaderAuthenticationFilter extends AbstractAuthenticationProcessingFilter{
+public class FIWAREHeaderAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private String headerName;
-    private FIWAREClient client;
+	private String headerName;
+	private FIWAREClient client;
 
-    protected FIWAREHeaderAuthenticationFilter() {
-        this("/api/", "X-Auth-Token");
-    }
+	private static final Pattern AUTHORIZATION_PATTERN =
+			Pattern.compile("^bearer ([^\\s]+)$", Pattern.CASE_INSENSITIVE);
 
-    protected FIWAREHeaderAuthenticationFilter(String baseUrl, String headerName) {
-        // Super class constructor must be called.
-        super(new FIWAREHeaderAuthenticationRequestMatcher(baseUrl, headerName));
+	protected FIWAREHeaderAuthenticationFilter() {
+		this("/api/", "Authorization");
+	}
 
-        // Store header name
-        this.headerName = headerName;
+	protected FIWAREHeaderAuthenticationFilter(String baseUrl, String headerName) {
+		// Super class constructor must be called.
+		super(new FIWAREHeaderAuthenticationRequestMatcher(baseUrl, headerName));
 
-        // Needed to continue with the process of the request
-        setContinueChainBeforeSuccessfulAuthentication(true);
+		// Store header name
+		this.headerName = headerName;
 
-        // Set the authentication in the context
-        setSessionAuthenticationStrategy(new FIWAREHeaderAuthenticationStrategy());
+		// Needed to continue with the process of the request
+		setContinueChainBeforeSuccessfulAuthentication(true);
 
-        // This handler doesn't do anything but it's required to replace the default one
-        setAuthenticationSuccessHandler(new FIWAREHeaderAuthenticationSuccessHandler());
-    }
+		// Set the authentication in the context
+		setSessionAuthenticationStrategy(new FIWAREHeaderAuthenticationStrategy());
 
-    @Override
-    public Authentication attemptAuthentication(HttpServletRequest request,
-            HttpServletResponse response) throws AuthenticationException,
-            IOException, ServletException {
+		// This handler doesn't do anything but it's required to replace the default one
+		setAuthenticationSuccessHandler(new FIWAREHeaderAuthenticationSuccessHandler());
+	}
 
-        Authentication auth = null;
-        String authToken = request.getHeader(headerName);
+	@Override
+	public Authentication attemptAuthentication(HttpServletRequest request,
+			HttpServletResponse response) throws AuthenticationException,
+			IOException, ServletException {
 
-        try {
-            // This method can return an exception when the Token is invalid
-            // In this case, the exception is caught and the correct exceptions is thrown...
-            UserProfile profile = client.getUserProfile(authToken);
+		Authentication auth = null;
+		String authHeader = request.getHeader(headerName);
+		Matcher matcher = AUTHORIZATION_PATTERN.matcher(authHeader);
 
-            // Define authorities
-            Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-            for (String role: profile.getRoles()) {
-                authorities.add(new SimpleGrantedAuthority(role));
-            }
+		try {
 
-            // new token with credentials (like previously) and user profile and authorities
-            OAuthCredentials credentials = new OAuthCredentials(null, authToken, "", client.getName());
-            auth = new ClientAuthenticationToken(credentials, client.getName(), profile, authorities);
+			// We only have one possible match
+			if (matcher.find()) {
+				String authToken = matcher.group(1);
 
-        } catch (Exception ex) {
-            // This exception should be risen in order to return a 401
-            throw new BadCredentialsException("The provided token is invalid or the system was not able to check it");
-        }
+				// This method can return an exception when the Token is invalid
+				// In this case, the exception is caught and the correct exceptions is thrown...
+				FIWAREProfile profile = client.getUserProfile(authToken);
 
-        return auth;
-    }
+				// Define authorities
+				Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		        for (String role: profile.getRoles()) {
+		            authorities.add(new SimpleGrantedAuthority(role));
+		        }
 
-    public FIWAREClient getClient() {
-        return this.client;
-    }
+				// new token with credentials (like previously) and user profile and authorities
+				OAuthCredentials credentials = new OAuthCredentials(null, authToken, "", client.getName());
+				auth = new ClientAuthenticationToken(credentials, client.getName(), profile, authorities);
+			} else {
+				// This is not supposed to happen
+				throw new IllegalStateException("Pattern is suppossed to match.");
+			}
 
-    public void setClient(FIWAREClient client) {
-        this.client = client;
-    }
+		} catch (Exception ex) {
+			// This exception should be risen in order to return a 401
+			throw new BadCredentialsException("The provided token is invalid or the system was not able to check it");
+		}
 
-    // AUXILIAR CLASSES //
+		return auth;
+	}
 
-    /**
-     * Request Matcher that specifies when the filter should be executed. In this case we
-     * want the filter to be executed when the following two conditions are true:
-     * 1) The request is to the API (/api/...)
-     * 2) The X-Auth-Token header is present (X-Auth-Token: ...)
-     * @author aitor
-     *
-     */
-    static class FIWAREHeaderAuthenticationRequestMatcher implements RequestMatcher {
+	public FIWAREClient getClient() {
+		return this.client;
+	}
 
-        private String baseUrl;
-        private String headerName;
+	public void setClient(FIWAREClient client) {
+		this.client = client;
+	}
 
-        public FIWAREHeaderAuthenticationRequestMatcher(String baseUrl, String headerName) {
-            this.baseUrl = baseUrl;
-            this.headerName = headerName;
-        }
+	// AUXILIAR CLASSES //
 
-        @Override
-        public boolean matches(HttpServletRequest request) {
+	/**
+	 * Request Matcher that specifies when the filter should be executed. In this case we
+	 * want the filter to be executed when the following two conditions are true:
+	 * 1) The request is to the API (/api/...)
+	 * 2) The X-Auth-Token header is present (Authorization: ...)
+	 * @author aitor
+	 *
+	 */
+	static class FIWAREHeaderAuthenticationRequestMatcher implements RequestMatcher {
 
-            String authToken = request.getHeader(headerName);
+		private String baseUrl;
+		private String headerName;
 
-            // Get path
-            String url = request.getServletPath();
-            String pathInfo = request.getPathInfo();
-            String query = request.getQueryString();
+		public FIWAREHeaderAuthenticationRequestMatcher(String baseUrl, String headerName) {
+			this.baseUrl = baseUrl;
+			this.headerName = headerName;
+		}
 
-            if (pathInfo != null || query != null) {
-                StringBuilder sb = new StringBuilder(url);
+		@Override
+		public boolean matches(HttpServletRequest request) {
 
-                if (pathInfo != null) {
-                    sb.append(pathInfo);
-                }
+			String authHeader = request.getHeader(headerName);
 
-                if (query != null) {
-                    sb.append('?').append(query);
-                }
-                url = sb.toString();
-            }
+			// Get path
+			String url = request.getServletPath();
+			String pathInfo = request.getPathInfo();
+			String query = request.getQueryString();
 
-            return url.startsWith(baseUrl) && authToken != null && StringUtils.hasText(authToken);
-        }
-    }
+			if (pathInfo != null || query != null) {
+				StringBuilder sb = new StringBuilder(url);
 
-    /**
-     * Actions to be carried out when the authentication is successful. In this case
-     * no actions are required.
-     * @author aitor
-     *
-     */
-    static class FIWAREHeaderAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+				if (pathInfo != null) {
+					sb.append(pathInfo);
+				}
 
-        @Override
-        public void onAuthenticationSuccess(HttpServletRequest request,
-                HttpServletResponse response, Authentication authentication)
-                throws IOException, ServletException {
-            // Nothing to do... The chain will continue
-        }
-    }
+				if (query != null) {
+					sb.append('?').append(query);
+				}
+				url = sb.toString();
+			}
 
-    /**
-     * Set the Session in the Security Context when the Authorization token is valid
-     * @author aitor
-     *
-     */
-    static class FIWAREHeaderAuthenticationStrategy implements SessionAuthenticationStrategy {
+			return url.startsWith(baseUrl) && authHeader != null &&
+					AUTHORIZATION_PATTERN.matcher(authHeader).matches();
+		}
+	}
 
-        @Override
-        public void onAuthentication(Authentication authentication,
-                HttpServletRequest request, HttpServletResponse response)
-                throws SessionAuthenticationException {
-            // Set the authentication in the current context
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+	/**
+	 * Actions to be carried out when the authentication is successful. In this case
+	 * no actions are required.
+	 * @author aitor
+	 *
+	 */
+	static class FIWAREHeaderAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    }
+		@Override
+		public void onAuthenticationSuccess(HttpServletRequest request,
+				HttpServletResponse response, Authentication authentication)
+						throws IOException, ServletException {
+			// Nothing to do... The chain will continue
+		}
+	}
+
+	/**
+	 * Set the Session in the Security Context when the Authorization token is valid
+	 * @author aitor
+	 *
+	 */
+	static class FIWAREHeaderAuthenticationStrategy implements SessionAuthenticationStrategy {
+
+		@Override
+		public void onAuthentication(Authentication authentication,
+				HttpServletRequest request, HttpServletResponse response)
+						throws SessionAuthenticationException {
+			// Set the authentication in the current context
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		}
+
+	}
 }
