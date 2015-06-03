@@ -57,6 +57,8 @@ public class QueryServiceTest {
     private SelectQueryResponse querySelect = new SelectQueryResponse();
     private String queryConstruct = "Construct query";
     private String queryDescribe = "Describe query";
+    private int OK = 200;
+    private int UNSOPORTED_MEDIA_TYPE = 415;
 
     public QueryServiceTest() {
     }
@@ -74,108 +76,200 @@ public class QueryServiceTest {
         toTest = new QueryService();
     }
 
-    @Test
-    public void getSelectTest() {
-        Response returned;
-        String accept = "";
-        String query = "select";
+    public void getSelectTest(String accept, int response) {
+        Response returned = toTest.executeQuery(accept, "select");
 
-        returned = toTest.executeQuery(accept, query);
+        assertEquals(response, returned.getStatus());
+    }
 
-        assertEquals(200, returned.getStatus());
-        assertEquals(querySelect, returned.getEntity());
+    public void getConstructTest(String accept, int response) {
+        Response returned = toTest.executeQuery(accept, "construct");
+
+        assertEquals(response, returned.getStatus());
+    }
+
+    public void getDescribeTest(String accept, int response) {
+        Response returned = toTest.executeQuery(accept, "describe");
+
+        assertEquals(response, returned.getStatus());
+    }
+
+    public void getAskTest(String accept, int response, boolean askResponse) {
+        when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(askResponse);
+
+        Response returned = toTest.executeQuery(accept, "ask");
+
+        assertEquals(response, returned.getStatus());
+    }
+
+    public void postSelectTest(String accept, int response) {
+        Response returned = toTest.executeLongQuery(accept, "select");
+
+        assertEquals(response, returned.getStatus());
+    }
+
+
+    public void postConstructTest(String accept, int response) {
+        Response returned = toTest.executeLongQuery(accept, "construct");
+
+        assertEquals(response, returned.getStatus());
+    }
+
+
+    public void postDescribeTest(String accept, int response) {
+        Response returned = toTest.executeLongQuery(accept, "describe");
+
+        assertEquals(response, returned.getStatus());
+    }
+
+    public void postAskTest(String accept, int response, boolean askResponse) {
+        when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(askResponse);
+
+        Response returned = toTest.executeLongQuery(accept, "ask");
+
+        assertEquals(response, returned.getStatus());
     }
 
     @Test
-    public void getConstructTest() {
-        Response returned;
-        String accept = "";
-        String query = "construct";
-
-        returned = toTest.executeQuery(accept, query);
-
-        assertEquals(200, returned.getStatus());
-        assertEquals(queryConstruct, returned.getEntity());
+    public void SelectXmlTest() {
+        getSelectTest("application/xml", OK);
+        postSelectTest("application/xml", OK);
     }
 
     @Test
-    public void getDescribeTest() {
-        Response returned;
-        String accept = "";
-        String query = "describe";
-
-        returned = toTest.executeQuery(accept, query);
-
-        assertEquals(200, returned.getStatus());
-        assertEquals(queryDescribe, returned.getEntity());
+    public void SelectJsonTest() {
+        getSelectTest("application/json", OK);
+        postSelectTest("application/json", OK);
     }
 
     @Test
-    public void getAskTest() {
-        Response returned;
-        String accept = "";
-        String query = "ask";
-
-        when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(true);
-
-        returned = toTest.executeQuery(accept, query);
-
-        assertEquals(200, returned.getStatus());
-        assertEquals("true", returned.getEntity());
+    public void SelectUnsoportedMediaTypeTest() {
+        getSelectTest("anything", UNSOPORTED_MEDIA_TYPE);
+        postSelectTest("anything", UNSOPORTED_MEDIA_TYPE);
     }
 
     @Test
-    public void postSelectTest() {
-        Response returned;
-        String accept = "";
-        String query = "select";
-
-        returned = toTest.executeLongQuery(accept, query);
-
-        assertEquals(200, returned.getStatus());
-        assertEquals(querySelect, returned.getEntity());
+    public void ConstructRdfXmlTest() {
+        getConstructTest("application/rdf+xml", OK);
+        postConstructTest("application/rdf+xml", OK);
     }
 
     @Test
-    public void postConstructTest() {
-        Response returned;
-        String accept = "";
-        String query = "construct";
-
-        returned = toTest.executeLongQuery(accept, query);
-
-        assertEquals(200, returned.getStatus());
-        assertEquals(queryConstruct, returned.getEntity());
+    public void ConstructRdfJsonTest() {
+        getConstructTest("application/rdf+json", OK);
+        postConstructTest("application/rdf+json", OK);
     }
 
     @Test
-    public void postDescribeTest() {
-        Response returned;
-        String accept = "";
-        String query = "describe";
-
-        returned = toTest.executeLongQuery(accept, query);
-
-        assertEquals(200, returned.getStatus());
-        assertEquals(queryDescribe, returned.getEntity());
+    public void postConstructTurtleTest1() {
+        getConstructTest("text/turtle", OK);
+        postConstructTest("text/turtle", OK);
     }
 
     @Test
-    public void postAskTest() {
-        Response returned;
-        String accept = "";
-        String query = "ask";
-
-        when(virtuosoResourceDAO.executeQueryAsk(anyString())).thenReturn(false);
-
-        returned = toTest.executeLongQuery(accept, query);
-
-        assertEquals(200, returned.getStatus());
-        assertEquals("false", returned.getEntity());
+    public void ConstructTurtleTest2() {
+        getConstructTest("application/x-turtle", OK);
+        postConstructTest("application/x-turtle", OK);
     }
 
     @Test
-    public void executeAnyQueryTest() {
+    public void ConstructN3Test1() {
+        getConstructTest("text/rdf+n3", OK);
+        postConstructTest("text/rdf+n3", OK);
+    }
+
+    @Test
+    public void ConstructN3Test2() {
+        getConstructTest("text/n3", OK);
+        postConstructTest("text/n3", OK);
+    }
+
+    @Test
+    public void ConstructNTriplesTest() {
+        getConstructTest("text/n-triples", OK);
+        postConstructTest("text/n-triples", OK);
+    }
+
+    @Test
+    public void ConstructUnsoportedMediaTypeTest() {
+        getConstructTest("anything", UNSOPORTED_MEDIA_TYPE);
+        postConstructTest("anything", UNSOPORTED_MEDIA_TYPE);
+    }
+
+    @Test
+    public void DescribeRdfXmlTest() {
+        getDescribeTest("application/rdf+xml", OK);
+        postDescribeTest("application/rdf+xml", OK);
+    }
+
+    @Test
+    public void DescribeRdfJsonTest() {
+        getDescribeTest("application/rdf+json", OK);
+        postDescribeTest("application/rdf+json", OK);
+    }
+
+    @Test
+    public void DescribeTurtleTest1() {
+        getDescribeTest("text/turtle", OK);
+        postDescribeTest("text/turtle", OK);
+    }
+
+    @Test
+    public void DescribeTurtleTest2() {
+        getDescribeTest("application/x-turtle", OK);
+        postDescribeTest("application/x-turtle", OK);
+    }
+
+    @Test
+    public void DescribeN3Test1() {
+        getDescribeTest("text/rdf+n3", OK);
+        postDescribeTest("text/rdf+n3", OK);
+    }
+
+    @Test
+    public void DescribeN3Test2() {
+        getDescribeTest("text/n3", OK);
+        postDescribeTest("text/n3", OK);
+    }
+
+    @Test
+    public void DescribeNTriplesTest() {
+        getDescribeTest("text/n-triples", OK);
+        postDescribeTest("text/n-triples", OK);
+    }
+
+    @Test
+    public void DescribeUnsoportedMediaTypeTest() {
+        getDescribeTest("anything", UNSOPORTED_MEDIA_TYPE);
+        postDescribeTest("anything", UNSOPORTED_MEDIA_TYPE);
+    }
+
+    @Test
+    public void getAskXmlTest() {
+        getAskTest("application/xml", OK, true);
+        getAskTest("application/xml", OK, false);
+        postAskTest("application/xml", OK, true);
+        postAskTest("application/xml", OK, false);
+    }
+
+    @Test
+    public void getAskJsonTest() {
+        getAskTest("application/xml", OK, true);
+        getAskTest("application/xml", OK, false);
+        postAskTest("application/xml", OK, true);
+        postAskTest("application/xml", OK, false);
+    }
+
+    @Test
+    public void getAskUnsoportedMediaTypeTest() {
+        getAskTest("anything", UNSOPORTED_MEDIA_TYPE, true);
+        getAskTest("anything", UNSOPORTED_MEDIA_TYPE, false);
+        postAskTest("anything", UNSOPORTED_MEDIA_TYPE, true);
+        postAskTest("anything", UNSOPORTED_MEDIA_TYPE, false);
+    }
+
+    @Test
+    public void obtainResourceOKTest() {
         Response returned;
         String path = "path";
         String type = "application/rdf+xml";
@@ -195,7 +289,7 @@ public class QueryServiceTest {
     }
 
     @Test
-    public void executeAnyQueryNullTest() {
+    public void obtainResourceNotFoundTest() {
         Response returned;
         String path = "path";
         String type = "application/rdf+xml";
@@ -212,7 +306,7 @@ public class QueryServiceTest {
     }
 
     @Test
-    public void executeAnyQueryErrorTest() {
+    public void obtainResourceErrorTest() {
         Response returned;
         String path = "path";
         String type = "application/rdf+xml";
