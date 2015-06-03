@@ -30,8 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -44,18 +42,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-import org.fiware.apps.repository.dao.VirtModelFactory;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
-import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
-
-
 
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
-import virtuoso.jena.driver.VirtGraph;
 
 @Path("/services/"+RepositorySettings.QUERY_SERVICE_NAME)
 public class QueryService {
@@ -94,18 +87,33 @@ public class QueryService {
     private Response executeAnyQuery(String query, String type) {
         String result = "";
         // Check type sparql query and execute the method.
-
         if (query.toLowerCase().contains("select")) {
-            return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+            if (!type.equalsIgnoreCase("application/xml") && !type.equalsIgnoreCase("application/json")) {
+                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+            } else {
+                return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+            }
         }
         if (query.toLowerCase().contains("construct")) {
-            result = virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(type));
+            if (!RestHelper.isRDF(type)) {
+                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+            } else {
+                result = virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(type));
+            }
         }
         if (query.toLowerCase().contains("describe")) {
-            result = virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(type));
+            if (!RestHelper.isRDF(type)) {
+                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+            } else {
+                result = virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(type));
+            }
         }
         if (query.toLowerCase().contains("ask")) {
-            result = (virtuosoResourceDAO.executeQueryAsk(query)) ? "true" : "false";
+            if (!type.equalsIgnoreCase("application/xml") && !type.equalsIgnoreCase("application/json")) {
+                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+            } else {
+                return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
+            }
         }
 
         return Response.status(Status.OK).entity(result).build();
