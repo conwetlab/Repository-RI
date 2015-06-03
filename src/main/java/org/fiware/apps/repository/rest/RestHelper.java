@@ -41,9 +41,6 @@ import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
-//import org.codehaus.jackson.JsonGenerator;
-//import org.codehaus.jackson.map.MappingJsonFactory;
-//import org.codehaus.jackson.map.ObjectMapper;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 
@@ -65,7 +62,7 @@ public class RestHelper {
         typeMap = new HashMap<String, String>();
         typeMap.put("application/json","application/json");
         typeMap.put("application/rdf+xml","RDF/XML");
-        typeMap.put("application/json","RDF/JSON");
+        typeMap.put("application/rdf+json","RDF/JSON");
         typeMap.put("application/ld+json","JSON-LD");
         typeMap.put("text/turtle","TURTLE");
         typeMap.put("application/x-turtle","TURTLE");
@@ -81,13 +78,13 @@ public class RestHelper {
     public static Boolean isRDF(String string)
     {
         return string.equalsIgnoreCase("application/rdf+xml") ||
+                string.equalsIgnoreCase("application/rdf+json") ||
                 string.equalsIgnoreCase("application/ld+json")||
                 string.equalsIgnoreCase("text/turtle") ||
                 string.equalsIgnoreCase("application/x-turtle") ||
                 string.equalsIgnoreCase("text/rdf+n3") ||
                 string.equalsIgnoreCase("text/n-triples") ||
-                string.equalsIgnoreCase("text/n3") ||
-                string.equalsIgnoreCase("application/json");
+                string.equalsIgnoreCase("text/n3");
     }
 
     public static Response multiFormatResponse(Object obj, Class clazz, String type, UriInfo uriInfo) throws JAXBException{
