@@ -46,7 +46,7 @@ import org.scribe.model.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ProxyOAuthRequest.class, ProxyOAuthFIWARE.class, Request.class})
-public class ProxyOAuthServiceImplTest {
+public class ProxyOAuthFIWARETest {
 
 
     ProxyOAuthFIWARE toTest;
@@ -57,7 +57,7 @@ public class ProxyOAuthServiceImplTest {
     @Mock Verifier verifier;
     @Mock AccessTokenExtractor tokenExtractor;
 
-    public ProxyOAuthServiceImplTest() {
+    public ProxyOAuthFIWARETest() {
     }
 
     @Before
@@ -78,7 +78,7 @@ public class ProxyOAuthServiceImplTest {
             PowerMockito.whenNew(ProxyOAuthRequest.class).withAnyArguments().thenReturn(request);
 
         } catch (Exception ex) {
-            Logger.getLogger(ProxyOAuthServiceImplTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ProxyOAuthFIWARETest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
