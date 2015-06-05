@@ -100,7 +100,7 @@ public class CollectionServiceTest {
     public void getResourceRootTest() {
         Response returned;
 
-        returned = toTest.getResourceRoot();
+        returned = toTest.getResourceRoot("application/xml");
 
         assertEquals(returned.getStatus(), 404);
     }
