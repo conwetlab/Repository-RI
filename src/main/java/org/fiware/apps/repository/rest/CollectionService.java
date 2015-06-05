@@ -35,15 +35,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -60,7 +52,6 @@ import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.AbstractResource;
-import org.fiware.apps.repository.model.FileUploadForm;
 import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
@@ -78,9 +69,8 @@ public class CollectionService {
     @GET
     @Path("/")
     @Produces({"application/xml", "application/json"})
-    public Response getResourceRoot() {
-        return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
-        //throw new RestNotFoundException("Please specify a collection", new Exception());
+    public Response getResourceRoot(@HeaderParam("Accept") String accept) {
+        return Response.status(Response.Status.NOT_FOUND).type(accept).entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
     }
 
     @GET
@@ -126,7 +116,7 @@ public class CollectionService {
                 {
                     return Response.status(Response.Status.NO_CONTENT).build();
                 }
-                return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(type).build();
+                return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).build();
             }
             else
             {
@@ -181,6 +171,7 @@ public class CollectionService {
     }
 
     @PUT
+    @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
     public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, AbstractResource absRes) {
         if(absRes.getClass().equals(Resource.class)) {
@@ -247,7 +238,6 @@ public class CollectionService {
     private Response deleteResource(String path)
     {
         // Check if the path is a resource or a collection and remove it.
-
         try {
             Resource resource = mongoResourceDAO.getResource(path);
             if (resource != null)

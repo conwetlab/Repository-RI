@@ -30,14 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -69,7 +63,8 @@ public class QueryService {
     }
 
     @GET
-    @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
+    @Produces({"application/rdf+xml", "application/rdf+json", "text/turtle", "application/x-turtle", "text/n3", "text/rdf+n3", "text/n-triples"})
+    @Path("/{path:[a-zA-Z0-9_\\:\\.\\-\\+\\/]*}")
     public Response obtainResource(@HeaderParam("Accept") String accept, @PathParam("path") String path) {
         Resource resource;
         try {
@@ -86,31 +81,36 @@ public class QueryService {
 
     private Response executeAnyQuery(String query, String type) {
         String result = "";
+
+        if (query == null) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+
         // Check type sparql query and execute the method.
         if (query.toLowerCase().contains("select")) {
             if (!type.equalsIgnoreCase("application/xml") && !type.equalsIgnoreCase("application/json")) {
-                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+                return Response.status(Status.NOT_ACCEPTABLE).build();
             } else {
                 return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
             }
         }
         if (query.toLowerCase().contains("construct")) {
             if (!RestHelper.isRDF(type)) {
-                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+                return Response.status(Status.NOT_ACCEPTABLE).build();
             } else {
                 result = virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(type));
             }
         }
         if (query.toLowerCase().contains("describe")) {
             if (!RestHelper.isRDF(type)) {
-                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+                return Response.status(Status.NOT_ACCEPTABLE).build();
             } else {
                 result = virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(type));
             }
         }
         if (query.toLowerCase().contains("ask")) {
             if (!type.equalsIgnoreCase("application/xml") && !type.equalsIgnoreCase("application/json")) {
-                return Response.status(Status.UNSUPPORTED_MEDIA_TYPE).build();
+                return Response.status(Status.NOT_ACCEPTABLE).build();
             } else {
                 return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
             }
