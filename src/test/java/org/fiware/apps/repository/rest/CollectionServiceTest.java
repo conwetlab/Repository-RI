@@ -499,12 +499,27 @@ public class CollectionServiceTest {
     public void deleteResourceCollectionTest() throws DatasourceException {
         Response returned;
         String path = "a/b/c";
+        ResourceCollection collection = generateResourceCollection(path, null, true);
 
         when(mongoResourceDAO.getResource(path)).thenReturn(null);
+        when(mongoCollectionDAO.findCollection(path)).thenReturn(collection);
 
         returned = toTest.delete(path);
 
         assertEquals(202, returned.getStatus());
+    }
+
+    @Test
+    public void deleteNotFoundTest() throws DatasourceException {
+        Response returned;
+        String path = "a/b/c";
+
+        when(mongoResourceDAO.getResource(path)).thenReturn(null);
+        when(mongoCollectionDAO.findCollection(path)).thenReturn(null);
+
+        returned = toTest.delete(path);
+
+        assertEquals(404, returned.getStatus());
     }
 
     @Test
