@@ -59,6 +59,7 @@ public class QueryServiceTest {
     private String queryDescribe = "Describe query";
     private int OK = 200;
     private int UNSOPORTED_MEDIA_TYPE = 415;
+    private int NOT_ACCEPTABLE = 406;
 
     public QueryServiceTest() {
     }
@@ -143,9 +144,9 @@ public class QueryServiceTest {
     }
 
     @Test
-    public void SelectUnsoportedMediaTypeTest() {
-        getSelectTest("anything", UNSOPORTED_MEDIA_TYPE);
-        postSelectTest("anything", UNSOPORTED_MEDIA_TYPE);
+    public void SelectNotAceptableTest() {
+        getSelectTest("anything", NOT_ACCEPTABLE);
+        postSelectTest("anything", NOT_ACCEPTABLE);
     }
 
     @Test
@@ -191,9 +192,9 @@ public class QueryServiceTest {
     }
 
     @Test
-    public void ConstructUnsoportedMediaTypeTest() {
-        getConstructTest("anything", UNSOPORTED_MEDIA_TYPE);
-        postConstructTest("anything", UNSOPORTED_MEDIA_TYPE);
+    public void ConstructNotAceptableTest() {
+        getConstructTest("anything", NOT_ACCEPTABLE);
+        postConstructTest("anything", NOT_ACCEPTABLE);
     }
 
     @Test
@@ -239,9 +240,9 @@ public class QueryServiceTest {
     }
 
     @Test
-    public void DescribeUnsoportedMediaTypeTest() {
-        getDescribeTest("anything", UNSOPORTED_MEDIA_TYPE);
-        postDescribeTest("anything", UNSOPORTED_MEDIA_TYPE);
+    public void DescribeNotAceptableTest() {
+        getDescribeTest("anything", NOT_ACCEPTABLE);
+        postDescribeTest("anything", NOT_ACCEPTABLE);
     }
 
     @Test
@@ -261,11 +262,11 @@ public class QueryServiceTest {
     }
 
     @Test
-    public void getAskUnsoportedMediaTypeTest() {
-        getAskTest("anything", UNSOPORTED_MEDIA_TYPE, true);
-        getAskTest("anything", UNSOPORTED_MEDIA_TYPE, false);
-        postAskTest("anything", UNSOPORTED_MEDIA_TYPE, true);
-        postAskTest("anything", UNSOPORTED_MEDIA_TYPE, false);
+    public void getAskNotAceptableTest() {
+        getAskTest("anything", NOT_ACCEPTABLE, true);
+        getAskTest("anything", NOT_ACCEPTABLE, false);
+        postAskTest("anything", NOT_ACCEPTABLE, true);
+        postAskTest("anything", NOT_ACCEPTABLE, false);
     }
 
     @Test
