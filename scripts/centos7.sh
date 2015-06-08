@@ -35,13 +35,13 @@ fi
 #Start Virtuoso
 cd $INSPWD/virtuoso7/var/lib/virtuoso/db/
 $INSPWD/virtuoso7/bin/virtuoso-t -f &
-cd
+cd $INSPWD
 
 #Start Tomcat
 cd $INSPWD/apache-tomcat-8.0.21/bin/
 ./shutdown.sh
 ./startup.sh
-cd
+cd $INSPWD
 
 #Create taks
 sudo ./scripts/startupCentos.sh
