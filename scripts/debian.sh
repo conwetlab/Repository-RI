@@ -20,10 +20,10 @@ sudo ./scripts/preVirtuosoDebian.sh
 ./scripts/installVirtuoso.sh
 
 # Deploy the war file
-if [ -f "./Repository-RI/target/FiwareRepository.war" ]; then
-    cp ./FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+if [ -f "./target/FiwareRepository.war" ]; then
+    cp ./target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
 else
-    cp ./Repository-RI/target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+    cp ./FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
 fi
 
 
