@@ -492,7 +492,7 @@ public class CollectionServiceTest {
 
         returned = toTest.delete(path);
 
-        assertEquals(202, returned.getStatus());
+        assertEquals(204, returned.getStatus());
     }
 
     @Test
@@ -506,7 +506,7 @@ public class CollectionServiceTest {
 
         returned = toTest.delete(path);
 
-        assertEquals(202, returned.getStatus());
+        assertEquals(204, returned.getStatus());
     }
 
     @Test
