@@ -63,10 +63,10 @@ Here you have a basic reference of all the status codes that you can get when yo
 | --------- | ---- | ----------- |
 | 200 | OK | Your request has been properly completed. |
 | 201 | Created | The request has been fulfilled and resulted in a new resource being created. |
-| 202 | Accepted | The request has been accepted for processing, but the processing has not been completed.  |
 | 204 | No Content | The server successfully processed the request, but is not returning any content. |
 | 403 | Forbidden | The request was a valid request, but the server is refusing to respond to it. |
 | 404 | Not Found | The requested resource could not be found but may be available again in the future.  |
+| 406 | Not Acceptable | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
 | 409 | Conflict | Indicates that the request could not be processed because of conflict in the request, such as an edit conflict in the case of multiple updates. |
 | 500 | Internal Server Error | A generic error message, given when an unexpected condition was encountered and no more specific message is suitable. |
 
