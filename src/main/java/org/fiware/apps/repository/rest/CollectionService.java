@@ -240,14 +240,16 @@ public class CollectionService {
         // Check if the path is a resource or a collection and remove it.
         try {
             Resource resource = mongoResourceDAO.getResource(path);
-            if (resource != null)
-            {
+            if (resource != null) {
                 mongoResourceDAO.deleteResource(path);
                 virtuosoResourceDAO.deleteResource(resource.getContentUrl());
             }
-            else
-            {
-                mongoCollectionDAO.deleteCollection(path);
+            else {
+                if (mongoCollectionDAO.findCollection(path) != null) {
+                    mongoCollectionDAO.deleteCollection(path);
+                } else {
+                    return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
+                }
             }
         } catch (DatasourceException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
