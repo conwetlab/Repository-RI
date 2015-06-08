@@ -41,6 +41,7 @@ Content-type: application/json, application/xml, text/plain
 | ---- | ----------- | ----------- |
 | 200 | OK | The request was handled successfully and transmitted in response message. |
 | 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
+| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
 
 ---
 ## Creating collections
@@ -50,7 +51,14 @@ Content-type: application/json, application/xml, text/plain
 Verb: POST
 URI: http://[SERVER_HOST]FiwareRepository/v2/collec/
 Content-Type: application/json, application/xml
-Body: [Collection]
+Body: <pre>
+	&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+	&lt;collection xmlns:atom="http://www.w3.org/2005/Atom"&gt;
+	       &lt;creator&gt;CreatornameUpdate&lt;/creator&gt;
+	       &lt;collections/&gt;
+	       &lt;resources/&gt;
+	&lt;/collection&gt;
+	</pre>
 </pre>
 
 * Responses
@@ -59,6 +67,7 @@ Body: [Collection]
 | ---- | ----------- | ----------- |
 | 201 | CREATED | The request has been fulfilled and resulted in a new resource being created. |
 | 409 | CONFLICT | Indicates that the request could not be processed because of conflict in the request, such as an edit conflict. |
+| 415 | UNSUPPORTED MEDIA TYPE | The request entity has a media type which the server or resource does not support. |
 
 ---
 ## Removing collections
@@ -73,7 +82,8 @@ URI: http://[SERVER_HOST]FiwareRepository/v2/collec/{collection}
 
 | Code | Description | Explanation |
 | ---- | ----------- | ----------- |
-| 202 | ACCEPTED | The request has been accepted for processing, but the processing has not been completed. |
+| 204 | NO CONTENT | The server successfully processed the request, but is not returning any content. Usually used as a response to a successful delete request. |
+| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
 
 ---
 ## Managing Resources
@@ -103,6 +113,7 @@ Accept: application/json, application/xml, text/plain
 | ---- | ----------- | ----------- |
 | 200 | OK | The request was handled successfully and transmitted in response message. |
 | 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
+| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
 
 ---
 ## Getting resources
@@ -130,7 +141,17 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 Verb: POST
 URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/
 Content-Type: application/json, application/xml
-Body: [Resource]
+Body: <pre>
+	&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+    &lt;resource id="collectionA/collectionB/resource"&gt;
+	    &lt;creator&gt;Creator&lt;/creator&gt;
+        &lt;creationDate&gt;&lt;/creationDate&gt;
+        &lt;modificationDate&gt;&lt;/modificationDate&gt;
+	    &lt;name&gt;Test resource&lt;/name&gt;
+        &lt;contentUrl&gt;http://testresourceurl.com/resource&lt;/contentUrl&gt;
+	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
+    &lt;/resource&gt;
+	</pre>
 </pre>
 
 * Responses
@@ -139,6 +160,7 @@ Body: [Resource]
 | ---- | ----------- | ----------- |
 | 201 | CREATED | The request has been fulfilled and resulted in a new resource being created. |
 | 409 | CONFLICT | Indicates that the request could not be processed because of conflict in the request, such as an edit conflict. |
+| 415 | UNSUPPORTED MEDIA TYPE | The request entity has a media type which the server or resource does not support. |
 
 ---
 ## Updating resources metadata
@@ -148,7 +170,16 @@ Body: [Resource]
 Verb: PUT
 URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource}.meta
 Content-Type: application/json, application/xml
-Body: [Resource]
+Body: <pre>
+    &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+    &lt;resource id="collectionA/collectionB/resource"&gt;
+	    &lt;creator&gt;Creator&lt;/creator&gt;
+        &lt;creationDate&gt;&lt;/creationDate&gt;
+        &lt;modificationDate&gt;&lt;/modificationDate&gt;
+	    &lt;name&gt;Test resource&lt;/name&gt;
+	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
+    &lt;/resource&gt;
+    </pre>
 </pre>
 
 * Responses
@@ -157,6 +188,7 @@ Body: [Resource]
 | ---- | ----------- | ----------- |
 | 200 | OK | The request was handled successfully and transmitted in response message. |
 | 403 | FORBIDDEN | The request was a valid request, but the server is refusing to respond to it. |
+| 415 | UNSUPPORTED MEDIA TYPE | The request entity has a media type which the server or resource does not support. |
 
 ---
 ## Updating resources content
@@ -189,7 +221,8 @@ URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource}
 
 | Code | Description | Explanation |
 | ---- | ----------- | ----------- |
-| 202 | ACCEPTED | The request has been accepted for processing, but the processing has not been completed. |
+| 204 | NO CONTENT | The server successfully processed the request, but is not returning any content. Usually used as a response to a successful delete request. |
+| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
 
 ---
 ## Making SPARQL queries
@@ -224,7 +257,7 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 * Request
 <pre>
 Verb: GET
-URI: http://[SERVER_HOST]/FiwareRepository/v2/services/query?query=[Query]
+URI: http://[SERVER_HOST]/FiwareRepository/v2/services/query?query=SELECT+%3Fs+%3Fp+%3Fo+WHERE+%7B%3Fs+%3Fp+%3Fo+%7D
 Accept: application/json, application/xml, application/rdf+xml, text/turtle, application/x-turtle, text/n3, text/rdf+n3, text/n-triples, text/plain
 </pre>
 
@@ -233,6 +266,7 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 | Code | Description | Explanation |
 | ---- | ----------- | ----------- |
 | 200 | OK | The request was handled successfully and transmitted in response message. |
+| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
 | 500 | INTERNAL SERVER ERROR | A generic error message, given when an unexpected condition was encountered and no more specific message is suitable. |
 
 ---
@@ -243,7 +277,7 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 Verb: GET
 URI: http://[SERVER_HOST]/FiwareRepository/v2/services/query
 Accept: application/json, application/xml, application/rdf+xml, text/turtle, application/x-turtle, text/n3, text/rdf+n3, text/n-triples, text/plain
-Body: [Query]
+Body: "<pre>SELECT ?s ?p ?o WHERE {?s ?p ?o }</pre>"
 </pre>
 
 * Responses
@@ -251,6 +285,7 @@ Body: [Query]
 | Code | Description | Explanation |
 | ---- | ----------- | ----------- |
 | 200 | OK | The request was handled successfully and transmitted in response message. |
+| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
 | 500 | INTERNAL SERVER ERROR | A generic error message, given when an unexpected condition was encountered and no more specific message is suitable. |
 
 ---
@@ -451,7 +486,7 @@ curl -v -X DELETE http://localhost:8080/FiwareRepository/v2/collec/collectionA/c
 &gt; Host: localhost:8080
 &gt; Accept: */*
 &gt; 
-&lt; HTTP/1.1 202 Accepted
+&lt; HTTP/1.1 204 No Content
 * Server Apache-Coyote/1.1 is not blacklisted
 &lt; Server: Apache-Coyote/1.1
 &lt; Content-Length: 0
@@ -492,8 +527,56 @@ curl -v -H "Accept: application/json" -H "Content-Type: text/plain" -X POST --da
 &lt; Transfer-Encoding: chunked
 &lt; Date: Thu, 28 May 2015 13:33:32 GMT
 &lt; 
-{"vars":3,"columns":[{"values":["http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type","http://www.w3.org/1999/02/22-rdf-syntax-ns#type"],"name":"p"},{"values":["http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","htt* Connection #0 to host localhost left intact
-p://www.openlinksw.com/schemas/virtrdf#QuadMapFormat","http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"],"name":"o"},{"values":["http://www.openlinksw.com/virtrdf-data-formats#default-iid","http://www.openlinksw.com/virtrdf-data-formats#default-iid-nullable","http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank","http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank-nullable","http://www.openlinksw.com/virtrdf-data-formats#default","http://www.openlinksw.com/virtrdf-data-formats#default-nullable","http://www.openlinksw.com/virtrdf-data-formats#sql-varchar","http://www.openlinksw.com/virtrdf-data-formats#sql-varchar-nullable","http://www.openlinksw.com/virtrdf-data-formats#sql-varchar-dt","http://www.openlinksw.com/virtrdf-data-formats#sql-varchar-dt-nullable"],"name":"s"}]}
+{
+vars: 3
+columns: [3]
+0:  {
+values: [10]
+0:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+1:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+2:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+3:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+4:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+5:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+6:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+7:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+8:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+9:  "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+-
+name: "p"
+}-
+1:  {
+values: [10]
+0:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+1:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+2:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+3:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+4:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+5:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+6:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+7:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+8:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+9:  "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"
+-
+name: "o"
+}-
+2:  {
+values: [10]
+0:  "http://www.openlinksw.com/virtrdf-data-formats#default-iid"
+1:  "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nullable"
+2:  "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank"
+3:  "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank-nullable"
+4:  "http://www.openlinksw.com/virtrdf-data-formats#default"
+5:  "http://www.openlinksw.com/virtrdf-data-formats#default-nullable"
+6:  "http://www.openlinksw.com/virtrdf-data-formats#sql-varchar"
+7:  "http://www.openlinksw.com/virtrdf-data-formats#sql-varchar-nullable"
+8:  "http://www.openlinksw.com/virtrdf-data-formats#sql-varchar-dt"
+9:  "http://www.openlinksw.com/virtrdf-data-formats#sql-varchar-dt-nullable"
+-
+name: "s"
+}-
+-
+}
 </pre>
 
 ---
