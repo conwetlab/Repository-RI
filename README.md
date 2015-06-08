@@ -18,7 +18,7 @@ Moreover, the Repository provides a uniform API to perform smart searches over t
 	
 - Virtuoso as "triple store" to store RDF data.
  	
-- Endpoint to execute Sparql queries on resources content.
+- Endpoint for executing SPARQL queries on resources content.
 
 - Endpoint for retrieving resources by its content-url.
 
@@ -40,9 +40,9 @@ You can install Repository-RI using the installation script <code>install.sh</co
 
 1. Install the prerequisites.
 
-2. Create a database for the Repository-RI in MongoDB. By default, Repository-RI uses the database <code>test</code>.
+2. Choose a database for the Repository-RI in MongoDB. By default, Repository-RI uses the database <code>test</code>.
 
-3. Create a user database for the Repository-RI in Virtuoso. By default, Repository-RI uses user <code>dba</code> and password <code>dba</code>.
+3. Create a user for the Repository-RI in Virtuoso. By default, Repository-RI uses user <code>dba</code> and password <code>dba</code>.
 
 4. Update <code>src/main/resources/properties/repository.properties</code> to set the preferences of your databases (MongoDB and Virtuoso).
 
@@ -52,7 +52,7 @@ You can install Repository-RI using the installation script <code>install.sh</co
     
     b. If you want to use FIWARE IdM OAtuh2 authentication to manage users, ensure that the file <code>securityOAuth2.xml</code> is imported in the web.xml file and modify <code>src/main/resources/properties/repository.properties</code> to set your OAuth2 configuration.
     
-6. If you want to generate the WAR file for the source code, run <code>mvn install</code>.
+6. Generate the WAR file for the source code, run <code>mvn install</code>.
 
 7. Copy the generated WAR file into the webapps folder of your Tomcat instance.
 
@@ -94,7 +94,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 - **Response**:
     - **Status**: 201
-____________________________________________________________
+
 
 #### Update Resource Metadata
 
@@ -115,7 +115,7 @@ ____________________________________________________________
     
 - **Response**:
     - **Status**: 200
-____________________________________________________________
+
 
 #### Update Resource Content
 
@@ -151,7 +151,7 @@ ____________________________________________________________
 
 - **Response**:
     - **Status**: 200
-____________________________________________________________
+
 
 #### Get Resource 
 
@@ -162,7 +162,7 @@ ____________________________________________________________
 - **Response**:
     - **Status**: 200
     - **Body**: [Resource Metadata]
-____________________________________________________________
+
 
 #### Get Resource Metadata
 
@@ -173,7 +173,8 @@ ____________________________________________________________
 - **Response**:
     - **Status**: 200
     - **Body**: [Resource Content]
-____________________________________________________________
+
+
 
 #### Delete Resource
 
@@ -182,7 +183,7 @@ ____________________________________________________________
 	
 - **Response**:
     - **Status**: 204
-____________________________________________________________
+
 
 ### Collection API
 
@@ -203,7 +204,7 @@ ____________________________________________________________
 
 - **Response**:
     - **Status**: 201
-____________________________________________________________
+
 
 #### Get Collection
 
@@ -214,7 +215,7 @@ ____________________________________________________________
 - **Response**:
     - **Status**: 200
     - **Body**: [Collection]
-____________________________________________________________
+
 
 #### Delete Collection
 
@@ -223,7 +224,7 @@ ____________________________________________________________
 	
 - **Response**:
     - **Status**: 204
-____________________________________________________________
+
 
 ### Query API
 
@@ -236,7 +237,7 @@ ____________________________________________________________
 - **Response**: 
     - **Status**: 200
     - **Body**: [Query Response]
-____________________________________________________________
+
 
 #### Execute Long Query  
 
@@ -248,7 +249,7 @@ ____________________________________________________________
 - **Response**: 
     - **Status**: 200
     - **Body**: [Query Response]
-____________________________________________________________	
+
 
 #### Get Resource by URL Content
 
@@ -259,4 +260,4 @@ ____________________________________________________________
 - **Response**:
     - **Status**: 200
     - **Body**: [Resource Metadata]
-__________________________________________________________	
+	
