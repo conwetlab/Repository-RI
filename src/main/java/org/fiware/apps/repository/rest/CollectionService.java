@@ -254,6 +254,6 @@ public class CollectionService {
         } catch (DatasourceException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         }
-        return Response.status(Status.ACCEPTED).build();
+        return Response.status(Status.NO_CONTENT).build();
     }
 }
