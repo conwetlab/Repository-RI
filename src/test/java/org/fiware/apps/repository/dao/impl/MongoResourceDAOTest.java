@@ -38,7 +38,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.fiware.apps.repository.dao.CollectionDAO;
 import org.fiware.apps.repository.dao.DAOFactory;
-import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.Resource;
@@ -387,6 +386,28 @@ public class MongoResourceDAOTest {
         when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
         when(mongoCollection.getCollection(anyString())).thenReturn(null);
         when(collectionDAO.getCollection(anyString())).thenReturn(null);
+
+        try {
+            toTest.insertResource(resource);
+        } catch (Exception ex) {
+            fail("Exception not expected:\n" + ex.getLocalizedMessage());
+        }
+
+        verify(db, times(2)).requestStart();
+        verify(db, times(2)).requestDone();
+    }
+
+    @Test
+    public void insertResourceCollectionTest() throws DatasourceException {
+        String string = "/string";
+        Date date = new Date();
+        Resource resource = generateResource(string, date, true);
+        ResourceCollection collection = generateResourceCollection(string, date, true);
+
+        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        when(mongoCollection.getCollection(anyString())).thenReturn(null);
+        when(collectionDAO.getCollection(anyString())).thenReturn(collection);
+
 
         try {
             toTest.insertResource(resource);

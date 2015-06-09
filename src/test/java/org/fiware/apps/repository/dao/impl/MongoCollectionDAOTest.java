@@ -483,6 +483,33 @@ public class MongoCollectionDAOTest {
         verify(db).requestDone();
     }
 
+    @Test
+    public void getCollectionsTest3() {
+        String id = "/id";
+        Date date = new Date();
+        DBCursor dBCursor = mock(DBCursor.class);
+        List list = new LinkedList();
+
+        mongoCollection = PowerMockito.mock(DBCollection.class);
+        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
+        list.add(dBObject);
+        list.add(dBObject);
+
+        PowerMockito.when(mongoCollection.find(any())).thenReturn(dBCursor);
+        rulesdbObjectCollection(id, date);
+        when(dBObject.get("id")).thenReturn(null);
+        when(dBCursor.toArray()).thenReturn(list);
+
+        try {
+            toTest.getCollections(id);
+        } catch (DatasourceException ex) {
+            fail("Exception not expected:\n" + ex.getLocalizedMessage());
+        }
+
+        verify(db).requestStart();
+        verify(db).requestDone();
+    }
+
     @Test(expected = DatasourceException.class)
     public void getCollectionsExceptionTest() throws DatasourceException {
         String id = "/id";
