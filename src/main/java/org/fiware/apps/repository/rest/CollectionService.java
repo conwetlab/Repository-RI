@@ -36,7 +36,9 @@ import java.net.URISyntaxException;
 import java.util.Date;
 
 import javax.ws.rs.*;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -69,20 +71,35 @@ public class CollectionService {
     @GET
     @Path("/")
     @Produces({"application/xml", "application/json"})
-    public Response getResourceRoot(@HeaderParam("Accept") String accept) {
-        return Response.status(Response.Status.NOT_FOUND).type(accept).entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
+    public Response getResourceRoot(@Context HttpHeaders headers) {
+        String type = "application/xml";
+        if(!headers.getAcceptableMediaTypes().isEmpty()) {
+            type = headers.getAcceptableMediaTypes().get(0).getType()+"/"+headers.getAcceptableMediaTypes().get(0).getSubtype();
+        }
+        return Response.status(Response.Status.NOT_FOUND).type(type).entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
     }
 
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response getResource(@Context UriInfo uriInfo, @HeaderParam("Accept") String accept, @PathParam("path") String path) {
-        return getResource(path, false, accept, uriInfo);
+    public Response getResource(@Context UriInfo uriInfo, @Context HttpHeaders headers, @PathParam("path") String path) {
+        String type = "text/plain";
+        if(!headers.getAcceptableMediaTypes().isEmpty()) {
+            type = headers.getAcceptableMediaTypes().get(0).getType()+"/"+headers.getAcceptableMediaTypes().get(0).getSubtype();
+        }
+        return getResource(path, false, type, uriInfo);
     }
 
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
-    public Response getResourceMeta(@Context UriInfo uriInfo, @HeaderParam("Accept") String accept, @PathParam("path") String path) {
-        return getResource(path, true, accept, uriInfo);
+    public Response getResourceMeta(@Context UriInfo uriInfo, @Context HttpHeaders headers, @PathParam("path") String path) {
+        String type = "application/xml";
+        if(!headers.getAcceptableMediaTypes().isEmpty()) {
+            type = headers.getAcceptableMediaTypes().get(0).getType()+"/"+headers.getAcceptableMediaTypes().get(0).getSubtype();
+        }
+        if (!RestHelper.isResourceOCollectionType(type)) {
+            return Response.status(Status.NOT_ACCEPTABLE).build();
+        }
+        return getResource(path, true, type, uriInfo);
     }
 
     private Response getResource(String path, boolean meta, String type, UriInfo uriInfo) {
