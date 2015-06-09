@@ -230,7 +230,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 #### Execute Short Query 
 
-- **Path**: /FiwareRepository/v2/services/query?query=[QUERY]
+- **Path**: /FiwareRepository/v2/services/query?query=SELECT+%3Fs+%3Fp+%3Fo+WHERE+%7B%3Fs+%3Fp+%3Fo+%7D+LIMIT+10
 - **Method**: GET
 - **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
 	
@@ -244,7 +244,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 - **Path**: /FiwareRepository/v2/services/query
 - **Method**: POST
 - **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
-- **Body**:   [QUERY]
+- **Body**: <pre>SELECT ?s ?p ?o WHERE {?s ?p ?o }</pre>
 	
 - **Response**: 
     - **Status**: 200
