@@ -77,6 +77,20 @@ public class QueryServiceTest {
         toTest = new QueryService();
     }
 
+    @Test
+    public void getVoidQueyTest() {
+        Response returned = toTest.executeQuery("accept", null);
+
+        assertEquals(400, returned.getStatus());
+    }
+
+    @Test
+    public void postVoidQueyTest() {
+        Response returned = toTest.executeLongQuery("accept", null);
+
+        assertEquals(400, returned.getStatus());
+    }
+
     public void getSelectTest(String accept, int response) {
         Response returned = toTest.executeQuery(accept, "select");
 
@@ -255,10 +269,10 @@ public class QueryServiceTest {
 
     @Test
     public void getAskJsonTest() {
-        getAskTest("application/xml", OK, true);
-        getAskTest("application/xml", OK, false);
-        postAskTest("application/xml", OK, true);
-        postAskTest("application/xml", OK, false);
+        getAskTest("application/json", OK, true);
+        getAskTest("application/json", OK, false);
+        postAskTest("application/json", OK, true);
+        postAskTest("application/json", OK, false);
     }
 
     @Test
