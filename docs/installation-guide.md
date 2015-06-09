@@ -113,7 +113,7 @@ This command will compile the source code and generate the war file <code>Fiware
 ---
 ## Installing the Repository using scripts
 
-At this  step it is assumed that you aready have the war file of the Repository.
+At this step it is assumed that you aready have the war file of the Repository.
 
 In order to facilitate the installation of the Repository, the script *install.sh* has been provided. This script installs all needed dependencies, configures the repository and deploys it. To use this script execute the following command:
 
@@ -131,7 +131,7 @@ Do you want to install them? Y/N
 
 ---
 ## Installing the Repository using scripts
-Finally, the installation script allows to configure the OAuth2 authentication of users.
+Finally, the installation script allows to configure the OAuth2 user authentication.
 
 <pre>
 Do you want to activate OAuth2 authentication in the Repository? Y/N
@@ -170,7 +170,7 @@ The variable <code>INSPWD</code> contains the path where the repository (Virtuos
 
 #### CentOS/RedHat
 
-The different dependencies can be installed in CentOS/RedHat using *yum*.
+Similarly, the different dependencies can be installed in CentOS/RedHat.
 
 <pre>
 # export INSPWD=$PWD
@@ -192,6 +192,8 @@ This configuration section assumes that the enviroment variable INSPWD exists, t
 
     $ export INSPWD=$PWD
 
+Please note that if you have used the script *install.sh* you can skip *Virtuoso 7 Configuration* and *Tomcat 8 Configuration* sections, since the specified actions are performed by the script. 
+
 ---  
 ## Virtuoso 7 Configuration
 
@@ -204,16 +206,6 @@ The first step is to create and configure the Virtuoso database to store RDF con
 </pre>
 
 This allows you to start the Virtuoso database. To make avanced configuration you can edit the file <code>$INSPWD/virtuoso7/var/lib/virtuoso/db/virtuoso.ini</code> by your own.
-
----
-## MongoDB Configuration
-
-The next step is to create the Repository internal database, e.g. "test". You may need to have root rights to do that. 
-
-<pre>
- $ mongo
- $ use test
-</pre>
 
 ---
 ## MongoDB Configuration
@@ -255,8 +247,20 @@ To install it on other Java Application Servers (e.g. JBoss), please refer to th
 
 The repository can use OAuth2 authentication with FIWARE Lab accounts. If you have used the automatic installation script you have been already asked to choose whether you want to use this authentication mechanism and to provide OAuth2 credentials in that case. 
 
+---
+## Repository Configuration
+
+Before enabling OAuth2 authentication in the Repository, it is needed to have registered it on the corresponding idM (KeyRock) instance. 
+
+It is needed to provide:
+* A name for the application
+* A description
+* The URL of the Repository
+* The callback URL of the Repository: http://[host]:[port]/FiwareRepository/v2/callback?client_name=FIWAREClient
+
 --- 
 ## Repository Configuration
+
 The OAuth2 authentication can be enabled and disabled modifiying the file <code>web.xml</code> located at <code>WEB-INF/web.xml</code>.
 
 To enable OAuth2 include <code>securityOAuth2.xml</code>
@@ -272,7 +276,7 @@ To enable OAuth2 include <code>securityOAuth2.xml</code>
 --- 
 ## Repository Configuration
 
-To disable OAuth2 <code>noSecurity.xml</code>
+To disable OAuth2 include <code>noSecurity.xml</code>
  
     <context-param>
         <param-name>contextConfigLocation</param-name>
