@@ -89,6 +89,9 @@ To download the source code usig git, execute the following command:
 
 ---
 ## Getting the Repository software
+
+Once the Repository sources have been downloaded, go to <code>Repository-RI</code> folder.
+
 Before compiling the code, is necesary to install Java 8. This can be achieved using the script provided with the source code as follows:
 
 <pre>
@@ -102,7 +105,7 @@ Before compiling the code, is necesary to install Java 8. This can be achieved u
 # sudo rpm -ivh jdk-8u25-linux-x64.rpm
 </pre>
 
-Once the Repository sources have been downloaded, go to <code>Repository-RI</code> folder, and execute:
+Once Java 8 is installed, execute: 
 
 <pre>
 # mvn clean install
