@@ -30,9 +30,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
+import com.hp.hpl.jena.vocabulary.DCTerms;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.*;
 
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -52,70 +59,90 @@ public class QueryService {
             UriInfo uriInfo;
 
     @GET
-    public Response executeQuery(@HeaderParam("Accept") String accept, @QueryParam("query") String query) {
-        return executeAnyQuery(query, accept);
+    public Response executeQuery(@Context HttpHeaders headers, @QueryParam("query") String query) {
+        return executeAnyQuery(query, headers.getAcceptableMediaTypes());
     }
 
     @POST
     @Consumes("text/plain")
-    public Response executeLongQuery(@HeaderParam("Accept") String accept, String content) {
-        return executeAnyQuery(content, accept);
+    public Response executeLongQuery(@Context HttpHeaders headers, String content) {
+        return executeAnyQuery(content, headers.getAcceptableMediaTypes());
     }
 
     @GET
-    @Produces({"application/rdf+xml", "application/rdf+json", "text/turtle", "application/x-turtle", "text/n3", "text/rdf+n3", "text/n-triples"})
     @Path("/{path:[a-zA-Z0-9_\\:\\.\\-\\+\\/]*}")
-    public Response obtainResource(@HeaderParam("Accept") String accept, @PathParam("path") String path) {
-        Resource resource;
+    public Response obtainResource(@Context HttpHeaders headers, @PathParam("path") String path) {
+        List <MediaType> accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = new LinkedList();
+            accepts.add(MediaType.valueOf("application/rdf+xml"));
+        }
+
+
         try {
-            resource = virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(accept));
+            Resource resource;
+            for (MediaType type : accepts) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+
+                if(RestHelper.isRDF(typeString)) {
+                    resource = virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(typeString));
+                    if (resource != null) {
+                        return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(MediaType.valueOf(typeString)).build();
+                    } else {
+                        return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"MENSAJE")).build();
+                    }
+                }
+            }
         } catch (DatasourceException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         }
-
-        if (resource != null)
-            return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(accept).build();
-        else
-            return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"MENSAJE")).build();
+        return Response.status(Status.NOT_ACCEPTABLE).build();
     }
 
-    private Response executeAnyQuery(String query, String type) {
-        String result = "";
-
+    private Response executeAnyQuery(String query, List <MediaType> types) {
         if (query == null) {
             return Response.status(Status.BAD_REQUEST).build();
         }
 
         // Check type sparql query and execute the method.
         if (query.toLowerCase().contains("select")) {
-            if (!type.equalsIgnoreCase("application/xml") && !type.equalsIgnoreCase("application/json")) {
-                return Response.status(Status.NOT_ACCEPTABLE).build();
-            } else {
-                return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+            for (MediaType type : types) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
+                if (typeString.equalsIgnoreCase("application/xml") || typeString.equalsIgnoreCase("application/json")) {
+                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+                }
             }
+            return Response.status(Status.NOT_ACCEPTABLE).build();
         }
         if (query.toLowerCase().contains("construct")) {
-            if (!RestHelper.isRDF(type)) {
-                return Response.status(Status.NOT_ACCEPTABLE).build();
-            } else {
-                result = virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(type));
+            for (MediaType type : types) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+                if (RestHelper.isRDF(typeString)) {
+                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQueryConstruct(query, typeString)).build();
+                }
             }
+            return Response.status(Status.NOT_ACCEPTABLE).build();
         }
         if (query.toLowerCase().contains("describe")) {
-            if (!RestHelper.isRDF(type)) {
-                return Response.status(Status.NOT_ACCEPTABLE).build();
-            } else {
-                result = virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(type));
+            for (MediaType type : types) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+                if (RestHelper.isRDF(typeString)) {
+                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQueryDescribe(query, typeString)).build();
+                }
             }
+            return Response.status(Status.NOT_ACCEPTABLE).build();
         }
         if (query.toLowerCase().contains("ask")) {
-            if (!type.equalsIgnoreCase("application/xml") && !type.equalsIgnoreCase("application/json")) {
-                return Response.status(Status.NOT_ACCEPTABLE).build();
-            } else {
-                return Response.status(Status.OK).entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
+            for (MediaType type : types) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
+                if (typeString.equalsIgnoreCase("application/xml") || typeString.equalsIgnoreCase("application/json")) {
+                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
+                }
             }
+            return Response.status(Status.NOT_ACCEPTABLE).build();
         }
-
-        return Response.status(Status.OK).entity(result).build();
+        return Response.status(Status.BAD_REQUEST).build();
     }
+
+
 }
