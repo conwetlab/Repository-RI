@@ -373,7 +373,7 @@ curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http:/
     &lt;/rdf:Description&gt;
 
     &lt;/rdf:RDF&gt;
-<pre>
+</pre>
 
 ---
 ## Updating the content of a resource
