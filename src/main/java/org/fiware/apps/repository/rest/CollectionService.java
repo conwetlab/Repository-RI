@@ -130,11 +130,10 @@ public class CollectionService {
             }
             //Ask the resourceCollection in the first compatible type
             for (MediaType type : types) {
-                if(RestHelper.isResourceOrCollectionType(type.getType()+"/"+type.getSubtype())) {
-                    return getCollection(path, type.getType()+"/"+type.getSubtype(), uriInfo);
-                }
-                if("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) {
-                    return getCollection(path, "application/xml", uriInfo);
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
+
+                if(RestHelper.isResourceOrCollectionType(typeString)) {
+                    return getCollection(path, typeString, uriInfo);
                 }
             }
             return Response.status(Status.NOT_ACCEPTABLE).build();
