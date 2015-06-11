@@ -79,6 +79,9 @@ public class VirtuosoResourceDAO {
         Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
                 RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
+        if (model.isEmpty()) {
+            return null;
+        }
         try {
             model.write(output, type, null);
         } catch (Exception e) {
