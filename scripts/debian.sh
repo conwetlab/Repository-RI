@@ -41,5 +41,5 @@ cd $INSPWD/apache-tomcat-8.0.22/bin/
 ./startup.sh
 cd $INSPWD
 
-#Create taks
+#Create startup tasks
 sudo ./scripts/startupDebian.sh

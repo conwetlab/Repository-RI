@@ -5,8 +5,8 @@ sudo yum -y install unzip
     
 set +e
 # Install java 8
-wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jdk-8u25-linux-x64.rpm"
-sudo rpm -ivh jdk-8u25-linux-x64.rpm
+./scripts/installJavaCentos.sh
+cd $INSPWD
 
 # Install tomcat 8
 ./scripts/installTomcat8.sh
