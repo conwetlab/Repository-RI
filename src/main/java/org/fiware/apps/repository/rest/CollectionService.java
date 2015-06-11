@@ -34,6 +34,11 @@ package org.fiware.apps.repository.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.HeaderParam;
@@ -72,72 +77,129 @@ public class CollectionService {
     @Path("/")
     @Produces({"application/xml", "application/json"})
     public Response getResourceRoot(@Context HttpHeaders headers) {
-        String type = "application/xml";
-        if(!headers.getAcceptableMediaTypes().isEmpty()) {
-            type = headers.getAcceptableMediaTypes().get(0).getType()+"/"+headers.getAcceptableMediaTypes().get(0).getSubtype();
+        List <MediaType> accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = new LinkedList();
+            accepts.add(MediaType.APPLICATION_XML_TYPE);
         }
-        return Response.status(Response.Status.NOT_FOUND).type(type).entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
+        return Response.status(Response.Status.NOT_FOUND).type(accepts.get(0)).entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
     }
 
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
     public Response getResource(@Context UriInfo uriInfo, @Context HttpHeaders headers, @PathParam("path") String path) {
-        String type = "text/plain";
-        if(!headers.getAcceptableMediaTypes().isEmpty()) {
-            type = headers.getAcceptableMediaTypes().get(0).getType()+"/"+headers.getAcceptableMediaTypes().get(0).getSubtype();
-        }
-        return getResource(path, false, type, uriInfo);
+        return getResource(path, headers.getAcceptableMediaTypes(), uriInfo);
     }
 
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
     public Response getResourceMeta(@Context UriInfo uriInfo, @Context HttpHeaders headers, @PathParam("path") String path) {
-        String type = "application/xml";
-        if(!headers.getAcceptableMediaTypes().isEmpty()) {
-            type = headers.getAcceptableMediaTypes().get(0).getType()+"/"+headers.getAcceptableMediaTypes().get(0).getSubtype();
+        List <MediaType> accepts = headers.getAcceptableMediaTypes();
+        //If Accept header is empty, add default media type.
+        if(accepts.isEmpty()) {
+            accepts = new LinkedList();
+            accepts.add(MediaType.valueOf("application/xml"));
         }
-        if (!RestHelper.isResourceOCollectionType(type)) {
-            return Response.status(Status.NOT_ACCEPTABLE).build();
+
+        for (MediaType type : accepts) {
+            if(RestHelper.isResourceOrCollectionType(type.getType()+"/"+type.getSubtype())) {
+                return getResourceMeta(path, type.getType()+"/"+type.getSubtype(), uriInfo);
+            }
+            if("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) {
+                return getResourceMeta(path, "application/xml", uriInfo);
+            }
         }
-        return getResource(path, true, type, uriInfo);
+
+        return Response.status(Status.NOT_ACCEPTABLE).build();
     }
 
-    private Response getResource(String path, boolean meta, String type, UriInfo uriInfo) {
+    private Response getResource(String path, List <MediaType> types, UriInfo uriInfo) {
+
+        //Check if the path is a resource or a resourceCollection
+        Resource resource = null;
+        try {
+            resource = mongoResourceDAO.getResource(path);
+        } catch (DatasourceException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+        }
+        if (resource == null) {
+            //If Accept header is empty, add default media type.
+            if(types.isEmpty()) {
+                types = new LinkedList();
+                types.add(MediaType.valueOf("application/xml"));
+            }
+            //Ask the resourceCollection in the first compatible type
+            for (MediaType type : types) {
+                if(RestHelper.isResourceOrCollectionType(type.getType()+"/"+type.getSubtype())) {
+                    return getCollection(path, type.getType()+"/"+type.getSubtype(), uriInfo);
+                }
+                if("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) {
+                    return getCollection(path, "application/xml", uriInfo);
+                }
+            }
+            return Response.status(Status.NOT_ACCEPTABLE).build();
+        }
+
+        //If Accept header is empty, add default media type.
+        if(types.isEmpty()) {
+            types = new LinkedList();
+            types.add(MediaType.valueOf("application/rdf+xml"));
+        }
 
         try {
-            Resource resource = null;
-            ResourceCollection resourceCollection = null;
+            //Get the resource in the first compatible type
+            for (MediaType type : types) {
 
-            // Check, if the path is a resource or a collection or it does not exist.
-            resource = mongoResourceDAO.getResource(path);
-            if (resource == null)
-            {
-                resourceCollection = mongoCollectionDAO.getCollection(path);
-                if (resourceCollection == null || meta)
-                    return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
-                else
-                    return RestHelper.multiFormatResponse(resourceCollection, ResourceCollection.class, type, uriInfo);
+                Resource resourceContent;
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+
+                //Check is posible to obtain the content from Mongo or from Virtuoso and return it.
+                if (typeString.equalsIgnoreCase(resource.getContentMimeType())) {
+                    resourceContent = mongoResourceDAO.getResourceContent(path);
+                    if (resourceContent.getContent() != "".getBytes()) {
+                        return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
+                    } else {
+                        return Response.status(Response.Status.NO_CONTENT).build();
+                    }
+                } else if (RestHelper.isRDF(typeString)) {
+                    resourceContent = virtuosoResourceDAO.getResource(resource.getContentUrl(), RestHelper.typeMap.get(typeString));
+                    if (resourceContent != null) {
+                        return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
+                    } else {
+                        return Response.status(Response.Status.NO_CONTENT).build();
+                    }
+                }
             }
 
-            if(!meta)
-            {
-                // Obtain the resource content from virtuoso triple store.
-                if(!type.equalsIgnoreCase(resource.getContentMimeType()) && RestHelper.isRDF(type)) {
-                    resource.setContent(virtuosoResourceDAO.getResource(resource.getContentUrl(), RestHelper.typeMap.get(type)).getContent());
-                }
-                // Obtain the resource content mongo DB.
-                else {
-                    resource.setContent(mongoResourceDAO.getResourceContent(path).getContent());
-                }
-                if (resource.getContent() == null)
-                {
-                    return Response.status(Response.Status.NO_CONTENT).build();
-                }
-                return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).build();
-            }
-            else
-            {
+            //If there are not any compatible type, returns NOT_ACCEPTABLE.
+            return Response.status(Status.NOT_ACCEPTABLE).build();
+
+        } catch (DatasourceException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+        }
+
+    }
+
+    private Response getResourceMeta(String path, String type, UriInfo uriInfo) {
+        try {
+            Resource resource = mongoResourceDAO.getResource(path);
+            if (resource != null) {
                 return RestHelper.multiFormatResponse(resource, Resource.class, type, uriInfo);
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Resource not found")).build();
+            }
+        } catch (DatasourceException | JAXBException ex) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+        }
+    }
+
+    private Response getCollection(String path, String type, UriInfo uriInfo) {
+        try {
+            ResourceCollection resourceCollection = mongoCollectionDAO.getCollection(path);
+            if (resourceCollection != null) {
+                return RestHelper.multiFormatResponse(resourceCollection, ResourceCollection.class, type, uriInfo);
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Resource or Collection not found")).build();
             }
         } catch (DatasourceException | JAXBException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
