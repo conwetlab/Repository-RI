@@ -87,11 +87,15 @@ public class RestHelper {
                 string.equalsIgnoreCase("text/n3");
     }
 
-    public static Boolean isResourceOCollectionType(String type) {
+    public static Boolean isResourceOrCollectionType(String type) {
         return type.equalsIgnoreCase("application/xml") ||
                 type.equalsIgnoreCase("application/json") ||
                 type.equalsIgnoreCase("text/html") ||
                 type.equalsIgnoreCase("application/x-ms-application") ||
+                type.equalsIgnoreCase("application/rdf+xml") ||
+                type.equalsIgnoreCase("application/rdf+json") ||
+                type.equalsIgnoreCase("text/turtle") ||
+                type.equalsIgnoreCase("text/n3") ||
                 type.equalsIgnoreCase("text/plain");
 
     }
