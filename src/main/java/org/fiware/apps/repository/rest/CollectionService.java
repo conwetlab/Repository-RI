@@ -205,25 +205,57 @@ public class CollectionService {
         }
     }
 
-    @POST
+    /*@POST
     @Consumes({"application/xml", "application/json"})
     public Response postResource(@Context UriInfo uriInfo, AbstractResource absRes) {
-        if(absRes.getClass().equals(Resource.class)) {
-            return insertResource((Resource) absRes, uriInfo);
-        }
-        else {
-            return insertCollection((ResourceCollection) absRes);
-        }
+    if(absRes.getClass().equals(Resource.class)) {
+    return insertResource((Resource) absRes, uriInfo);
+    }
+    else {
+    return insertCollection((ResourceCollection) absRes);
+    }
+    }*/
+
+    @POST
+    @Consumes({"application/xml", "application/json"})
+    @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
+    public Response postResource(@PathParam("path") String path, Resource resource) {
+        System.err.println(path);
+        return insertResource(resource, path);
     }
 
-    private Response insertResource(Resource resource, UriInfo uriInfo) {
-        // Create a new resource with the resource metadata given.
-        // Some metadata can not be given by the user.
-        resource.setContentMimeType("");
-        resource.setCreationDate(new Date());
+    @POST
+    @Consumes({"application/xml", "application/json"})
+    @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
+    public Response postCollection(@PathParam("path") String path, ResourceCollection resourceCollection) {
+        System.err.println(path);
+        return insertCollection(resourceCollection, path);
+    }
+
+    @POST
+    @Consumes({"application/xml", "application/json"})
+    @Path("/")
+    public Response postCollection(ResourceCollection resourceCollection) {
+        return insertCollection(resourceCollection, "");
+    }
+
+    private Response insertResource(Resource resource, String path) {
         try {
+            // Create a new resource with the resource metadata given.
+            // Some metadata can not be given by the user.
+            resource.setId(path+"/"+resource.getName());
+            resource.setContentMimeType("");
+            resource.setCreationDate(new Date());
+
+            if (path == null || path.equalsIgnoreCase("")) {
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+            if ((!checkPath(path) && !path.equalsIgnoreCase("")) || mongoCollectionDAO.getCollection(resource.getId()) != null) {
+                return Response.status(Status.CONFLICT).build();
+            }
+
             mongoResourceDAO.insertResource(resource);
-            return Response.status(Status.CREATED).contentLocation(new URI(resource.getContentUrl())).build();
+            return Response.status(Status.CREATED).contentLocation(new URI(resource.getId())).build();
         } catch (DatasourceException | URISyntaxException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         } catch (SameIdException ex) {
@@ -231,15 +263,39 @@ public class CollectionService {
         }
     }
 
-    private Response insertCollection(ResourceCollection resourceCollection) {
+    private Response insertCollection(ResourceCollection resourceCollection, String path) {
         try {
+
+            if (!path.equalsIgnoreCase("")) {
+                resourceCollection.setId(path+"/"+resourceCollection.getName());
+            } else {
+                resourceCollection.setId(resourceCollection.getName());
+            }
+
+            if (!checkPath(path) || mongoCollectionDAO.getCollection(resourceCollection.getId()) != null) {
+                return Response.status(Status.CONFLICT).build();
+            }
+
             mongoCollectionDAO.insertCollection(resourceCollection);
-        } catch (DatasourceException ex) {
+            return Response.status(Status.CREATED).contentLocation(new URI(resourceCollection.getId())).build();
+        } catch (DatasourceException | URISyntaxException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
         } catch (SameIdException ex) {
             return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
         }
-        return Response.status(Status.CREATED).build();
+
+    }
+
+    private boolean checkPath(String path) throws DatasourceException {
+        if (!mongoResourceDAO.isResource(path)) {
+            if (path.lastIndexOf("/") == -1) {
+                return true;
+            } else {
+                return checkPath(path.substring(0, path.lastIndexOf("/")));
+            }
+        } else {
+            return false;
+        }
     }
 
     @PUT
