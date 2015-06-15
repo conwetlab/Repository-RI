@@ -421,92 +421,194 @@ public class CollectionServiceTest {
         getResourceOrCollection(path, accepts, null, 500);
     }
 
+    //POST Resource
+
+    private void postResource(String path, Resource resource, int status) throws URISyntaxException {
+        Response returned = toTest.postResource(path, resource);
+
+        assertEquals(status, returned.getStatus());
+    }
+
     @Test
     public void postResourceTest() throws URISyntaxException {
-        Response returned;
-        String path = "a";
-        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"));
-        AbstractResource resource = generateResource(path, null, true, null);
+        String path = "collection";
+        int status = 201;
+        Resource resource = generateResource("a", null, true, null);
 
-        returned = toTest.postResource(uriInfo, resource);
-
-        assertEquals(returned.getStatus(), 201);
+        postResource(path, resource, status);
     }
 
     @Test
-    public void postResourceConflictTest() throws URISyntaxException, DatasourceException, SameIdException {
-        Response returned;
-        String path = "a";
-        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"));
-        AbstractResource resource = generateResource(path, null, true, null);
+    public void postResourceTest2() throws URISyntaxException {
+        String path = "collection/collection";
+        int status = 201;
+        Resource resource = generateResource("a", null, true, null);
 
-        //doThrow(SameIdException.class);
-        doThrow(SameIdException.class).when(mongoResourceDAO).insertResource(eq((Resource) resource));
-
-        returned = toTest.postResource(uriInfo, resource);
-
-        assertEquals(returned.getStatus(), 409);
+        postResource(path, resource, status);
     }
 
     @Test
-    public void postResourceErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
-        Response returned;
-        String path = "a";
-        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"));
-        AbstractResource resource = generateResource(path, null, true, null);
+    public void postResourceBadRequestTest() throws URISyntaxException {
+        String path = "";
+        int status = 400;
+        Resource resource = generateResource("a", null, true, null);
 
-        //doThrow(SameIdException.class);
-        doThrow(DatasourceException.class).when(mongoResourceDAO).insertResource(eq((Resource) resource));
-
-        returned = toTest.postResource(uriInfo, resource);
-
-        assertEquals(returned.getStatus(), 500);
+        postResource(path, resource, status);
     }
 
     @Test
-    public void postResourceCollectionTest() throws URISyntaxException {
-        Response returned;
-        String path = "a";
-        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"));
-        AbstractResource resource = generateResourceCollection(path, null, true);
+    public void postResourceBadRequestTest2() throws URISyntaxException {
+        String path = null;
+        int status = 400;
+        Resource resource = generateResource("a", null, true, null);
 
-        returned = toTest.postResource(uriInfo, resource);
-
-        assertEquals(returned.getStatus(), 201);
+        postResource(path, resource, status);
     }
 
     @Test
-    public void postResourceCollectionConflictTest() throws URISyntaxException, DatasourceException, SameIdException {
-        Response returned;
-        String path = "a";
-        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"));
-        AbstractResource resource = generateResourceCollection(path, null, true);
+    public void postResourceConflictTest() throws URISyntaxException, DatasourceException {
+        String path = "collection/collection2";
+        int status = 409;
+        Resource resource = generateResource("a", null, true, null);
 
-        doThrow(SameIdException.class).when(mongoCollectionDAO).insertCollection(eq((ResourceCollection) resource));
+        when(mongoResourceDAO.isResource(path)).thenReturn(true);
 
-        returned = toTest.postResource(uriInfo, resource);
-
-        assertEquals(409, returned.getStatus());
+        postResource(path, resource, status);
     }
 
     @Test
-    public void postResourceCollectionErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
-        Response returned;
-        String path = "a";
-        UriInfo uriInfo = new ResteasyUriInfo(new URI("http://localhost:8080/FiwareRepository/v2/collec/a"),
-                new URI("http://localhost:8080/FiwareRepository/v2/"));
-        AbstractResource resource = generateResourceCollection(path, null, true);
+    public void postResourceConflictTest2() throws URISyntaxException, DatasourceException {
+        String path = "collection/collection2";
+        int status = 409;
+        Resource resource = generateResource("a", null, true, null);
 
-        doThrow(DatasourceException.class).when(mongoCollectionDAO).insertCollection(eq((ResourceCollection) resource));
+        when(mongoResourceDAO.isResource(path)).thenReturn(true);
+        when(mongoCollectionDAO.getCollection(path+resource.getId())).thenReturn(null);
 
-        returned = toTest.postResource(uriInfo, resource);
+        postResource(path, resource, status);
+    }
 
-        assertEquals(500, returned.getStatus());
+    @Test
+    public void postResourceDatasourceExceptionTest() throws URISyntaxException, DatasourceException, SameIdException {
+        String path = "collection/collection2";
+        int status = 500;
+        Resource resource = generateResource("a", null, true, null);
+
+        doThrow(DatasourceException.class).when(mongoResourceDAO).insertResource(resource);
+
+        postResource(path, resource, status);
+    }
+
+    @Test
+    public void postResourceURISyntaxExceptionTest() throws URISyntaxException, DatasourceException, SameIdException {
+        String path = "collection/collection2";
+        int status = 500;
+        Resource resource = generateResource("a", null, true, null);
+
+        doThrow(URISyntaxException.class).when(mongoResourceDAO).insertResource(resource);
+
+        postResource(path, resource, status);
+    }
+
+    @Test
+    public void postResourceSameIdExceptionTest() throws URISyntaxException, DatasourceException, SameIdException {
+        String path = "collection/collection2";
+        int status = 409;
+        Resource resource = generateResource("a", null, true, null);
+
+        doThrow(SameIdException.class).when(mongoResourceDAO).insertResource(resource);
+
+        postResource(path, resource, status);
+    }
+
+    private void postResourceCollection(String path, ResourceCollection resourceCollection, int status) {
+        Response response = toTest.postCollection(path, resourceCollection);
+
+        assertEquals(status, response.getStatus());
+    }
+
+    @Test
+    public void postResourceCollectionNoPathTest() {
+        int status = 201;
+        ResourceCollection resourceCollection = generateResourceCollection("collection", null, true);
+
+        Response response = toTest.postCollection(resourceCollection);
+
+        assertEquals(status, response.getStatus());
+    }
+
+    @Test
+    public void postResourceCollectionTest() {
+        String path = "";
+        int status = 201;
+        ResourceCollection resourceCollection = generateResourceCollection("collection", null, true);
+
+        postResourceCollection(path, resourceCollection, status);
+    }
+
+    @Test
+    public void postResourceCollectionTest2() {
+        String path = "collection";
+        int status = 201;
+        ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
+
+        postResourceCollection(path, resourceCollection, status);
+    }
+
+    @Test
+    public void postResourceCollectionConflictTest() throws DatasourceException {
+        String path = "collection/collection3";
+        int status = 409;
+        ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
+
+        when(mongoResourceDAO.isResource(path)).thenReturn(true);
+
+        postResourceCollection(path, resourceCollection, status);
+    }
+
+    @Test
+    public void postResourceCollectionConflictTest2() throws DatasourceException {
+        String path = "collection/collection3";
+        int status = 409;
+        ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
+
+        when(mongoResourceDAO.isResource(path)).thenReturn(false);
+        when(mongoCollectionDAO.getCollection(path+"/"+resourceCollection.getName())).thenReturn(resourceCollection);
+
+        postResourceCollection(path, resourceCollection, status);
+    }
+
+    @Test
+    public void postResourceCollectionDatasourceExceptionTest() throws DatasourceException, SameIdException, SameIdException, SameIdException, SameIdException {
+        String path = "collection/collection3";
+        int status = 500;
+        ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
+
+        doThrow(DatasourceException.class).when(mongoCollectionDAO).insertCollection(resourceCollection);
+
+        postResourceCollection(path, resourceCollection, status);
+    }
+
+    @Test
+    public void postResourceCollectionURISyntaxExceptionTest() throws DatasourceException, SameIdException {
+        String path = "collection/collection3";
+        int status = 500;
+        ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
+
+        doThrow(URISyntaxException.class).when(mongoCollectionDAO).insertCollection(resourceCollection);
+
+        postResourceCollection(path, resourceCollection, status);
+    }
+
+    @Test
+    public void postResourceCollectionSameIdExceptionTest() throws DatasourceException, SameIdException {
+        String path = "collection/collection3";
+        int status = 409;
+        ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
+
+        doThrow(SameIdException.class).when(mongoCollectionDAO).insertCollection(resourceCollection);
+
+        postResourceCollection(path, resourceCollection, status);
     }
 
     @Test
@@ -732,6 +834,7 @@ public class CollectionServiceTest {
         if (creationDate)
             collection.setCreationDate(date);
 
+        collection.setName(string);
         collection.setCreator(string + "Creator");
         collection.setModificationDate(date);
         collection.setId(string + "Id");
