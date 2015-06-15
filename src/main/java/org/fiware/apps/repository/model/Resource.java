@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "resource")
 public class Resource extends AbstractResource{
 
-    private String name="";
     private String contentUrl="";
     private String contentMimeType="";
     private String contentFileName="";
@@ -31,16 +30,7 @@ public class Resource extends AbstractResource{
         this.collection = collection;
     }
 
-    @XmlElement
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
-    @XmlElement
+    @XmlElement(required = true)
     public String getContentUrl() {
         return contentUrl;
     }

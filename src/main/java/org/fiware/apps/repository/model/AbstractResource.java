@@ -2,7 +2,7 @@ package org.fiware.apps.repository.model;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -11,13 +11,11 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 public abstract class AbstractResource {
 
 	private String id;
+        private String name;
 	private Date creationDate;
 	private Date modificationDate;
 	private String creator="";
 
-
-
-	@XmlID
 	@XmlAttribute
 	public String getId() {
 		return id;
@@ -26,6 +24,15 @@ public abstract class AbstractResource {
 	public void setId(String id) {
 		this.id = id;
 	}
+
+        @XmlElement(required = true)
+        public String getName() {
+            return this.name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
 
 	@XmlElement
 	public String getCreator() {
