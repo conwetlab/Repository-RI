@@ -34,11 +34,8 @@ package org.fiware.apps.repository.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.HeaderParam;
@@ -205,22 +202,10 @@ public class CollectionService {
         }
     }
 
-    /*@POST
-    @Consumes({"application/xml", "application/json"})
-    public Response postResource(@Context UriInfo uriInfo, AbstractResource absRes) {
-    if(absRes.getClass().equals(Resource.class)) {
-    return insertResource((Resource) absRes, uriInfo);
-    }
-    else {
-    return insertCollection((ResourceCollection) absRes);
-    }
-    }*/
-
     @POST
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
     public Response postResource(@PathParam("path") String path, Resource resource) {
-        System.err.println(path);
         return insertResource(resource, path);
     }
 
@@ -228,7 +213,6 @@ public class CollectionService {
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
     public Response postCollection(@PathParam("path") String path, ResourceCollection resourceCollection) {
-        System.err.println(path);
         return insertCollection(resourceCollection, path);
     }
 
@@ -320,7 +304,7 @@ public class CollectionService {
         // Update a resource content inserting in virtuoso triple store if content is RDF.
         Resource resource;
         try {
-            resource = mongoResourceDAO.getResource(path);
+            resource = mongoResourceDAO.getResourceContent(path);
             if (resource == null)
             {
                 return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
@@ -345,9 +329,13 @@ public class CollectionService {
     private Response updateResource(String path, Resource resource) {
         //Update a resource metadata.
         try {
-            Resource aux = mongoResourceDAO.getResourceContent(path);
-            resource.setId(aux.getId());
-            resource.setContent(aux.getContent());
+            Resource aux = mongoResourceDAO.getResource(path);
+            if (aux == null)
+            {
+                return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
+            }
+
+            resource.setId(path.substring(0, path.lastIndexOf("/"))+"/"+resource.getName());
             resource.setCreationDate(aux.getCreationDate());
 
             if (!resource.getContentMimeType().equals(aux.getContentMimeType())) {
