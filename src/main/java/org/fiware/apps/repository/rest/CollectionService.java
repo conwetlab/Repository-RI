@@ -205,22 +205,21 @@ public class CollectionService {
     @POST
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response postResource(@PathParam("path") String path, Resource resource) {
-        return insertResource(resource, path);
-    }
-
-    @POST
-    @Consumes({"application/xml", "application/json"})
-    @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response postCollection(@PathParam("path") String path, ResourceCollection resourceCollection) {
-        return insertCollection(resourceCollection, path);
+    public Response postResource(@PathParam("path") String path, AbstractResource absResource) {
+        if(absResource instanceof Resource) {
+            return insertResource((Resource) absResource, path);
+        }
+        if (absResource instanceof ResourceCollection) {
+            return insertCollection((ResourceCollection) absResource, path);
+        }
+        return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, absResource.getClass().toString())).build();
     }
 
     @POST
     @Consumes({"application/xml", "application/json"})
     @Path("/")
     public Response postCollection(ResourceCollection resourceCollection) {
-        return insertCollection(resourceCollection, "");
+            return insertCollection(resourceCollection, "");
     }
 
     private Response insertResource(Resource resource, String path) {
@@ -234,7 +233,9 @@ public class CollectionService {
             if (path == null || path.equalsIgnoreCase("")) {
                 return Response.status(Status.BAD_REQUEST).build();
             }
-            if ((!checkPath(path) && !path.equalsIgnoreCase("")) || mongoCollectionDAO.getCollection(resource.getId()) != null) {
+            if ((!checkPath(path) && !path.equalsIgnoreCase("")) ||
+                    mongoCollectionDAO.getCollection(resource.getId()) != null ||
+                    mongoResourceDAO.getResource(resource.getId()) != null) {
                 return Response.status(Status.CONFLICT).build();
             }
 
@@ -256,7 +257,9 @@ public class CollectionService {
                 resourceCollection.setId(resourceCollection.getName());
             }
 
-            if (!checkPath(path) || mongoCollectionDAO.getCollection(resourceCollection.getId()) != null) {
+            if (!checkPath(path) ||
+                    mongoCollectionDAO.getCollection(resourceCollection.getId()) != null ||
+                    mongoResourceDAO.getResource(resourceCollection.getId()) != null) {
                 return Response.status(Status.CONFLICT).build();
             }
 
@@ -291,13 +294,8 @@ public class CollectionService {
     @PUT
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
-    public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, AbstractResource absRes) {
-        if(absRes.getClass().equals(Resource.class)) {
-            return updateResource(path, (Resource) absRes);
-        }
-        else {
-            return Response.status(Status.FORBIDDEN).build();
-        }
+    public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, Resource resource) {
+            return updateResource(path, (Resource) resource);
     }
 
     private Response updateResourceContent(String path, String content, String type) {
@@ -332,7 +330,9 @@ public class CollectionService {
             Resource aux = mongoResourceDAO.getResource(path);
             if (aux == null)
             {
-                return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
+                resource.setId(path);
+                resource.setName(path.substring(path.lastIndexOf("/")+1, path.length()));
+                return postResource(path.substring(0, path.lastIndexOf("/")), resource);
             }
 
             resource.setId(path.substring(0, path.lastIndexOf("/"))+"/"+resource.getName());
