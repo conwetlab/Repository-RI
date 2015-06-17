@@ -662,7 +662,7 @@ public class CollectionServiceTest {
 
         returned = toTest.putResource(accept, path, "content");
 
-        assertEquals(406, returned.getStatus());
+        assertEquals(400, returned.getStatus());
     }
 
     @Test
@@ -675,7 +675,7 @@ public class CollectionServiceTest {
 
         returned = toTest.putResource(accept, path, "content");
 
-        assertEquals(406, returned.getStatus());
+        assertEquals(400, returned.getStatus());
     }
 
     @Test
