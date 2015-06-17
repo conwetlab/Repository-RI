@@ -219,7 +219,7 @@ public class CollectionService {
     @Consumes({"application/xml", "application/json"})
     @Path("/")
     public Response postCollection(ResourceCollection resourceCollection) {
-            return insertCollection(resourceCollection, "");
+        return insertCollection(resourceCollection, "");
     }
 
     private Response insertResource(Resource resource, String path) {
@@ -288,14 +288,18 @@ public class CollectionService {
     @PUT
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
     public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, String content/*, @MultipartForm FileUploadForm form*/) {
-        return updateResourceContent(path, content, contentType);
+        if (contentType == null || contentType.equalsIgnoreCase("")) {
+            return Response.status(Status.BAD_REQUEST).build();
+        } else {
+            return updateResourceContent(path, content, contentType);
+        }
     }
 
     @PUT
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
     public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, Resource resource) {
-            return updateResource(path, (Resource) resource);
+        return updateResource(path, (Resource) resource);
     }
 
     private Response updateResourceContent(String path, String content, String type) {

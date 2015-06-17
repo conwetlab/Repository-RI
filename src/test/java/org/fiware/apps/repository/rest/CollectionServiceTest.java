@@ -653,6 +653,32 @@ public class CollectionServiceTest {
     }
 
     @Test
+    public void putResourceNoContentTypeTest() throws URISyntaxException, DatasourceException {
+        Response returned;
+        String path = "a/b/c";
+        String accept = null;
+
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(null);
+
+        returned = toTest.putResource(accept, path, "content");
+
+        assertEquals(406, returned.getStatus());
+    }
+
+    @Test
+    public void putResourceNoContentTypeTest2() throws URISyntaxException, DatasourceException {
+        Response returned;
+        String path = "a/b/c";
+        String accept = "";
+
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(null);
+
+        returned = toTest.putResource(accept, path, "content");
+
+        assertEquals(406, returned.getStatus());
+    }
+
+    @Test
     public void putResourceErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
         Response returned;
         String path = "a/b/c";
