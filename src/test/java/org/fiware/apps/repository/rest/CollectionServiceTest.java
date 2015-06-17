@@ -522,7 +522,7 @@ public class CollectionServiceTest {
     }
 
     private void postResourceCollection(String path, ResourceCollection resourceCollection, int status) {
-        Response response = toTest.postCollection(path, resourceCollection);
+        Response response = toTest.postResource(path, resourceCollection);
 
         assertEquals(status, response.getStatus());
     }
@@ -618,7 +618,7 @@ public class CollectionServiceTest {
         String accept = "application/rdf+xml";
         Resource resource = generateResource(accept, null, true, null);
 
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
         returned = toTest.putResource(accept, path, "content");
 
@@ -632,7 +632,7 @@ public class CollectionServiceTest {
         String accept = "accept";
         Resource resource = generateResource(accept, null, true, null);
 
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(resource);
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
         returned = toTest.putResource(accept, path, "content");
 
@@ -645,7 +645,7 @@ public class CollectionServiceTest {
         String path = "a/b/c";
         String accept = "application/rdf+xml";
 
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(null);
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(null);
 
         returned = toTest.putResource(accept, path, "content");
 
@@ -658,7 +658,7 @@ public class CollectionServiceTest {
         String path = "a/b/c";
         String accept = "application/rdf+xml";
 
-        doThrow(DatasourceException.class).when(mongoResourceDAO).getResource(path);
+        doThrow(DatasourceException.class).when(mongoResourceDAO).getResourceContent(path);
 
         returned = toTest.putResource(accept, path, "content");
 
@@ -675,7 +675,7 @@ public class CollectionServiceTest {
         newResource.setContentMimeType(oldResource.getContentMimeType());
         newResource.setContentUrl(oldResource.getContentUrl());
 
-        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
         when(mongoResourceDAO.insertResource(anyObject())).thenReturn(null);
 
         returned = toTest.putResource(accept, path, newResource);
@@ -692,7 +692,7 @@ public class CollectionServiceTest {
         Resource newResource = generateResource("new", null, true, null);
         newResource.setContentUrl(oldResource.getContentUrl());
 
-        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
 
         returned = toTest.putResource(accept, path, newResource);
 
@@ -708,7 +708,7 @@ public class CollectionServiceTest {
         Resource newResource = generateResource("new", null, true, null);
         newResource.setContentMimeType(oldResource.getContentMimeType());
 
-        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
 
         returned = toTest.putResource(accept, path, newResource);
 
@@ -725,26 +725,13 @@ public class CollectionServiceTest {
         newResource.setContentMimeType(oldResource.getContentMimeType());
         newResource.setContentUrl(oldResource.getContentUrl());
 
-        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(oldResource);
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
         doThrow(DatasourceException.class).when(mongoResourceDAO).updateResource(eq(path), anyObject());
 
         returned = toTest.putResource(accept, path, newResource);
 
         assertEquals(500, returned.getStatus());
     }
-
-    @Test
-    public void putResourceCollectionMetaTest() {
-        Response returned;
-        String path = "a/b/c";
-        String accept = "application/rdf+xml";
-        AbstractResource collection = generateResourceCollection(path, null, true);
-
-        returned = toTest.putResource(accept, path, collection);
-
-        assertEquals(403, returned.getStatus());
-    }
-
 
     @Test
     public void deleteResourceTest() throws DatasourceException {
