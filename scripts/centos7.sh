@@ -2,6 +2,7 @@
 
 sudo yum update
 sudo yum -y install unzip
+sudo yum -y install maven
     
 set +e
 # Install java 8
@@ -22,15 +23,17 @@ set -e
 # Install mongodb
 sudo ./scripts/installMongoCentos.sh    
 
-# Deploy the war file
-if [ -f "./target/FiwareRepository.war" ]; then
-    cp ./target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+# Install the repository from source code or build
+if [ -f "$INSPWD/src" ]; then
+	# Installation from source code
+	./scripts/oAuthConfigSource.sh
+	mvn clean install
+	cp ./target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
 else
-    cp ./FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
+	# Installation from build
+	./scripts/oAuthConfig.sh
+	cp ./FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
 fi
-
-#Modify Repository OAuth2
-./scripts/oAuthConfig.sh
 
 #Start Virtuoso
 cd $INSPWD/virtuoso7/var/lib/virtuoso/db/
