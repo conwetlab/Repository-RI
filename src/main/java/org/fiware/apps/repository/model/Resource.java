@@ -4,15 +4,12 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jboss.resteasy.links.ParentResource;
 import org.jboss.resteasy.links.RESTServiceDiscovery;
 
 @XmlRootElement(name = "resource")
 public class Resource extends AbstractResource{
 
-    private final String namePatern = "[a-zA-Z0-9._-]+";
-    private final String noMetaPatern = ".*.meta$";
+    private final String namePatern = "((.*[^a-zA-Z0-9._-]+.*)|(.*.meta$))";
     private String contentUrl = "";
     private String contentMimeType = "";
     private String contentFileName = "";
@@ -54,21 +51,12 @@ public class Resource extends AbstractResource{
 
     @Override
     public boolean checkName() {
-        if (this.getName().matches(this.namePatern) && !this.getName().matches(this.noMetaPatern)) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return !this.namePatern.matches(this.name);
     }
 
     @Override
     public boolean checkName(String name) {
-        if (this.namePatern.matches(name) && !this.noMetaPatern.matches(name)) {
-            return true;
-        } else {
-            return false;
-        }
+            return !this.namePatern.matches(name);
     }
 
     @Override
