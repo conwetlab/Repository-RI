@@ -11,66 +11,43 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 @XmlSeeAlso({Resource.class, ResourceCollection.class})
 @JsonTypeInfo(
-use = JsonTypeInfo.Id.NAME,
-include = JsonTypeInfo.As.PROPERTY,
-property = "type")
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
 @JsonSubTypes({
-@JsonSubTypes.Type(value = ResourceCollection.class, name = "collection"),
-@JsonSubTypes.Type(value = Resource.class, name = "resource"),
+    @JsonSubTypes.Type(value = ResourceCollection.class, name = "collection"),
+    @JsonSubTypes.Type(value = Resource.class, name = "resource"),
 })
 public abstract class AbstractResource {
 
-	private String id;
-        private String name="";
-	private Date creationDate;
-	private Date modificationDate;
-	private String creator="";
+    protected String id;
+    protected String name="";
+    protected Date creationDate;
+    protected Date modificationDate;
+    protected String creator="";
 
+    @XmlID
+    @XmlAttribute
+    public abstract String getId();
+    public abstract void setId(String id);
 
+    @XmlElement
+    public abstract String getName();
+    public abstract void setName(String name);
 
-	@XmlID
-	@XmlAttribute
-	public String getId() {
-		return id;
-	}
+    @XmlElement
+    public abstract String getCreator();
+    public abstract void setCreator(String creator);
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    @XmlElement
+    public abstract Date getCreationDate();
+    public abstract void setCreationDate(Date creationDate);
 
-        @XmlElement
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
+    @XmlElement
+    public abstract Date getModificationDate();
+    public abstract void setModificationDate(Date modificationDate);
 
-	@XmlElement
-	public String getCreator() {
-		return creator;
-	}
-
-	public void setCreator(String creator) {
-		this.creator = creator;
-	}
-
-	@XmlElement
-	public Date getCreationDate() {
-		return creationDate;
-	}
-
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
-	}
-
-	@XmlElement
-	public Date getModificationDate() {
-		return modificationDate;
-	}
-
-	public void setModificationDate(Date modificationDate) {
-		this.modificationDate = modificationDate;
-	}
+    public abstract boolean checkName();
+    public abstract boolean checkName(String name);
 
 }
