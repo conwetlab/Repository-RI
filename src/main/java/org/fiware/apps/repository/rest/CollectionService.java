@@ -226,6 +226,13 @@ public class CollectionService {
         try {
             // Create a new resource with the resource metadata given.
             // Some metadata can not be given by the user.
+            if(!resource.checkName()) {
+                return Response.status(Status.BAD_REQUEST)
+                        .type(MediaType.APPLICATION_XML)
+                        .entity(new RepositoryException(Status.CONFLICT, "Field name do not comply the pattern."))
+                        .build();
+            }
+
             resource.setId(path+"/"+resource.getName());
             resource.setContentMimeType("");
             resource.setCreationDate(new Date());
@@ -242,14 +249,26 @@ public class CollectionService {
             mongoResourceDAO.insertResource(resource);
             return Response.status(Status.CREATED).contentLocation(new URI(resource.getId())).build();
         } catch (DatasourceException | URISyntaxException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.APPLICATION_XML)
+                    .entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage()))
+                    .build();
         } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
+            return Response.status(Status.CONFLICT)
+                    .type(MediaType.APPLICATION_XML)
+                    .entity(new RepositoryException(Status.CONFLICT, ex.getMessage()))
+                    .build();
         }
     }
 
     private Response insertCollection(ResourceCollection resourceCollection, String path) {
         try {
+            if(!resourceCollection.checkName()) {
+                return Response.status(Status.BAD_REQUEST)
+                        .type(MediaType.APPLICATION_XML)
+                        .entity(new RepositoryException(Status.CONFLICT, "Field name do not comply the pattern."))
+                        .build();
+            }
 
             if (!path.equalsIgnoreCase("")) {
                 resourceCollection.setId(path+"/"+resourceCollection.getName());
@@ -266,9 +285,15 @@ public class CollectionService {
             mongoCollectionDAO.insertCollection(resourceCollection);
             return Response.status(Status.CREATED).contentLocation(new URI(resourceCollection.getId())).build();
         } catch (DatasourceException | URISyntaxException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.APPLICATION_XML)
+                    .entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage()))
+                    .build();
         } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.CONFLICT, ex.getMessage())).build();
+            return Response.status(Status.CONFLICT)
+                    .type(MediaType.APPLICATION_XML)
+                    .entity(new RepositoryException(Status.CONFLICT, ex.getMessage()))
+                    .build();
         }
 
     }
@@ -299,7 +324,7 @@ public class CollectionService {
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
     public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, Resource resource) {
-        return updateResource(path, (Resource) resource);
+        return updateResourceMeta(path, (Resource) resource);
     }
 
     private Response updateResourceContent(String path, String content, String type) {
@@ -328,8 +353,15 @@ public class CollectionService {
         return Response.status(Status.OK).build();
     }
 
-    private Response updateResource(String path, Resource resource) {
+    private Response updateResourceMeta(String path, Resource resource) {
         //Update a resource metadata.
+        if(!resource.checkName()) {
+            return Response.status(Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_XML)
+                    .entity(new RepositoryException(Status.CONFLICT, "Field name do not comply the pattern."))
+                    .build();
+        }
+
         try {
             Resource aux = mongoResourceDAO.getResource(path);
             if (aux == null)
@@ -342,12 +374,19 @@ public class CollectionService {
             resource.setId(path.substring(0, path.lastIndexOf("/"))+"/"+resource.getName());
             resource.setCreationDate(aux.getCreationDate());
 
-            if (!resource.getContentMimeType().equals(aux.getContentMimeType())) {
+            if (mongoResourceDAO.isResource(resource.getId()) || mongoCollectionDAO.getCollection(resource.getId()) != null) {
+                return Response.status(Status.CONFLICT).build();
+            }
+            if (!resource.getContentMimeType().equalsIgnoreCase("") && !resource.getContentMimeType().equals(aux.getContentMimeType())) {
                 return Response.status(Status.FORBIDDEN).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Response.Status.FORBIDDEN,"Changing ContentMimeType is forbidden")).build();
             }
-            if (!resource.getContentUrl().equals(aux.getContentUrl())) {
+            if (!resource.getContentUrl().equalsIgnoreCase("") && !resource.getContentUrl().equals(aux.getContentUrl())) {
                 return Response.status(Status.FORBIDDEN).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Response.Status.FORBIDDEN,"Changing UrlContent is forbidden")).build();
             }
+
+            resource.setContentUrl(aux.getContentUrl());
+            resource.setContentMimeType(aux.getContentMimeType());
+
             mongoResourceDAO.updateResource(path, resource);
         } catch (DatasourceException ex) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
