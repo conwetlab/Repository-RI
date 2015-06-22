@@ -25,6 +25,7 @@ Following you can find  the description of the operations that can be performed 
 * POST  http://[SERVER_HOST]/FiwareRepository/v2/collec/  Create a collection.
 * DELETE  http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/ Delete a resource
 
+NOTE: Every collection name must comply the regular expresion <code>"[a-zA-Z0-9_-]+"</code>.
 ---
 ## Getting collections
 
@@ -49,15 +50,25 @@ Content-type: application/json, application/xml, text/plain
 * Request
 <pre>
 Verb: POST
-URI: http://[SERVER_HOST]FiwareRepository/v2/collec/
+URI: http://[SERVER_HOST]FiwareRepository/v2/collec/[collection]
 Content-Type: application/json, application/xml
 Body: <pre>
 	&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
 	&lt;collection xmlns:atom="http://www.w3.org/2005/Atom"&gt;
 	       &lt;creator&gt;CreatornameUpdate&lt;/creator&gt;
+	       &lt;name&gt;TestCollection&lt;/name&gt;
 	       &lt;collections/&gt;
 	       &lt;resources/&gt;
 	&lt;/collection&gt;
+	</pre>
+	<pre>
+	{
+	   "type":"collection",
+	   "creator":"Creator",
+	   "creationDate":"",
+	   "modificationDate":"",
+	   "name":"TestCollection"
+	}
 	</pre>
 </pre>
 
@@ -97,6 +108,7 @@ Following you can find  the description of the operations that can be performed 
 * PUT  http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource}  Replace content of a resource.
 * DELETE  http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource} Delete a resource
 
+NOTE: Every resource name must comply the regular expresion <code>"[a-zA-Z0-9._-]+"</code>.
 ---
 ## Getting resources metadata
 
@@ -147,10 +159,22 @@ Body: <pre>
 	    &lt;creator&gt;Creator&lt;/creator&gt;
         &lt;creationDate&gt;&lt;/creationDate&gt;
         &lt;modificationDate&gt;&lt;/modificationDate&gt;
-	    &lt;name&gt;Test resource&lt;/name&gt;
+	    &lt;name&gt;TestResource&lt;/name&gt;
         &lt;contentUrl&gt;http://testresourceurl.com/resource&lt;/contentUrl&gt;
 	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
     &lt;/resource&gt;
+	</pre>
+	or
+	<pre>
+	{
+	   "type":"resource",
+	   "creator":"Creator",
+	   "creationDate":"",
+	   "modificationDate":"",
+	   "name":"TestResource",
+	   "contentUrl":"http://testresourceurl.com/resource",
+	   "contetnFileName":"resourceFileName"
+	}
 	</pre>
 </pre>
 
@@ -180,6 +204,17 @@ Body: <pre>
 	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
     &lt;/resource&gt;
     </pre>
+    <pre>
+	{
+	   "type":"resource",
+	   "creator":"Creator",
+	   "creationDate":"",
+	   "modificationDate":"",
+	   "name":"TestResource",
+	   "contentUrl":"http://testresourceurl.com/resource",
+	   "contetnFileName":"resourceFileName"
+	}
+	</pre>
 </pre>
 
 * Responses
@@ -631,6 +666,7 @@ Resources:
 {
   "resources": [
     {
+      "type":"resource",
       "name": "",
       "content": null,
       "collection": null,
@@ -643,6 +679,7 @@ Resources:
       "modificationDate": 1363859199839
     },
     {
+      "type":"resource",
       "name": "",
       "content": null,
       "collection": null,
@@ -655,6 +692,7 @@ Resources:
       "modificationDate": 1363859273515
     },
     {
+      "type":"resource",
       "name": "",
       "content": null,
       "collection": null,
@@ -667,6 +705,7 @@ Resources:
       "modificationDate": 1363859273535
     },
     {
+      "type":"resource",
       "name": "",
       "content": null,
       "collection": null,
@@ -687,6 +726,7 @@ Resources:
       "collections": [
         
       ],
+      "type":"collection",
       "id": "testCollection\/collectionA",
       "creationDate": 1363859273552,
       "creator": "",
@@ -699,6 +739,7 @@ Resources:
       "collections": [
         
       ],
+      "type":"collection"
       "id": "testCollection\/collectionB",
       "creationDate": 1363859273566,
       "creator": "",
@@ -711,12 +752,14 @@ Resources:
       "collections": [
         
       ],
+      "type":"collection"
       "id": "testCollection\/",
       "creationDate": 1363859273575,
       "creator": "",
       "modificationDate": null
     }
   ],
+  "type":"collection"
   "id": "testCollection",
   "creationDate": 1363859199837,
   "creator": "",
