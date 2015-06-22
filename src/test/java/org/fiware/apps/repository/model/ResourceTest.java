@@ -30,8 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.model;
 
 import java.util.Date;
-import org.fiware.apps.repository.model.Resource;
-import org.fiware.apps.repository.model.ResourceCollection;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -59,7 +57,7 @@ public class ResourceTest {
 
         toTest = new Resource();
 
-        toTest.setCollection(resourceCollection);
+        //toTest.setCollection(resourceCollection);
         toTest.setContent(bytes);
         toTest.setContentFileName(fileName);
         toTest.setContentMimeType(mimeName);
@@ -71,7 +69,7 @@ public class ResourceTest {
         toTest.setId(id);
         toTest.setModificationDate(date2);
 
-        assertEquals(toTest.getCollection(), resourceCollection);
+        //assertEquals(toTest.getCollection(), resourceCollection);
         assertEquals(toTest.getContent(), bytes);
         assertEquals(toTest.getContentFileName(), fileName);
         assertEquals(toTest.getContentMimeType(), mimeName);
