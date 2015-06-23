@@ -23,7 +23,7 @@ sudo ./scripts/preVirtuosoDebian.sh
 # Install the repository from source code or build
 if [ -d "$INSPWD/src" ]; then
 	# Installation from source code
-	./scripts/oAuthConfigSource.sh
+	./scripts/oAuthConfigSources.sh
 	mvn clean install
 	cp ./target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository.war
 else
