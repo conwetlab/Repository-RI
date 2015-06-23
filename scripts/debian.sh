@@ -21,7 +21,7 @@ sudo ./scripts/preVirtuosoDebian.sh
 ./scripts/installVirtuoso.sh
 
 # Install the repository from source code or build
-if [ -f "$INSPWD/src" ]; then
+if [ -d "$INSPWD/src" ]; then
 	# Installation from source code
 	./scripts/oAuthConfigSource.sh
 	mvn clean install
