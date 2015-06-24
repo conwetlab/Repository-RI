@@ -5,7 +5,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
+import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.context.J2EContext;
@@ -59,9 +59,9 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
     private boolean isBrowser(List <MediaType> accept) {
         for (MediaType media : accept) {
             String mediaString = media.getType()+"/"+media.getSubtype();
-            if(mediaString.equals("text/html") ||
-                mediaString.equals("application/xhtml+xml") ||
-                mediaString.equals("imagen/webp")) {
+            if(mediaString.equalsIgnoreCase("text/html") ||
+                mediaString.equalsIgnoreCase("application/xhtml+xml") ||
+                mediaString.equalsIgnoreCase("imagen/webp")) {
                 return true;
             }
         }
@@ -69,9 +69,9 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
     }
 
     private boolean isHTMLinfo(String uri) {
-        MongoCollectionDAO mongoCollectionDAO = new MongoCollectionDAO();
+        MongoResourceDAO resourceDAO = new MongoResourceDAO();
         try {
-            return uri.regionMatches(true, uri.length()-5, ".meta", 0, 5) && mongoCollectionDAO.getCollection(uri.substring(uri.indexOf("collec/")+7, uri.length())) != null;
+            return uri.regionMatches(true, uri.length()-5, ".meta", 0, 5) || !resourceDAO.isResource(uri.substring(uri.indexOf("collec/")+7, uri.length()));
         } catch (DatasourceException ex) {
             return false;
         }
