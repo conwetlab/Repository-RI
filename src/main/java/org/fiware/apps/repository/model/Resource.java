@@ -51,12 +51,12 @@ public class Resource extends AbstractResource{
 
     @Override
     public boolean checkName() {
-        return !this.namePatern.matches(this.name);
+        return !this.name.matches(this.namePatern);
     }
 
     @Override
     public boolean checkName(String name) {
-            return !this.namePatern.matches(name);
+        return !name.matches(namePatern);
     }
 
     @Override
