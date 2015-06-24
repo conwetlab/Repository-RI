@@ -68,16 +68,14 @@ This package contains the war file of the Repository as well as the intallation 
 ---
 ## Getting the Repository software
 
-Alternatively, it is possible to install the Repository from the sources published in GitHub. To compile the source code will be necesary the following packages:
+Alternatively, it is possible to install the Repository from the sources published in GitHub. To clone the repository, the git package is needed:
 
 <pre>
 # Ubuntu/Debian
 # apt-get install git
-# apt-get install maven
 
 # CentOS
 # yum -y install git
-# yum -y install maven
 </pre>
 ---
 ## Getting the Repository software
@@ -88,35 +86,7 @@ To download the source code usig git, execute the following command:
 </pre>
 
 ---
-## Getting the Repository software
-
-Once the Repository sources have been downloaded, go to <code>Repository-RI</code> folder.
-
-Before compiling the code, is necesary to install Java 8. This can be achieved using the script provided with the source code as follows:
-
-<pre>
-# Ubuntu/Debian
-# export INSPWD=$PWD
-# ./scripts/installJavaDebian.sh
-
-# CentOS
-# export INSPWD=$PWD
-# # wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jdk-8u25-linux-x64.rpm"
-# sudo rpm -ivh jdk-8u25-linux-x64.rpm
-</pre>
-
-Once Java 8 is installed, execute: 
-
-<pre>
-# mvn clean install
-</pre>
-
-This command will compile the source code and generate the war file <code>FiwareRepository.war</code> in the <code>taget</code> folder.
-
----
 ## Installing the Repository using scripts
-
-At this step it is assumed that you aready have the war file of the Repository.
 
 In order to facilitate the installation of the Repository, the script *install.sh* has been provided. This script installs all needed dependencies, configures the repository and deploys it. To use this script execute the following command:
 
