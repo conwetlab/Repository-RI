@@ -1,12 +1,12 @@
 package org.fiware.apps.repository.oauth2;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
+import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.WebContext;
@@ -31,9 +31,9 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
         logger.debug("client : {}", this.client);
         final WebContext context = new J2EContext(request, response);
 
-
+        // Check if client is a web browser
         try {
-            if (isBrowser(MediaType.parseMediaTypes(request.getHeader("Accept")))) {
+            if (isBrowser(MediaType.parseMediaTypes(request.getHeader("Accept"))) && isHTMLinfo(request.getRequestURI())) {
                 this.client.redirect(context, true, false);
             } else {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access Denied");
@@ -43,6 +43,7 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
         }
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         CommonHelper.assertNotNull("client", this.client);
     }
@@ -65,5 +66,14 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
             }
         }
         return false;
+    }
+
+    private boolean isHTMLinfo(String uri) {
+        MongoCollectionDAO mongoCollectionDAO = new MongoCollectionDAO();
+        try {
+            return uri.regionMatches(true, uri.length()-5, ".meta", 0, 5) && mongoCollectionDAO.getCollection(uri.substring(uri.indexOf("collec/")+7, uri.length())) != null;
+        } catch (DatasourceException ex) {
+            return false;
+        }
     }
 }
