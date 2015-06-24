@@ -71,7 +71,7 @@
 	
     <bean id="apiHeaderFilter"
           class="org.fiware.apps.repository.oauth2.FIWAREHeaderAuthenticationFilter">
-        <constructor-arg value="/api/" index="0" />
+        <constructor-arg value="/v2/" index="0" />
         <constructor-arg value="Authorization" index="1"/>
         <property name="client" ref="fiwareClient" />
         <property name="authenticationManager" ref="authenticationManager" />
