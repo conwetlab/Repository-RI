@@ -49,9 +49,12 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
+import java.util.List;
+import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.settings.RepositorySettings;
 
 public class RestHelper {
@@ -419,6 +422,16 @@ public class RestHelper {
         content.append("No Representation for Class "+clazz.getCanonicalName()+" found.");
         return Response.status(500).type("text/plain").entity(content.toString()).build();
 
+    }
+
+    public static Response sendError(String message, Response.Status status, List<MediaType> types) {
+        for (MediaType type : types) {
+            if("application/xml".equalsIgnoreCase(type.getType()+"/"+type.getSubtype()) ||
+                    "application/json".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) {
+                return Response.status(status).type(type).entity(new RepositoryException(status, message)).build();
+            }
+        }
+        return Response.status(status).type(MediaType.APPLICATION_XML).entity(new RepositoryException(status, message)).build();
     }
 
 
