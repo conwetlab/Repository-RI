@@ -14,15 +14,16 @@ public interface ResourceDAO {
 
 	public List<Resource> getResources(String id, ResourceFilter filter) throws DatasourceException;
 	public List<Resource> getResources(String id) throws DatasourceException;
-	
+
 	public Boolean isResource (String id) throws DatasourceException;
+        public Boolean isResourceByContentUrl (String id) throws DatasourceException;
 	public Resource getResource(String id)  throws DatasourceException;
 	public Resource findResource(String id) throws DatasourceException;
 	public Boolean updateResourceContent(Resource r) throws DatasourceException;
 	public Resource getResourceContent(String id) throws DatasourceException;
 	public Boolean updateResource(String path, Resource r) throws DatasourceException;
-	public Boolean deleteResource(String id) throws DatasourceException ;	
-	
-	
-	
+	public Boolean deleteResource(String id) throws DatasourceException ;
+
+
+
 }

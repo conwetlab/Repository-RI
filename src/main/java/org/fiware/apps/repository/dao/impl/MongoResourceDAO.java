@@ -226,6 +226,29 @@ public class MongoResourceDAO implements ResourceDAO{
     }
 
     @Override
+    public Boolean isResourceByContentUrl (String contentUrl) throws DatasourceException{
+
+        db.requestStart();
+        DBObject obj =null;
+        try{
+
+            BasicDBObject query = new BasicDBObject();
+            query.put("contentUrl", contentUrl);
+            obj = mongoCollection.findOne(query);
+
+        }catch (Exception e){
+            db.requestDone();
+            throw new DatasourceException("Error parsing " + contentUrl + " " + e.getMessage(), Resource.class );
+        }
+        db.requestDone();
+        if(obj == null){
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public Resource insertResource(Resource r)throws DatasourceException, SameIdException{
         //Check if resource exist.
         if (isResource(r.getId())){
