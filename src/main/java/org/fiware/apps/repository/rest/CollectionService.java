@@ -79,7 +79,8 @@ public class CollectionService {
             accepts = new LinkedList();
             accepts.add(MediaType.APPLICATION_XML_TYPE);
         }
-        return Response.status(Response.Status.NOT_FOUND).type(accepts.get(0)).entity(new RepositoryException(Response.Status.NOT_FOUND,"Please specify a collection")).build();
+
+        return RestHelper.sendError("Please specify a collection or a resource", Status.NOT_FOUND, accepts);
     }
 
     @GET
@@ -107,7 +108,7 @@ public class CollectionService {
             }
         }
 
-        return Response.status(Status.NOT_ACCEPTABLE).build();
+        return RestHelper.sendError("", Status.NOT_ACCEPTABLE, accepts);
     }
 
     private Response getResource(String path, List <MediaType> types, UriInfo uriInfo) {
@@ -117,7 +118,7 @@ public class CollectionService {
         try {
             resource = mongoResourceDAO.getResource(path);
         } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, types);
         }
         if (resource == null) {
             //If Accept header is empty, add default media type.
@@ -133,7 +134,8 @@ public class CollectionService {
                     return getCollection(path, typeString, uriInfo);
                 }
             }
-            return Response.status(Status.NOT_ACCEPTABLE).build();
+
+            return RestHelper.sendError("", Status.NOT_ACCEPTABLE, types);
         }
 
         //If Accept header is empty, add default media type.
@@ -155,23 +157,22 @@ public class CollectionService {
                     if (resourceContent.getContent() != "".getBytes()) {
                         return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
                     } else {
-                        return Response.status(Response.Status.NO_CONTENT).build();
+                        return RestHelper.sendError("", Status.NO_CONTENT, types);
                     }
                 } else if (RestHelper.isRDF(typeString)) {
                     resourceContent = virtuosoResourceDAO.getResource(resource.getContentUrl(), RestHelper.typeMap.get(typeString));
                     if (resourceContent != null) {
                         return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
                     } else {
-                        return Response.status(Response.Status.NO_CONTENT).build();
+                        return RestHelper.sendError("", Status.NO_CONTENT, types);
                     }
                 }
             }
 
             //If there are not any compatible type, returns NOT_ACCEPTABLE.
-            return Response.status(Status.NOT_ACCEPTABLE).build();
-
+            return RestHelper.sendError("", Status.NOT_ACCEPTABLE, types);
         } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, types);
         }
 
     }
@@ -223,13 +224,18 @@ public class CollectionService {
     }
 
     private Response insertResource(Resource resource, String path) {
+        if(!resource.checkName()) {
+            return Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_XML)
+                    .entity(new RepositoryException(Status.BAD_REQUEST, "Field name do not comply the pattern."))
+                    .build();
+        }
         try {
             // Create a new resource with the resource metadata given.
             // Some metadata can not be given by the user.
-            if(!resource.checkName()) {
-                return Response.status(Status.BAD_REQUEST)
-                        .type(MediaType.APPLICATION_XML)
-                        .entity(new RepositoryException(Status.CONFLICT, "Field name do not comply the pattern."))
+
+            if(mongoResourceDAO.isResourceByContentUrl(resource.getContentUrl())) {
+                return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML)
+                        .entity(new RepositoryException(Status.CONFLICT, "Resource with field contentUrl '"+resource.getContentUrl()+"' already exists."))
                         .build();
             }
 
@@ -262,13 +268,14 @@ public class CollectionService {
     }
 
     private Response insertCollection(ResourceCollection resourceCollection, String path) {
+        if(!resourceCollection.checkName()) {
+            return Response.status(Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_XML)
+                    .entity(new RepositoryException(Status.BAD_REQUEST, "Field name do not comply the pattern."))
+                    .build();
+        }
         try {
-            if(!resourceCollection.checkName()) {
-                return Response.status(Status.BAD_REQUEST)
-                        .type(MediaType.APPLICATION_XML)
-                        .entity(new RepositoryException(Status.CONFLICT, "Field name do not comply the pattern."))
-                        .build();
-            }
+
 
             if (!path.equalsIgnoreCase("")) {
                 resourceCollection.setId(path+"/"+resourceCollection.getName());
@@ -358,7 +365,7 @@ public class CollectionService {
         if(!resource.checkName()) {
             return Response.status(Status.BAD_REQUEST)
                     .type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.CONFLICT, "Field name do not comply the pattern."))
+                    .entity(new RepositoryException(Status.BAD_REQUEST, "Field name do not comply the pattern."))
                     .build();
         }
 
