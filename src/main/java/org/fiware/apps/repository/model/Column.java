@@ -41,6 +41,10 @@ public class Column {
     String varName;
     List<String> list;
 
+    public Column() {
+        list = new LinkedList<>();
+    }
+
     public Column(String name) {
         super();
         varName = name;
