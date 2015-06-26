@@ -338,12 +338,13 @@ public class RestHelper {
             content.append("<h1>Resource: "+res.getId()+"</h1>");
 
             content.append("<table class=\"tab\">");
-            content.append("<th>Resource Id</th><th>Creation Date</th><th>Modification Date</th><th>Filename</th><th>Mime Type</th>");
+            content.append("<th>Resource Id</th><th>Creation Date</th><th>Modification Date</th><th>Content URL</th><th>Filename</th><th>Mime Type</th>");
 
             content.append("<tr>");
             content.append("<td><a href=\""+uriInfo.getBaseUri()+"collec/"+res.getId()+"\">"+res.getId()+"</a></td>");
             content.append("<td>"+res.getCreationDate()+"</td>");
             content.append("<td>"+res.getModificationDate()+"</td>");
+            content.append("<td>"+res.getContentUrl()+"</td>");
             content.append("<td>"+res.getContentFileName()+"</td>");
             content.append("<td>"+res.getContentMimeType()+"</td>");
             content.append("</tr>");
