@@ -40,7 +40,6 @@ cd $INSPWD
 
 #Start Tomcat
 cd $INSPWD/apache-tomcat-8.0.22/bin/
-./shutdown.sh
 ./startup.sh
 cd $INSPWD
 

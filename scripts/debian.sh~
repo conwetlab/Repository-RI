@@ -1,28 +1,25 @@
 #! /bin/bash
 
-sudo yum update
-sudo yum -y install unzip
-sudo yum -y install zip
-sudo yum -y install maven
-    
+sudo apt-get update
+sudo apt-get -y install unzip
+sudo apt-get install zip
+sudo apt-get -y install maven
+
 set +e
 # Install java 8
-./scripts/installJavaCentos.sh
-cd $INSPWD
-
+./scripts/installJavaDebian.sh
+   
 # Install tomcat 8
 ./scripts/installTomcat8.sh
 
-# PreInstall Virtuoso
-sudo ./scripts/preVirtuosoCentos.sh
+# Install mongodb
+sudo apt-get install -y mongodb
+
+# PreInstallVirtuoso
+sudo ./scripts/preVirtuosoDebian.sh
 
 # Install virtuoso
 ./scripts/installVirtuoso.sh
-
-set -e
-
-# Install mongodb
-sudo ./scripts/installMongoCentos.sh    
 
 # Install the repository from source code or build
 if [ -d "$INSPWD/src" ]; then
@@ -42,9 +39,10 @@ $INSPWD/virtuoso7/bin/virtuoso-t -f &
 cd $INSPWD
 
 #Start Tomcat
-cd $INSPWD/apache-tomcat-8.0.21/bin/
+cd $INSPWD/apache-tomcat-8.0.22/bin/
+./shutdown.sh
 ./startup.sh
 cd $INSPWD
 
-#Create taks
-sudo ./scripts/startupCentos.sh
+#Create startup tasks
+sudo ./scripts/startupDebian.sh

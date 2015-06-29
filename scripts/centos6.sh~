@@ -22,7 +22,9 @@ sudo ./scripts/preVirtuosoCentos.sh
 set -e
 
 # Install mongodb
-sudo ./scripts/installMongoCentos.sh    
+sudo ./scripts/installMongoCentos.sh
+
+sudo yum install -y mongodb-org
 
 # Install the repository from source code or build
 if [ -d "$INSPWD/src" ]; then
@@ -43,8 +45,10 @@ cd $INSPWD
 
 #Start Tomcat
 cd $INSPWD/apache-tomcat-8.0.21/bin/
+./shutdown.sh
 ./startup.sh
 cd $INSPWD
 
 #Create taks
 sudo ./scripts/startupCentos.sh
+
