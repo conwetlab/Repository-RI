@@ -4,60 +4,94 @@
 export REPODIR
 export X
 echo "-------------------------------------------------"
-echo "This script activate or desactivate OAuth2 authentication in the Repository."
+echo "This script activate, deactivate or update OAuth2 authentication in the Repository."
 
 if [ -f "./apache-tomcat-8.0.22/webapps/FiwareRepository/WEB-INF/classes/properties/repository.properties" ]; then
-	REPODIR=$PWD/apache-tomcat-8.0.22/webapps/FiwareRepository
+    REPODIR=$PWD/apache-tomcat-8.0.22/webapps/FiwareRepository
 elif [ -f "$CATALINA_HOME/webapps/FiwareRepository/WEB-INF/classes/properties/repository.properties" ]; then
-	
+    REPODIR=$CATALINA_HOME/webapps/FiwareRepository
 else
-	echo "Where is located Repository-RI? Insert the path:"
-	read REPODIR
-	while [ ! -f "$REPODIR/WEB-INF/classes/properties/repository.properties" ]; do
-		echo "Repository-RI is not located in '$REPODIR'"
-		echo "Where is located Repository-RI? Insert the path:"
-		read REPODIR
-	done
+    echo "Where is located Repository-RI? Insert the path:"
+    read REPODIR
+    while [ ! -f "$REPODIR/WEB-INF/classes/properties/repository.properties" ]; do
+        echo "Repository-RI is not located in '$REPODIR'"
+        echo "Where is located Repository-RI? Insert the path:"
+        read REPODIR
+    done
 fi
 
-echo "Do you want to activate(Y), desactivate(N) or cancel(C)?"
+echo "Do you want to activate(Y), update info(U), deactivate(N) or cancel(C)?"
 read X
+
+
+while [ $X != "Y" ] && [ $X != "y" ] && [ $X != "N" ] && [ $X != "n" ] && [ $X != "U" ] && [ $X != "u" ] && [ $X != "C" ] && [ $X != "c" ]; do
+    echo "Do you want to activate(Y), update info(U), deactivate(N) or cancel(C)?"
+    read X
+done
+
+if [  $X == "C" ] || [ $X == "c" ]; then
+    echo "Configuration aborted"
+    exit 0
+fi
 
 echo "Shutting down Tomcat Server"
 $CATALINA_HOME/bin/shutdown.sh
 
-while [ $X != "Y" ] && [ $X != "y" ] && [ $X != "N" ] && [ $X != "n" ] && [ $X != "C" ] && [ $X != "c" ]; do
-	echo "Do you want to activate(Y), desactivate(N) or cancel(C)?"
-	read X
-done
+WAR=$REPODIR.war
+mv $WAR .
+rm -rf $REPODIR
+unzip FiwareRepository.war -d temp
 
-if [  $X == "Y" ] || [ $X == "y" ]; then
-	# Activate oauth2 and configurate
-	echo "OAuth2 configuration is located in $REPODIR/WEB-INF/classes/properties/repository.properties."
-	sed -i "s/noSecurity/securityOAuth2/g" $REPODIR/WEB-INF/web.xml
+if [  $X == "Y" ] || [ $X == "y" ] || [ $X == "U" ] || [ $X == "u" ]; then
 
-	echo "What is your FIWAREClient Key?"
-	read X
-	sed -i "/oauth2.key=/c\oauth2.key=$X" $REPODIR/WEB-INF/classes/properties/repository.properties
-	
-	echo "What is your FIWAREClient Secret?"
-	read X
-	sed -i "/oauth2.secret=/c\oauth2.secret=$X" $REPODIR/WEB-INF/classes/properties/repository.properties
+    # Activate oauth2 and configure
+    if [ $X != "U" ] || [ $X != "u" ]; then
+        echo "OAuth2 configuration is located in $REPODIR/WEB-INF/classes/properties/repository.properties."
+        sed -i "s/noSecurity/securityOAuth2/g" temp/WEB-INF/web.xml
+    fi
 
-	echo "What is your Callback URL?"
-	read X
-	sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" $REPODIR/WEB-INF/classes/properties/repository.properties
+    echo "The default OAuth2 enpoint is http://account.lab.fiware.org"
+    echo "Do you want to provide a different idm enpoint? Y/N"
+    read O
+
+    while [ $O != "Y" ] && [ $O != "y" ] && [ $O != "N" ] && [ $O != "n" ]; do
+        echo "Do you want to provide a different idm enpoint? Y/N"
+        read O
+    done
+
+    if [ $O == "Y" ] || [ $O == "y" ]; then
+        echo "What is the identity manager endpoint?"
+        read X
+        sudo sed -i "/oauth2.server=/c\oauth2.server=$X" $INSPWD/temp/WEB-INF/classes/properties/repository.properties
+    fi
+
+    echo "What is your FIWARE Client id?"
+    read X
+    sed -i "/oauth2.key=/c\oauth2.key=$X" temp/WEB-INF/classes/properties/repository.properties
+
+    echo "What is your FIWARE Client Secret?"
+    read X
+    sed -i "/oauth2.secret=/c\oauth2.secret=$X" temp/WEB-INF/classes/properties/repository.properties
+
+    echo "What is your Callback URL?"
+    read X
+    sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" temp/WEB-INF/classes/properties/repository.properties
 
 elif [  $X == "N" ] || [ $X == "n" ]; then
-	# Desactivate oauth2
-	echo "OAuth2 configuration is located in $REPODIR/WEB-INF/classes/properties/repository.properties."
-	sed -i "s/securityOAuth2/noSecurity/g" $REPODIR/WEB-INF/web.xml
-
-elif [  $X == "C" ] || [ $X == "c" ]; then
-	echo "Configuration aborted"
+    # Desactivate oauth2
+    echo "OAuth2 configuration is located in $REPODIR/WEB-INF/classes/properties/repository.properties."
+    sed -i "s/securityOAuth2/noSecurity/g" temp/WEB-INF/web.xml
 fi
 
-"Startting up Tomcat"
+cd temp
+zip -r FiwareRepositoryTemp.war *
+mv ./FiwareRepositoryTemp.war ../FiwareRepository.war
+cd ..
+rm -rf temp
+
+mv FiwareRepository.war $WAR
+
+echo "Startting up Tomcat"
 $CATALINA_HOME/bin/startup.sh
 
 
