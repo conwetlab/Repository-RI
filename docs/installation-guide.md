@@ -119,6 +119,9 @@ What is your FIWARE Client id?
 
 What is your FIWARE Client Secret?
 [client secret]
+
+What is your Callback URL?
+http://[host]:[port]/FiwareRepository/v2/callback
 </pre>
 
 ---
