@@ -2,6 +2,7 @@
 
 sudo apt-get update
 sudo apt-get -y install unzip
+sudo apt-get install zip
 sudo apt-get -y install maven
 
 set +e

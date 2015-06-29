@@ -2,6 +2,7 @@
 
 sudo yum update
 sudo yum -y install unzip
+sudo yum -y install zip
 sudo yum -y install maven
     
 set +e
