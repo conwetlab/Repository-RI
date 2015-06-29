@@ -312,6 +312,7 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 Verb: GET
 URI: http://[SERVER_HOST]/FiwareRepository/v2/services/query
 Accept: application/json, application/xml, application/rdf+xml, text/turtle, application/x-turtle, text/n3, text/rdf+n3, text/n-triples, text/plain
+Content-Type: text/plain
 Body: "<pre>SELECT ?s ?p ?o WHERE {?s ?p ?o }</pre>"
 </pre>
 

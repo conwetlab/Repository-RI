@@ -312,17 +312,15 @@ The first test step involves creating a new resource as well as the implicit cre
 **Step 1 - Create the Resource**
 Create a file named resource.xml with resource content like this.
 <pre>
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<resource id="collectionA/collectionB/ResourceExample">
-	<creator>Yo</creator>
-	<creationDate></creationDate>
-	<modificationDate></modificationDate>
-	<name>Resource Example</name>
-	<contentUrl>http://localhost:8080/FiwareRepository/v2/collec/collectionA/collectionB/ResourceExample</contentUrl>
-	<contentFileName>http://whereistheresource.com/ResourceExample</contentFileName>
-</resource>
-```
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;resource id="collectionA/collectionB/ResourceExample"&gt;
+	&lt;creator&gt;Yo&lt;/creator&gt;
+	&lt;creationDate&gt;&lt;/creationDate&gt;
+	&lt;modificationDate&gt;&lt;/modificationDate&gt;
+	&lt;name&gt;Resource Example&lt;/name&gt;
+	&lt;contentUrl&gt;http://localhost:8080/FiwareRepository/v2/collec/collectionA/collectionB/ResourceExample&lt;/contentUrl&gt;
+	&lt;contentFileName&gt;http://whereistheresource.com/ResourceExample&lt;/contentFileName&gt;
+&lt;/resource&gt;
 </pre>
 
 <pre>
