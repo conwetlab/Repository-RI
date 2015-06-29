@@ -88,7 +88,11 @@ To download the source code usig git, execute the following command:
 ---
 ## Installing the Repository using scripts
 
-In order to facilitate the installation of the Repository, the script *install.sh* has been provided. This script installs all needed dependencies, configures the repository and deploys it. To use this script execute the following command:
+In order to facilitate the installation of the Repository, the script *install.sh* has been provided. This script installs all needed dependencies, configures the repository and deploys it. 
+
+Note that the installation script installs dependencies such as Java 1.8 or Tomcat. If you are installing the Repository in a system that is already in used, you may want to have more control over what dependecies are installed. In this case have a look at section *Manually Installing the Repository*.
+
+To use the installation script execute the following command:
 
     $ ./install.sh
 
