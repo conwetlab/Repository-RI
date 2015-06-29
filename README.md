@@ -76,7 +76,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 #### Create a Resource
 
-- **Path**: /FiwareRepository/v2/collec/
+- **Path**: /FiwareRepository/v2/collec/collectionA
 - **Method**: POST
 - **Content-Type**: <code>application/json</code> or <code>application/xml</code>
 - **Body**:
@@ -166,7 +166,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 #### Get Resource Metadata
 
-- **Path**: /FiwareRepository/v1/collectionA/collectionB/ResourceName.meta
+- **Path**: /FiwareRepository/v2/collec/collectionA/collectionB/ResourceName.meta
 - **Method**: GET
 - **Accept**: <code>text/plain</code>, <code>text/html</code>, <code>application/json</code> or <code>application/xml</code>
 	
@@ -178,7 +178,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 #### Delete Resource
 
-- **Path**: /FiwareRepository/v1/collectionA/collectionB/ResourceName
+- **Path**: /FiwareRepository/v2/collec/collectionA/collectionB/ResourceName
 - **Method**: DELETE
 	
 - **Response**:
@@ -208,7 +208,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 #### Get Collection
 
-- **Path**: /FiwareRepository/v1/collectionA
+- **Path**: /FiwareRepository/v2/collec/collectionA
 - **Method**: GET
 - **Accept**: <code>text/plain</code>, <code>text/html</code>, <code>application/json</code> or <code>application/xml</code>
 
@@ -219,7 +219,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 #### Delete Collection
 
-- **Path**: /FiwareRepository/v1/collectionA
+- **Path**: /FiwareRepository/v2/collec/collectionA
 - **Method**: DELETE
 	
 - **Response**:
@@ -232,7 +232,7 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 - **Path**: /FiwareRepository/v2/services/query?query=SELECT+%3Fs+%3Fp+%3Fo+WHERE+%7B%3Fs+%3Fp+%3Fo+%7D+LIMIT+10
 - **Method**: GET
-- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
+- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>application/RDF+json</code>, <code>text/turtle</code>, <code>text/n3</code>
 	
 - **Response**: 
     - **Status**: 200
@@ -243,7 +243,8 @@ Here you have a basic reference of all the status codes that you can get when yo
 
 - **Path**: /FiwareRepository/v2/services/query
 - **Method**: POST
-- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
+- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>application/RDF+json</code>, <code>text/turtle</code>, <code>text/n3</code>
+- **Content-Type**: <code>text/plain</code>
 - **Body**: <pre>SELECT ?s ?p ?o WHERE {?s ?p ?o }</pre>
 	
 - **Response**: 
@@ -251,11 +252,11 @@ Here you have a basic reference of all the status codes that you can get when yo
     - **Body**: [Query Response]
 
 
-#### Get Resource by URL Content
+#### Get Resource Content by URL Content
 
 - **Path**: /FiwareRepository/v2/services/query/urlContent
 - **Method**: GET
-- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>text/turtle</code>, <code>text/n3</code>
+- **Accept**: <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, <code>application/RDF+xml</code>, <code>application/RDF+json</code>, <code>text/turtle</code>, <code>text/n3</code>
 	
 - **Response**:
     - **Status**: 200
