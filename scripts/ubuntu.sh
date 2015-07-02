@@ -7,7 +7,7 @@ sudo apt-get -y install maven
 
 set +e
 # Install java 8
-./scripts/installJava8DebianWheezy.sh
+./scripts/installJavaDebian.sh
    
 # Install tomcat 8
 ./scripts/installTomcat8.sh

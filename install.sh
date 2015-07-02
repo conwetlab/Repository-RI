@@ -16,7 +16,9 @@ elif [ -f "/etc/issue" ]; then
 	CONTENT=$(cat /etc/issue)
 	if [[ $CONTENT == *CentOS* ]]; then
 		./scripts/centos6.sh
-	elif [[ $CONTENT == *Ubuntu* || $CONTENT == *Debian* ]]; then
+	elif [[ $CONTENT == *Ubuntu* ]]; then
+		./scripts/ubuntu.sh
+	elif [[ $CONTENT == *Debian* ]]; then
 		./scripts/debian.sh
 	fi
 fi
