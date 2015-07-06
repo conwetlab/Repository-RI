@@ -96,7 +96,6 @@ public class RestHelper {
                 type.equalsIgnoreCase("text/html") ||
                 type.equalsIgnoreCase("application/x-ms-application") ||
                 type.equalsIgnoreCase("application/rdf+xml") ||
-                type.equalsIgnoreCase("application/rdf+json") ||
                 type.equalsIgnoreCase("text/turtle") ||
                 type.equalsIgnoreCase("text/n3") ||
                 type.equalsIgnoreCase("text/plain");
