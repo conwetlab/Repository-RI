@@ -1,0 +1,105 @@
+<rdf:RDF
+    xmlns:fn="http://www.w3.org/2005/xpath-functions/#"
+    xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+    xmlns:ogcsf="http://www.opengis.net/ont/sf#"
+    xmlns:product="http://www.buy.com/rss/module/productV2/"
+    xmlns:j.0="http://purl.org/dc/terms/"
+    xmlns:j.1="http://www.linked-usdl.org/ns/usdl-pricing#"
+    xmlns:j.2="http://purl.org/goodrelations/v1#"
+    xmlns:obo="http://www.geneontology.org/formats/oboInOwl#"
+    xmlns:sql="sql:"
+    xmlns:xf="http://www.w3.org/2004/07/xpath-functions"
+    xmlns:j.3="http://www.linked-usdl.org/ns/usdl-core#"
+    xmlns:protseq="http://purl.org/science/protein/bysequence/"
+    xmlns:sd="http://www.w3.org/ns/sparql-service-description#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfa="http://www.w3.org/ns/rdfa#"
+    xmlns:ogcgml="http://www.opengis.net/ont/gml#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sc="http://purl.org/science/owl/sciencecommons/"
+    xmlns:dbpprop="http://dbpedia.org/property/"
+    xmlns:ogcgsr="http://www.opengis.net/def/rule/geosparql/"
+    xmlns:scovo="http://purl.org/NET/scovo#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:bif="bif:"
+    xmlns:sioc="http://rdfs.org/sioc/ns#"
+    xmlns:mesh="http://purl.org/commons/record/mesh/"
+    xmlns:ogcgs="http://www.opengis.net/ont/geosparql#"
+    xmlns:xslwd="http://www.w3.org/TR/WD-xsl"
+    xmlns:ldp="http://www.w3.org/ns/ldp#"
+    xmlns:yago="http://dbpedia.org/class/yago/"
+    xmlns:nci="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#"
+    xmlns:xsl10="http://www.w3.org/XSL/Transform/1.0"
+    xmlns:virtcxml="http://www.openlinksw.com/schemas/virtcxml#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:ogc="http://www.opengis.net/"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:math="http://www.w3.org/2000/10/swap/math#"
+    xmlns:mf="http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#"
+    xmlns:go="http://purl.org/obo/owl/GO#"
+    xmlns:xsl1999="http://www.w3.org/1999/XSL/Transform"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#"
+    xmlns:virtrdf="http://www.openlinksw.com/schemas/virtrdf#"
+    xmlns:rdfdf="http://www.openlinksw.com/virtrdf-data-formats#"
+    xmlns:dbpedia="http://dbpedia.org/resource/"
+    xmlns:ogcgsf="http://www.opengis.net/def/function/geosparql/"
+    xmlns:void="http://rdfs.org/ns/void#"
+    xmlns:dawgt="http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#"
+    xmlns:vcard2006="http://www.w3.org/2006/vcard/ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/" > 
+  <rdf:Description rdf:about="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuT">
+    <rdf:type rdf:resource="http://www.linked-usdl.org/ns/usdl-core#Service"/>
+    <j.0:title xml:lang="en">OrionStarterKit</j.0:title>
+    <foaf:depiction rdf:resource="https://store.lab.fi-ware.org/media/CoNWeT__OrionStarterKit__1.2/catalogue.png"/>
+    <j.0:description xml:lang="en">A mashuplet with different widgets and operators to use Orion CB in your dashboards</j.0:description>
+    <j.3:versionInfo>1.0</j.3:versionInfo>
+    <j.3:hasClassification rdf:nodeID="A0"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A0">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <rdfs:label>WireCloud Component</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuU">
+    <rdf:type rdf:resource="http://www.linked-usdl.org/ns/usdl-core#Service"/>
+    <j.0:title xml:lang="en">Data set</j.0:title>
+    <foaf:depiction rdf:resource="https://store.lab.fi-ware.org/media/CoNWeT__OrionStarterKit__1.2/catalogue.png"/>
+    <j.0:description xml:lang="en">This is a description</j.0:description>
+    <j.3:versionInfo>1.0</j.3:versionInfo>
+    <j.3:hasClassification rdf:nodeID="A1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#7jnovpSvDceyPlJxE">
+    <rdf:type rdf:resource="http://www.linked-usdl.org/ns/usdl-pricing#PriceComponent"/>
+    <j.0:title xml:lang="en">Single payment</j.0:title>
+    <j.0:description xml:lang="en">This component defines a single payment</j.0:description>
+    <j.2:hasCurrency>EUR</j.2:hasCurrency>
+    <j.2:hasCurrencyValue rdf:datatype="http://www.w3.org/2001/XMLSchema#float">1.0</j.2:hasCurrencyValue>
+    <j.2:hasUnitOfMeasurement>single payment</j.2:hasUnitOfMeasurement>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A1">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <rdfs:label>Dataset</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#NMTecgiP49qlfU90V">
+    <rdf:type rdf:resource="http://www.linked-usdl.org/ns/usdl-pricing#PricePlan"/>
+    <j.0:title xml:lang="en">Single Payment</j.0:title>
+    <j.0:description xml:lang="en">This offering needs a single payment to be acquired</j.0:description>
+    <j.1:hasPriceComponent rdf:resource="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#7jnovpSvDceyPlJxE"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#Xo9ZQS2Qa3yX8fDfm">
+    <rdf:type rdf:resource="http://www.linked-usdl.org/ns/usdl-core#ServiceOffering"/>
+    <j.0:created rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@7a513051</j.0:created>
+    <j.0:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@7a513051</j.0:modified>
+    <j.0:title xml:lang="en">OrionStarterKit</j.0:title>
+    <j.0:description xml:lang="en">Offering composed of three mashable application components: ngsi-source, ngsientity2poi and ngsi-updater. Those components are provided as the base tools/examples for making application mashups using WireCloud and the Orion Context Broker. Those resources can be used for example for showing entities coming from an Orion server inside the Map Viewer widget or browsing and updating the attributes of those entities.</j.0:description>
+    <j.3:versionInfo>1.0</j.3:versionInfo>
+    <j.0:abstract xml:lang="en">Offering composed of three mashable application components: ngsi-source, ngsientity2poi and ngsi-updater. Those components are provided as the base tools/examples for making application mashups using WireCloud and the Orion Context Broker. Those resources can be used for example for showing entities coming from an Orion server inside the Map Viewer widget or browsing and updating the attributes of those entities.</j.0:abstract>
+    <j.3:validFrom rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@f6dee62d</j.3:validFrom>
+    <j.3:validThrough rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@f6dee62d</j.3:validThrough>
+    <j.3:includes rdf:resource="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuT"/>
+    <j.3:includes rdf:resource="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuU"/>
+    <j.3:hasPricePlan rdf:resource="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#NMTecgiP49qlfU90V"/>
+    <j.3:hasServiceLevelProfile rdf:resource="http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#KmhtiqmYXHT7L0vlu"/>
+    <foaf:thumbnail rdf:resource="https://store.lab.fi-ware.org/media/CoNWeT__OrionStarterKit__1.2/catalogue.png"/>
+  </rdf:Description>
+</rdf:RDF>

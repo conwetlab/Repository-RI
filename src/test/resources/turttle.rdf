@@ -1,0 +1,122 @@
+@prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix yago:  <http://dbpedia.org/class/yago/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix ogc:   <http://www.opengis.net/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+@prefix protseq: <http://purl.org/science/protein/bysequence/> .
+@prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+@prefix sql:   <sql:> .
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+@prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+@prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+@prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+@prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+@prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+@prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+@prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+@prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+@prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix scovo: <http://purl.org/NET/scovo#> .
+@prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+@prefix dbpprop: <http://dbpedia.org/property/> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix mesh:  <http://purl.org/commons/record/mesh/> .
+@prefix sioc:  <http://rdfs.org/sioc/ns#> .
+@prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+@prefix product: <http://www.buy.com/rss/module/productV2/> .
+@prefix void:  <http://rdfs.org/ns/void#> .
+@prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+@prefix go:    <http://purl.org/obo/owl/GO#> .
+@prefix dbpedia: <http://dbpedia.org/resource/> .
+@prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+@prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+@prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+@prefix ldp:   <http://www.w3.org/ns/ldp#> .
+@prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+@prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+@prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+@prefix bif:   <bif:> .
+@prefix dc:    <http://purl.org/dc/elements/1.1/> .
+
+<http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#7jnovpSvDceyPlJxE>
+        a       <http://www.linked-usdl.org/ns/usdl-pricing#PriceComponent> ;
+        <http://purl.org/dc/terms/description>
+                "This component defines a single payment"@en ;
+        <http://purl.org/dc/terms/title>
+                "Single payment"@en ;
+        <http://purl.org/goodrelations/v1#hasCurrency>
+                "EUR" ;
+        <http://purl.org/goodrelations/v1#hasCurrencyValue>
+                "1.0"^^xsd:float ;
+        <http://purl.org/goodrelations/v1#hasUnitOfMeasurement>
+                "single payment" .
+
+<http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuU>
+        a               <http://www.linked-usdl.org/ns/usdl-core#Service> ;
+        <http://purl.org/dc/terms/description>
+                "This is a description"@en ;
+        <http://purl.org/dc/terms/title>
+                "Data set"@en ;
+        <http://www.linked-usdl.org/ns/usdl-core#hasClassification>
+                [ a           skos:Concept ;
+                  rdfs:label  "Dataset"
+                ] ;
+        <http://www.linked-usdl.org/ns/usdl-core#versionInfo>
+                "1.0" ;
+        foaf:depiction  <https://store.lab.fi-ware.org/media/CoNWeT__OrionStarterKit__1.2/catalogue.png> .
+
+<http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuT>
+        a               <http://www.linked-usdl.org/ns/usdl-core#Service> ;
+        <http://purl.org/dc/terms/description>
+                "A mashuplet with different widgets and operators to use Orion CB in your dashboards"@en ;
+        <http://purl.org/dc/terms/title>
+                "OrionStarterKit"@en ;
+        <http://www.linked-usdl.org/ns/usdl-core#hasClassification>
+                [ a           skos:Concept ;
+                  rdfs:label  "WireCloud Component"
+                ] ;
+        <http://www.linked-usdl.org/ns/usdl-core#versionInfo>
+                "1.0" ;
+        foaf:depiction  <https://store.lab.fi-ware.org/media/CoNWeT__OrionStarterKit__1.2/catalogue.png> .
+
+<http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#NMTecgiP49qlfU90V>
+        a       <http://www.linked-usdl.org/ns/usdl-pricing#PricePlan> ;
+        <http://purl.org/dc/terms/description>
+                "This offering needs a single payment to be acquired"@en ;
+        <http://purl.org/dc/terms/title>
+                "Single Payment"@en ;
+        <http://www.linked-usdl.org/ns/usdl-pricing#hasPriceComponent>
+                <http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#7jnovpSvDceyPlJxE> .
+
+<http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#Xo9ZQS2Qa3yX8fDfm>
+        a               <http://www.linked-usdl.org/ns/usdl-core#ServiceOffering> ;
+        <http://purl.org/dc/terms/abstract>
+                "Offering composed of three mashable application components: ngsi-source, ngsientity2poi and ngsi-updater. Those components are provided as the base tools/examples for making application mashups using WireCloud and the Orion Context Broker. Those resources can be used for example for showing entities coming from an Orion server inside the Map Viewer widget or browsing and updating the attributes of those entities."@en ;
+        <http://purl.org/dc/terms/created>
+                "com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@7a513051"^^xsd:datetime ;
+        <http://purl.org/dc/terms/description>
+                "Offering composed of three mashable application components: ngsi-source, ngsientity2poi and ngsi-updater. Those components are provided as the base tools/examples for making application mashups using WireCloud and the Orion Context Broker. Those resources can be used for example for showing entities coming from an Orion server inside the Map Viewer widget or browsing and updating the attributes of those entities."@en ;
+        <http://purl.org/dc/terms/modified>
+                "com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@7a513051"^^xsd:datetime ;
+        <http://purl.org/dc/terms/title>
+                "OrionStarterKit"@en ;
+        <http://www.linked-usdl.org/ns/usdl-core#hasPricePlan>
+                <http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#NMTecgiP49qlfU90V> ;
+        <http://www.linked-usdl.org/ns/usdl-core#hasServiceLevelProfile>
+                <http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#KmhtiqmYXHT7L0vlu> ;
+        <http://www.linked-usdl.org/ns/usdl-core#includes>
+                <http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuT> , <http://130.206.81.113/FiwareRepository/v1/storeOfferingCollection/OrionStarterKit#bUvq9oTgNStSwDnuU> ;
+        <http://www.linked-usdl.org/ns/usdl-core#validFrom>
+                "com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@f6dee62d"^^xsd:datetime ;
+        <http://www.linked-usdl.org/ns/usdl-core#validThrough>
+                "com.hp.hpl.jena.datatypes.BaseDatatype$TypedValue@f6dee62d"^^xsd:datetime ;
+        <http://www.linked-usdl.org/ns/usdl-core#versionInfo>
+                "1.0" ;
+        foaf:thumbnail  <https://store.lab.fi-ware.org/media/CoNWeT__OrionStarterKit__1.2/catalogue.png> .
