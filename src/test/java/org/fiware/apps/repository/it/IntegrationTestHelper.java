@@ -48,7 +48,7 @@ public class IntegrationTestHelper {
 
     private HttpClient client;
     private final String collectionServiceUrl = RepositorySettings.REPOSITORY_BASE_URL + "v2/" + RepositorySettings.COLLECTION_SERVICE_NAME + "/";
-    private final String queryServiceUrl = RepositorySettings.REPOSITORY_BASE_URL + "v2/" + "/services/"+RepositorySettings.QUERY_SERVICE_NAME;
+    private final String queryServiceUrl = RepositorySettings.REPOSITORY_BASE_URL + "v2/" + "services/"+RepositorySettings.QUERY_SERVICE_NAME;
 
 
     public IntegrationTestHelper() {
@@ -211,7 +211,8 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse getQuery(String query, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + "?query="+query;
+        String finalURL = queryServiceUrl + "?query="+query;
+        System.err.println(finalURL);
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
@@ -225,7 +226,8 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse postQuery(String query, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl;
+        String finalURL = queryServiceUrl;
+        System.err.println(finalURL);
         HttpPost request = new HttpPost(finalURL);
 
         //Add Headers
@@ -245,7 +247,8 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse getResourceByUrlContent(String contentUrl, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + "/" + contentUrl;
+        String finalURL = queryServiceUrl + "/" + contentUrl;
+        System.err.println(finalURL);
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
