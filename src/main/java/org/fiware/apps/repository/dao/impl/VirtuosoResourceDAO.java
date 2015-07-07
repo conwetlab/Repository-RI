@@ -124,12 +124,20 @@ public class VirtuosoResourceDAO {
         Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
                 RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
-        model.removeAll();
         try {
             model.read(new InputStreamReader(input), null, type);
         } catch (Exception e) {
             throw new DatasourceException(e.getMessage(), Resource.class);
         }
+        //Improve, it is bad solution
+        model.removeAll();
+        input = new ByteArrayInputStream(content.getBytes());
+        try {
+            model.read(new InputStreamReader(input), null, type);
+        } catch (Exception e) {
+            throw new DatasourceException(e.getMessage(), Resource.class);
+        }
+
         model.close();
         return true;
     }
