@@ -48,6 +48,5 @@ public abstract class AbstractResource {
     public abstract void setModificationDate(Date modificationDate);
 
     public abstract boolean checkName();
-    public abstract boolean checkName(String name);
 
 }

@@ -13,7 +13,7 @@ import org.jboss.resteasy.links.RESTServiceDiscovery;
 @XmlRootElement(name = "collection")
 public class ResourceCollection extends AbstractResource{
 
-    private final String namePatern = "[a-zA-Z0-9_-]+";
+    private final static String namePatern = "[a-zA-Z0-9_-]+";
     private List<ResourceCollection> collections= new ArrayList <ResourceCollection>();
     private List<Resource> resources=new ArrayList <Resource>();
 
@@ -42,9 +42,8 @@ public class ResourceCollection extends AbstractResource{
     public boolean checkName() {
         return this.getName().matches(this.namePatern);
     }
-    @Override
-    public boolean checkName(String name) {
-        return name.matches(this.namePatern);
+    public static boolean checkName(String name) {
+        return name.matches(namePatern);
     }
 
     @Override

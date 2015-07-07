@@ -9,7 +9,7 @@ import org.jboss.resteasy.links.RESTServiceDiscovery;
 @XmlRootElement(name = "resource")
 public class Resource extends AbstractResource{
 
-    private final String namePatern = "((.*[^a-zA-Z0-9._-]+.*)|(.*.meta$))";
+    private final static String namePatern = "((.*[^a-zA-Z0-9._-]+.*)|(.*.meta$))";
     private String contentUrl = "";
     private String contentMimeType = "";
     private String contentFileName = "";
@@ -54,8 +54,7 @@ public class Resource extends AbstractResource{
         return !this.name.matches(this.namePatern);
     }
 
-    @Override
-    public boolean checkName(String name) {
+    public static boolean checkName(String name) {
         return !name.matches(namePatern);
     }
 
