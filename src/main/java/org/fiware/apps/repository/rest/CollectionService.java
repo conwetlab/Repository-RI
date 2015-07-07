@@ -232,7 +232,6 @@ public class CollectionService {
         try {
             // Create a new resource with the resource metadata given.
             // Some metadata can not be given by the user.
-
             if(mongoResourceDAO.isResourceByContentUrl(resource.getContentUrl())) {
                 return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML)
                         .entity(new RepositoryException(Status.CONFLICT, "Resource with field contentUrl '"+resource.getContentUrl()+"' already exists."))
@@ -310,7 +309,11 @@ public class CollectionService {
             if (path.lastIndexOf("/") == -1) {
                 return true;
             } else {
-                return checkPath(path.substring(0, path.lastIndexOf("/")));
+                if (!ResourceCollection.checkName(path.substring(path.lastIndexOf("/")+1, path.length()))) {
+                    return false;
+                } else {
+                    return checkPath(path.substring(0, path.lastIndexOf("/")));
+                }
             }
         } else {
             return false;
@@ -362,13 +365,13 @@ public class CollectionService {
 
     private Response updateResourceMeta(String path, Resource resource) {
         //Update a resource metadata.
+        System.err.println("Entra");
         if(!resource.checkName()) {
             return Response.status(Status.BAD_REQUEST)
                     .type(MediaType.APPLICATION_XML)
                     .entity(new RepositoryException(Status.BAD_REQUEST, "Field name do not comply the pattern."))
                     .build();
         }
-
         try {
             Resource aux = mongoResourceDAO.getResource(path);
             if (aux == null)
@@ -381,7 +384,8 @@ public class CollectionService {
             resource.setId(path.substring(0, path.lastIndexOf("/"))+"/"+resource.getName());
             resource.setCreationDate(aux.getCreationDate());
 
-            if (mongoResourceDAO.isResource(resource.getId()) || mongoCollectionDAO.getCollection(resource.getId()) != null) {
+            if (!resource.getName().equalsIgnoreCase(aux.getName()) &&
+                    (mongoResourceDAO.isResource(resource.getId()) || (mongoCollectionDAO.getCollection(resource.getId()) != null))) {
                 return Response.status(Status.CONFLICT).build();
             }
             if (!resource.getContentMimeType().equalsIgnoreCase("") && !resource.getContentMimeType().equals(aux.getContentMimeType())) {
