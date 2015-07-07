@@ -365,7 +365,6 @@ public class CollectionService {
 
     private Response updateResourceMeta(String path, Resource resource) {
         //Update a resource metadata.
-        System.err.println("Entra");
         if(!resource.checkName()) {
             return Response.status(Status.BAD_REQUEST)
                     .type(MediaType.APPLICATION_XML)

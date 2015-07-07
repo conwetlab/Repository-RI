@@ -212,7 +212,6 @@ public class IntegrationTestHelper {
 
     public HttpResponse getQuery(String query, List <Header> headers) throws IOException {
         String finalURL = queryServiceUrl + "?query="+query;
-        System.err.println(finalURL);
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
@@ -227,7 +226,6 @@ public class IntegrationTestHelper {
 
     public HttpResponse postQuery(String query, List <Header> headers) throws IOException {
         String finalURL = queryServiceUrl;
-        System.err.println(finalURL);
         HttpPost request = new HttpPost(finalURL);
 
         //Add Headers
@@ -248,7 +246,6 @@ public class IntegrationTestHelper {
 
     public HttpResponse getResourceByUrlContent(String contentUrl, List <Header> headers) throws IOException {
         String finalURL = queryServiceUrl + "/" + contentUrl;
-        System.err.println(finalURL);
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
