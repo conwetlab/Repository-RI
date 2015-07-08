@@ -1,0 +1,50 @@
+<rdf:RDF
+xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:app="http://www.app.fake/app#">
+
+<rdf:Description
+rdf:about="http://www.app.fake/app/uno">
+  <app:name>Uno</app:name>
+  <app:country>USA</app:country>
+  <app:company>Mattel</app:company>
+  <app:price>0.99</app:price>
+  <app:year>2010</app:year>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.app.fake/app/unoattack">
+  <app:name>Uno Attack</app:name>
+  <app:country>USA</app:country>
+  <app:company>Mattel</app:company>
+  <app:price>0.99</app:price>
+  <app:year>2010</app:year>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.app.fake/app/halo">
+  <app:name>Halo</app:name>
+  <app:country>USA</app:country>
+  <app:company>Microsoft</app:company>
+  <app:price>9.99</app:price>
+  <app:year>2005</app:year>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.app.fake/app/halo2">
+  <app:name>Halo 2</app:name>
+  <app:country>USA</app:country>
+  <app:company>Microsoft</app:company>
+  <app:price>10.99</app:price>
+  <app:year>2007</app:year>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.app.fake/app/halo3">
+  <app:name>Halo 3</app:name>
+  <app:country>USA</app:country>
+  <app:company>Bungie</app:company>
+  <app:price>59.99</app:price>
+  <app:year>2010</app:year>
+</rdf:Description>
+
+</rdf:RDF>
