@@ -86,7 +86,6 @@ public class IntegrationTestHelper {
     public HttpResponse postResourceMeta(String collectionsId, String resource, List <Header> headers) throws IOException {
         String finalURL = collectionServiceUrl + collectionsId;
         HttpPost request = new HttpPost(finalURL);
-        System.err.println("finalUrl: "+finalURL);
 
         //Add Headers
         for (Header header : headers) {
