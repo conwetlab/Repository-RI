@@ -1,0 +1,265 @@
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
+package org.fiware.apps.repository.it.collectionService;
+
+import org.fiware.apps.repository.it.IntegrationTestHelper;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.message.BasicHeader;
+import org.fiware.apps.repository.model.Resource;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class CollectionServiceGetITTest {
+
+    private IntegrationTestHelper client;
+    private final static String collection = "collectionTestGet";
+    private static String rdfxmlExample;
+
+    public CollectionServiceGetITTest() {
+        client = new IntegrationTestHelper();
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws IOException {
+        IntegrationTestHelper client = new IntegrationTestHelper();
+
+        String fileName = "fileNameExample";
+        String contentUrl = "http://localhost:8080/contentUrl/resourceTestGet";
+        String creator = "Me";
+        String name = "resourceTest";
+        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
+
+        String auxString = "";
+        FileReader file = new FileReader("src/test/resources/rdf+xml.rdf");
+        BufferedReader buffer = new BufferedReader(file);
+        while(buffer.ready()) {
+            auxString = auxString.concat(buffer.readLine());
+        }
+        buffer.close();
+        rdfxmlExample = auxString;
+
+        //Delete the collection
+        List <Header> headers = new LinkedList<>();
+        client.deleteCollection(collection, headers);
+
+        //Create a resource in the repository
+        headers.add(new BasicHeader("Content-Type", "application/json"));
+        HttpResponse response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        assertEquals(201, response.getStatusLine().getStatusCode());
+
+        //Insert RDF content in the resource
+        headers = new LinkedList<>();
+        headers.add(new BasicHeader("Content-Type", "application/rdf+xml"));
+        response = client.putResourceContent(collection+"/"+name, rdfxmlExample, headers);
+        assertEquals(200, response.getStatusLine().getStatusCode());
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    /*
+    Resource Meta Tests
+    */
+    private void getResourceMeta(String name, String type, String typeExpected, int status) throws IOException {
+        List <Header> headers = new LinkedList<>();
+        headers.add(new BasicHeader("Accept", type));
+        HttpResponse response = client.getResourceMeta(name, headers);
+
+        assertEquals(status, response.getStatusLine().getStatusCode());
+        if (typeExpected != null) {
+            assertEquals(type, response.getEntity().getContentType().getValue());
+        }
+    }
+
+    @Test
+    public void getResourceRootTest() throws IOException {
+        String resource = "";
+        String type = "application/xml";
+        getResourceMeta(resource, type, type, 404);
+    }
+
+    @Test
+    public void getResourceMetaXmlTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "application/xml";
+        getResourceMeta(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceMetaJsonTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "application/json";
+        getResourceMeta(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceMetaHtmlTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "text/html";
+        getResourceMeta(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceMetaTextTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "text/plain";
+        getResourceMeta(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceMetaRDFxmlTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "application/rdf+xml";
+        getResourceMeta(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceMetaTurtleTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "text/turtle";
+        getResourceMeta(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceMetaN3Test() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "text/n3";
+        getResourceMeta(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceMetaNotAcceptableTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "not/acceptable";
+        getResourceMeta(resource, type, null, 406);
+    }
+
+    /*
+    Resource Content Tests
+    */
+    private void getResourceContent(String name, String type, String typeExpected, int status) throws IOException {
+        List <Header> headers = new LinkedList<>();
+        headers.add(new BasicHeader("Accept", type));
+        HttpResponse response = client.getResourceContent(name, headers);
+
+        assertEquals(status, response.getStatusLine().getStatusCode());
+        if (typeExpected != null) {
+            assertEquals(type, response.getEntity().getContentType().getValue());
+        }
+    }
+
+    @Test
+    public void getResourceContentRDFxmlTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "application/rdf+xml";
+        getResourceContent(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceContentTurtleTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "text/turtle";
+        getResourceContent(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceContentN3Test() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "text/n3";
+        getResourceContent(resource, type, type, 200);
+    }
+
+    @Test
+    public void getResourceContentNotAcceptableTest() throws IOException {
+        String resource = collection + "/resourceTest";
+        String type = "not/acceptable";
+        getResourceContent(resource, type, null, 406);
+    }
+
+    //TODO: Test para cuando el contenido no sea RDF
+
+    /*
+    Collection Meta Tests
+    */
+    private void getCollection(String name, String type, String typeExpected, int status) throws IOException {
+        List <Header> headers = new LinkedList<>();
+        headers.add(new BasicHeader("Accept", type));
+        HttpResponse response = client.getCollection(name, headers);
+
+        assertEquals(status, response.getStatusLine().getStatusCode());
+        if (typeExpected != null) {
+            assertEquals(type, response.getEntity().getContentType().getValue());
+        }
+    }
+
+    @Test
+    public void getCollectionMetaXmlTest() throws IOException {
+        String type = "application/xml";
+        getCollection(collection, type, type, 200);
+    }
+
+    @Test
+    public void getCollectionMetaJsonTest() throws IOException {
+        String type = "application/json";
+        getCollection(collection, type, type, 200);
+    }
+
+    @Test
+    public void getCollectionMetaHtmlTest() throws IOException {
+        String type = "text/html";
+        getCollection(collection, type, type, 200);
+    }
+
+    @Test
+    public void getCollectionMetaTextTest() throws IOException {
+        String type = "text/plain";
+        getCollection(collection, type, type, 200);
+    }
+
+    @Test
+    public void getCollectionMetaRDFxmlTest() throws IOException {
+        String type = "application/rdf+xml";
+        getCollection(collection, type, type, 200);
+    }
+
+    @Test
+    public void getCollectionMetaTurtleTest() throws IOException {
+        String type = "text/turtle";
+        getCollection(collection, type, type, 200);
+    }
+
+    @Test
+    public void getCollectionMetaN3Test() throws IOException {
+        String type = "text/n3";
+        getCollection(collection, type, type, 200);
+    }
+
+    @Test
+    public void getCollectionMetaNotAcceptableTest() throws IOException {
+        String type = "not/acceptable";
+        getCollection(collection, type, null, 406);
+    }
+}
