@@ -30,6 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
+import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,7 +111,12 @@ public class QueryService {
             for (MediaType type : types) {
                 String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
                 if (typeString.equalsIgnoreCase("application/xml") || typeString.equalsIgnoreCase("application/json")) {
-                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+                    try {
+                        return Response.status(Status.OK).type(MediaType.valueOf(typeString))
+                                .entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+                    } catch (JenaException ex) {
+                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf(typeString)).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                    }
                 }
             }
             return Response.status(Status.NOT_ACCEPTABLE).build();
@@ -118,7 +125,12 @@ public class QueryService {
             for (MediaType type : types) {
                 String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
                 if (RestHelper.isRDF(typeString)) {
-                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQueryConstruct(query, typeString)).build();
+                    try {
+                        return Response.status(Status.OK).type(MediaType.valueOf(typeString))
+                                .entity(virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(typeString))).build();
+                    } catch (JenaException ex) {
+                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf("application/json")).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                    }
                 }
             }
             return Response.status(Status.NOT_ACCEPTABLE).build();
@@ -127,7 +139,12 @@ public class QueryService {
             for (MediaType type : types) {
                 String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
                 if (RestHelper.isRDF(typeString)) {
-                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQueryDescribe(query, typeString)).build();
+                    try {
+                        return Response.status(Status.OK).type(MediaType.valueOf(typeString))
+                                .entity(virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(typeString))).build();
+                    } catch (JenaException ex) {
+                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf("application/json")).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                    }
                 }
             }
             return Response.status(Status.NOT_ACCEPTABLE).build();
@@ -136,7 +153,12 @@ public class QueryService {
             for (MediaType type : types) {
                 String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
                 if (typeString.equalsIgnoreCase("application/xml") || typeString.equalsIgnoreCase("application/json")) {
-                    return Response.status(Status.OK).type(MediaType.valueOf(typeString)).entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
+                    try {
+                        return Response.status(Status.OK).type(MediaType.valueOf(typeString))
+                                .entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
+                    } catch (JenaException ex) {
+                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf(typeString)).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                    }
                 }
             }
             return Response.status(Status.NOT_ACCEPTABLE).build();
