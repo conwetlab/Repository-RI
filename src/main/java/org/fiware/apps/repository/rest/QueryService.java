@@ -152,13 +152,16 @@ public class QueryService {
         if (query.toLowerCase().contains("ask")) {
             for (MediaType type : types) {
                 String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
-                if (typeString.equalsIgnoreCase("application/xml") || typeString.equalsIgnoreCase("application/json")) {
-                    try {
+                try {
+                    if (typeString.equalsIgnoreCase("application/json")) {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
                                 .entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
-                    } catch (JenaException ex) {
-                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf(typeString)).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                    } else if (typeString.equalsIgnoreCase("application/xml")) {
+                        return Response.status(Status.OK).type(MediaType.valueOf(typeString))
+                                .entity(Boolean.toString(virtuosoResourceDAO.executeQueryAsk(query))).build();
                     }
+                } catch (JenaException ex) {
+                    return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf(typeString)).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
                 }
             }
             return Response.status(Status.NOT_ACCEPTABLE).build();
