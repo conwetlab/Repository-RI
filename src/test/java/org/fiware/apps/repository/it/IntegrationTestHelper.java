@@ -47,8 +47,8 @@ import org.fiware.apps.repository.settings.RepositorySettings;
 public class IntegrationTestHelper {
 
     private HttpClient client;
-    private final String collectionServiceUrl = RepositorySettings.REPOSITORY_BASE_URL + "v2/" + RepositorySettings.COLLECTION_SERVICE_NAME + "/";
-    private final String queryServiceUrl = RepositorySettings.REPOSITORY_BASE_URL + "v2/" + "services/"+RepositorySettings.QUERY_SERVICE_NAME;
+    private final String collectionServiceUrl = "http://localhost:12345/FiwareRepository/" + "v2/" + RepositorySettings.COLLECTION_SERVICE_NAME + "/";
+    private final String queryServiceUrl = "http://localhost:12345/FiwareRepository/" + "v2/" + "services/"+RepositorySettings.QUERY_SERVICE_NAME;
 
 
     public IntegrationTestHelper() {
