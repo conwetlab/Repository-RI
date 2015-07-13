@@ -31,6 +31,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.settings;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -44,15 +46,15 @@ public class RepositorySettings {
         public final static String QUERY_SERVICE_NAME = "query";
 
         public static String getProperty(String property) {
-            if(properties == null) {
-                try {
-                    properties = new Properties();
-                    properties.load(RepositorySettings.class.getClassLoader().getResourceAsStream("properties/repository.properties"));
-                } catch (IOException ex) {
-                    Logger.getLogger(RepositorySettings.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        if(properties == null) {
+            try {
+                properties = new Properties();
+                properties.load(new FileInputStream(new File("/etc/default/Repository-RI.properties")));
+            } catch (IOException ex) {
+                Logger.getLogger(RepositorySettings.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return properties.getProperty(property);
         }
+        return properties.getProperty(property);
+    }
 
 }
