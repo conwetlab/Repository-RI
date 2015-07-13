@@ -22,7 +22,10 @@ sudo ./scripts/preVirtuosoCentos.sh
 set -e
 
 # Install mongodb
-sudo ./scripts/installMongoCentos.sh    
+sudo ./scripts/installMongoCentos.sh
+
+# Add the file settings
+sudo ./scripts/repositorySettings.sh    
 
 # Install the repository from source code or build
 if [ -d "$INSPWD/src" ]; then

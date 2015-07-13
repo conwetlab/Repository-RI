@@ -26,6 +26,9 @@ sudo ./scripts/installMongoCentos.sh
 
 sudo yum install -y mongodb-org
 
+# Add the file settings
+sudo ./scripts/repositorySettings.sh
+
 # Install the repository from source code or build
 if [ -d "$INSPWD/src" ]; then
 	# Installation from source code

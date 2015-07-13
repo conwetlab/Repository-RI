@@ -21,6 +21,9 @@ sudo ./scripts/preVirtuosoDebian.sh
 # Install virtuoso
 ./scripts/installVirtuoso.sh
 
+# Add the file settings
+sudo ./scripts/repositorySettings.sh
+
 # Install the repository from source code or build
 if [ -d "$INSPWD/src" ]; then
 	# Installation from source code
