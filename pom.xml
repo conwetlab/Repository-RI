@@ -422,6 +422,7 @@
                 <version>2.0</version>
                 <configuration>
                     <path>/</path>
+                    <port>12345</port>
                 </configuration>
                 <executions>
                     <execution>
@@ -431,6 +432,7 @@
                             <goal>run-war-only</goal>
                         </goals>
                         <configuration>
+                            
                             <fork>true</fork>
                         </configuration>
                     </execution>
