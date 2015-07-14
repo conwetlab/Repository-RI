@@ -16,8 +16,8 @@ if [  $X == "Y" ] || [ $X == "y" ]; then
 	unzip FiwareRepository.war -d temp 	
 
 	sudo sed -i "s/noSecurity/securityOAuth2/g" $INSPWD/temp/WEB-INF/web.xml
-
-	echo "OAuth2 configuration is located in $INSPWD/apache-tomcat-8.0.22/webapps/FiwareRepository/WEB-INF/classes/properties/repository.properties"
+	
+	echo "OAuth2 configuration is located in /etc/default/Repository-RI.properties"
 
     echo "The default OAuth2 enpoint is http://account.lab.fiware.org"
     echo "Do you want to provide a different idm enpoint? Y/N"
@@ -36,15 +36,16 @@ if [  $X == "Y" ] || [ $X == "y" ]; then
 
     echo "What is your FIWARE Client id?"
 	read X
-	sudo sed -i "/oauth2.key=/c\oauth2.key=$X" $INSPWD/temp/WEB-INF/classes/properties/repository.properties
+	sudo sed -i "/oauth2.key=/c\oauth2.key=$X" /etc/default/Repository-RI.properties
+	
+	echo "What is your FIWAREClient Secret?"
 
-	echo "What is your FIWARE Client Secret?"
 	read X
-	sudo sed -i "/oauth2.secret=/c\oauth2.secret=$X" $INSPWD/temp/WEB-INF/classes/properties/repository.properties
+	sudo sed -i "/oauth2.secret=/c\oauth2.secret=$X" /etc/default/Repository-RI.properties
 
 	echo "What is your Callback URL?"
 	read X
-	sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" $INSPWD/temp/WEB-INF/classes/properties/repository.properties
+	sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" /etc/default/Repository-RI.properties
 
 	cd temp
 	zip -r FiwareRepositoryTemp.war *

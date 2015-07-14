@@ -6,18 +6,19 @@ export X
 echo "-------------------------------------------------"
 echo "This script activate, deactivate or update OAuth2 authentication in the Repository."
 
-if [ -f "./apache-tomcat-8.0.22/webapps/FiwareRepository/WEB-INF/classes/properties/repository.properties" ]; then
+if [ -f "./apache-tomcat-8.0.22/webapps/FiwareRepository/WEB-INF/web.xml" ]; then
     REPODIR=$PWD/apache-tomcat-8.0.22/webapps/FiwareRepository
-elif [ -f "$CATALINA_HOME/webapps/FiwareRepository/WEB-INF/classes/properties/repository.properties" ]; then
+elif [ -f "$CATALINA_HOME/webapps/FiwareRepository/WEB-INF/web.xml" ]; then
     REPODIR=$CATALINA_HOME/webapps/FiwareRepository
 else
-    echo "Where is located Repository-RI? Insert the path:"
-    read REPODIR
-    while [ ! -f "$REPODIR/WEB-INF/classes/properties/repository.properties" ]; do
-        echo "Repository-RI is not located in '$REPODIR'"
-        echo "Where is located Repository-RI? Insert the path:"
-        read REPODIR
-    done
+
+	echo "Where is located Repository-RI? Insert the path:"
+	read REPODIR
+	while [ ! -f "$REPODIR/WEB-INF/web.xml" ]; do
+		echo "Repository-RI is not located in '$REPODIR'"
+		echo "Where is located Repository-RI? Insert the path:"
+		read REPODIR
+	done
 fi
 
 echo "Do you want to activate(Y), update info(U), deactivate(N) or cancel(C)?"
@@ -46,7 +47,7 @@ if [  $X == "Y" ] || [ $X == "y" ] || [ $X == "U" ] || [ $X == "u" ]; then
 
     # Activate oauth2 and configure
     if [ $X != "U" ] || [ $X != "u" ]; then
-        echo "OAuth2 configuration is located in $REPODIR/WEB-INF/classes/properties/repository.properties."
+        echo "OAuth2 configuration is located in /etc/default/Repository-RI.properties."
         sed -i "s/noSecurity/securityOAuth2/g" temp/WEB-INF/web.xml
     fi
 
@@ -62,24 +63,24 @@ if [  $X == "Y" ] || [ $X == "y" ] || [ $X == "U" ] || [ $X == "u" ]; then
     if [ $O == "Y" ] || [ $O == "y" ]; then
         echo "What is the identity manager endpoint?"
         read X
-        sudo sed -i "/oauth2.server=/c\oauth2.server=$X" $INSPWD/temp/WEB-INF/classes/properties/repository.properties
+        sudo sed -i "/oauth2.server=/c\oauth2.server=$X" /etc/default/Repository-RI.properties
     fi
 
     echo "What is your FIWARE Client id?"
     read X
-    sed -i "/oauth2.key=/c\oauth2.key=$X" temp/WEB-INF/classes/properties/repository.properties
+    sed -i "/oauth2.key=/c\oauth2.key=$X" /etc/default/Repository-RI.properties
 
     echo "What is your FIWARE Client Secret?"
     read X
-    sed -i "/oauth2.secret=/c\oauth2.secret=$X" temp/WEB-INF/classes/properties/repository.properties
+    sed -i "/oauth2.secret=/c\oauth2.secret=$X" /etc/default/Repository-RI.properties
 
     echo "What is your Callback URL?"
     read X
-    sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" temp/WEB-INF/classes/properties/repository.properties
+    sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" /etc/default/Repository-RI.properties
 
 elif [  $X == "N" ] || [ $X == "n" ]; then
     # Desactivate oauth2
-    echo "OAuth2 configuration is located in $REPODIR/WEB-INF/classes/properties/repository.properties."
+    echo "OAuth2 configuration is located in /etc/default/Repository-RI.properties."
     sed -i "s/securityOAuth2/noSecurity/g" temp/WEB-INF/web.xml
 fi
 
