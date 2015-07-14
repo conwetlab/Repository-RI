@@ -183,7 +183,7 @@ public class VirtuosoResourceDAOTest {
             fail("exception not expected:\n" + ex.getLocalizedMessage());
         }
         verify(virtModel).removeAll();
-        verify(virtModel, times(2)).read(any(InputStreamReader.class), isNull(String.class), eq(type));
+        verify(virtModel).read(any(InputStreamReader.class), isNull(String.class), eq(type));
         verify(virtModel).close();
     }
 

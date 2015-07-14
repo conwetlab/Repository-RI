@@ -83,8 +83,13 @@ public class VirtuosoResourceDAO {
             return null;
         }
         try {
+            model.begin();
+
             model.write(output, type, null);
+
+            model.abort();
         } catch (Exception e) {
+            model.abort();
             throw new DatasourceException(e.getMessage(), Resource.class);
         }
 
@@ -102,8 +107,13 @@ public class VirtuosoResourceDAO {
         ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
         try
         {
+            model.begin();
+
             model.read(new InputStreamReader(input), null, type);
+
+            model.commit();
         } catch (Exception e) {
+            model.abort();
             throw new DatasourceException(e.getMessage(), Resource.class);
         }
         model.close();
@@ -125,19 +135,16 @@ public class VirtuosoResourceDAO {
                 RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
         try {
-            model.read(new InputStreamReader(input), null, type);
-        } catch (Exception e) {
-            throw new DatasourceException(e.getMessage(), Resource.class);
-        }
-        //Improve, it is bad solution
-        model.removeAll();
-        input = new ByteArrayInputStream(content.getBytes());
-        try {
-            model.read(new InputStreamReader(input), null, type);
-        } catch (Exception e) {
-            throw new DatasourceException(e.getMessage(), Resource.class);
-        }
+            model.begin();
 
+            model.removeAll();
+            model.read(new InputStreamReader(input), null, type);
+
+            model.commit();
+        } catch (Exception e) {
+            model.abort();
+            throw new DatasourceException(e.getMessage(), Resource.class);
+        }
         model.close();
         return true;
     }
@@ -150,21 +157,31 @@ public class VirtuosoResourceDAO {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
             oldModel.write(output, type, null);
-            oldModel.removeAll();
         } catch (Exception e) {
             throw new DatasourceException(e.getMessage(), Resource.class);
         }
-        oldModel.close();
+
 
         Model newModel = modelFactory.openDatabaseModel(newGraph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
                 RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
         ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
         try {
+            oldModel.begin();
+            newModel.begin();
+
             newModel.removeAll();
             newModel.read(new InputStreamReader(input), null, type);
+            oldModel.removeAll();
+
+            oldModel.commit();
+            newModel.commit();
         } catch (Exception e) {
+            oldModel.abort();
+            newModel.abort();
             throw new DatasourceException(e.getMessage(), Resource.class);
         }
+
+        oldModel.close();
         newModel.close();
         return true;
     }
@@ -174,7 +191,18 @@ public class VirtuosoResourceDAO {
         //It is not necessary to check if "id" is a graph.
         Model model = modelFactory.openDatabaseModel(graph, RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port"),
                 RepositorySettings.getProperty("virtuoso.user"), RepositorySettings.getProperty("virtuoso.password"));
+
+        try {
+        model.begin();
+
         model.removeAll();
+
+        model.commit();
+        } catch (Exception ex) {
+            model.abort();
+            return false;
+        }
+
         model.close();
         return true;
     }
