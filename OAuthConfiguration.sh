@@ -6,8 +6,8 @@ export X
 echo "-------------------------------------------------"
 echo "This script activate, deactivate or update OAuth2 authentication in the Repository."
 
-if [ -f "./apache-tomcat-8.0.22/webapps/FiwareRepository/WEB-INF/web.xml" ]; then
-    REPODIR=$PWD/apache-tomcat-8.0.22/webapps/FiwareRepository
+if [ -f "./apache-tomcat/webapps/FiwareRepository/WEB-INF/web.xml" ]; then
+    REPODIR=$PWD/apache-tomcat/webapps/FiwareRepository
 elif [ -f "$CATALINA_HOME/webapps/FiwareRepository/WEB-INF/web.xml" ]; then
     REPODIR=$CATALINA_HOME/webapps/FiwareRepository
 else

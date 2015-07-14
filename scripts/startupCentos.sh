@@ -18,7 +18,7 @@ script
 	cd
 
 	#Start Tomcat
-	cd $INSPWD/apache-tomcat-8.0.24/bin/
+	cd $INSPWD/apache-tomcat/bin/
 	./shutdown.sh
 	./startup.sh
 	cd

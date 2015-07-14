@@ -29,11 +29,11 @@ if [ -d "$INSPWD/src" ]; then
 	# Installation from source code
 	./scripts/oAuthConfigSources.sh
 	mvn clean install
-	cp ./target/FiwareRepository.war $INSPWD/apache-tomcat-8.0.24/webapps/FiwareRepository.war
+	cp ./target/FiwareRepository.war $INSPWD/apache-tomcat/webapps/FiwareRepository.war
 else
 	# Installation from build
 	./scripts/oAuthConfig.sh
-	cp ./FiwareRepository.war $INSPWD/apache-tomcat-8.0.24/webapps/FiwareRepository.war
+	cp ./FiwareRepository.war $INSPWD/apache-tomcat/webapps/FiwareRepository.war
 fi
 
 #Start Virtuoso
@@ -42,7 +42,7 @@ $INSPWD/virtuoso7/bin/virtuoso-t -f &
 cd $INSPWD
 
 #Start Tomcat
-cd $INSPWD/apache-tomcat-8.0.24/bin/
+cd $INSPWD/apache-tomcat/bin/
 ./startup.sh
 cd $INSPWD
 
