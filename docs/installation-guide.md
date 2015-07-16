@@ -131,7 +131,24 @@ http://[host]:[port]/FiwareRepository/v2/callback
 ---
 ## Manually installing the Repository
 
-#### Ubuntu/Debian
+#### Debian
+
+All the mandatory dependencies can be easily installed on a debian based Linux distribution using diferent scripts:
+
+<pre>
+ # export INSPWD=$PWD
+ # ./scripts/installTomcat8.sh
+ # ./scripts/installJava8DebianWheezy.sh
+ # ./scripts/installVirtuoso.sh
+ # apt-get install mongodb
+</pre>
+
+The variable <code>INSPWD</code> contains the path where the repository (Virtuoso, and Tomcat) has been installed.
+
+---
+## Manually installing the Repository
+
+#### Ubuntu
 
 All the mandatory dependencies can be easily installed on a debian based Linux distribution using diferent scripts:
 
@@ -206,7 +223,7 @@ dbpath=/var/lib/mongodb
 To continue, the next step is to start and to configurate Tomcat 8. You may need to have root rights to do that.
 
 <pre>
- $ cd $INSPWD/apache-tomcat-8.0.22/bin/
+ $ cd $INSPWD/apache-tomcat/bin/
  $ ./shutdown.sh
  $ ./startup.sh
  $ cd
@@ -222,8 +239,9 @@ This can be achieved by using a front-end HTTPS server that will proxy all reque
 --- 
 ## Repository Configuration
 
-If you have installed the Repository manually, you have to deploy the Repository software to your Application Server. For that you have to copy the Repository WAR package into the "webapp" folder of Apache Tomcat. 
-To install it on other Java Application Servers (e.g. JBoss), please refer to the specific application server guidelines.
+If you have installed the Repository manually, you have to deploy the Repository software to your Application Server. For that you have to copy the Repository WAR package into the "webapp" folder of Apache Tomcat. To install it on other Java Application Servers (e.g. JBoss), please refer to the specific application server guidelines.
+
+Also, you have to create a properties file located at <code>/etc/default/Repository-RI.properties</code> with the configuration of the repository. To create the properties file with basic configuration it is possible use the script <code>repositorySettings.sh</code>.
 
 The repository can use OAuth2 authentication with FIWARE Lab accounts. If you have used the automatic installation script you have been already asked to choose whether you want to use this authentication mechanism and to provide OAuth2 credentials in that case. 
 
@@ -267,7 +285,7 @@ To disable OAuth2 include <code>noSecurity.xml</code>
 
 --- 
 ## Repository Configuration
-You can modify OAuth2 credentials in the <code>repository.properties</code> file located at <code>resources/properties/repository.properties</code>
+You can modify OAuth2 credentials in the <code>Repository-RI.properties</code> file located at <code>/etc/default/Repository-RI.properties</code>
 
 <pre>
 oauth2.server=https://account.lab.fiware.org
@@ -280,7 +298,7 @@ Note that if you have decided to use OAuth2 authentication you will need to modi
 
 --- 
 ## Repository Configuration
-Finally, you can configure the MongoDB and Virtuoso instances the Repository is going to use in <code>repository.properties</code>, which contains the following values by default.
+Finally, you can configure the MongoDB and Virtuoso instances the Repository is going to use in <code>Repository-RI.properties</code>, which contains the following values by default.
 
 <pre>
 #MongoDb Database
