@@ -20,4 +20,5 @@ if [  $X == "Y" ] || [ $X == "y" ]; then
 	apt-get install -y make
 	apt-get install -y OpenSSL
 	apt-get install -y libssl-dev
+        apt-get install -y build-essential
 fi
