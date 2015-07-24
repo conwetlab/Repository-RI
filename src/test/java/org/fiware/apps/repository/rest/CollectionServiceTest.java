@@ -168,27 +168,28 @@ public class CollectionServiceTest {
     @Test
     public void getResourceMongoDefaultMediaTypeTest() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+xml");
+        Resource resource = generateResource(path, null, true, "application/rdf+json");
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
         when(mongoResourceDAO.getResourceContent(path)).thenReturn(resource);
 
-        getResourceOrCollection(path, accepts, "application/rdf+xml", 200);
+        getResourceOrCollection(path, accepts, "application/rdf+json", 200);
     }
 
     @Test
     public void getResourceVirtuosoDefaultMediaTypeTest() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+json");
+        Resource resource = generateResource(path, null, true, "application/rdf+xml");
+        resource.setContent("content".getBytes());
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
-        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/XML")).thenReturn(resource);
+        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/JSON")).thenReturn(resource);
 
-        getResourceOrCollection(path, accepts, "application/rdf+xml", 200);
+        getResourceOrCollection(path, accepts, "application/rdf+json", 200);
     }
 
     @Test
@@ -208,12 +209,13 @@ public class CollectionServiceTest {
     @Test
     public void getResourceVirtuosoNoContentTest() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+json");
+        Resource resource = generateResource(path, null, true, "application/rdf+xml");
+        resource.setContent("content".getBytes());
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
-        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/XML")).thenReturn(null);
+        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/JSON")).thenReturn(null);
 
         getResourceOrCollection(path, accepts, null, 204);
     }
@@ -245,7 +247,7 @@ public class CollectionServiceTest {
     @Test
     public void getResourceDatasourceExceptionTest2() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+xml");
+        Resource resource = generateResource(path, null, true, "application/rdf+json");
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
@@ -264,7 +266,7 @@ public class CollectionServiceTest {
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
 
-        getResourceMeta(path, accepts, "application/xml", 200);
+        getResourceMeta(path, accepts, "application/json", 200);
     }
 
     @Test
@@ -275,7 +277,7 @@ public class CollectionServiceTest {
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
 
-        getResourceMeta(path, accepts, "application/xml", 200);
+        getResourceMeta(path, accepts, "application/json", 200);
     }
 
     @Test
@@ -372,7 +374,7 @@ public class CollectionServiceTest {
         when(mongoResourceDAO.getResource(path)).thenReturn(null);
         when(mongoCollectionDAO.getCollection(path)).thenReturn(resourceCollection);
 
-        getResourceOrCollection(path, accepts, "application/xml", 200);
+        getResourceOrCollection(path, accepts, "application/json", 200);
     }
 
     @Test
@@ -384,7 +386,7 @@ public class CollectionServiceTest {
         when(mongoResourceDAO.getResource(path)).thenReturn(null);
         when(mongoCollectionDAO.getCollection(path)).thenReturn(resourceCollection);
 
-        getResourceOrCollection(path, accepts, "application/xml", 200);
+        getResourceOrCollection(path, accepts, "application/json", 200);
     }
 
     @Test
@@ -416,68 +418,90 @@ public class CollectionServiceTest {
         List <String> accepts = new LinkedList<>();
 
         when(mongoResourceDAO.getResource(path)).thenReturn(null);
-        when(mongoCollectionDAO.getCollection(path)).thenThrow(JAXBException.class);;
+        when(mongoCollectionDAO.getCollection(path)).thenThrow(JAXBException.class);
 
         getResourceOrCollection(path, accepts, null, 500);
     }
 
     //POST Resource
 
-    private void postResource(String path, Resource resource, int status) throws URISyntaxException {
-        Response returned = toTest.postResource(path, resource);
+    private void postResource(String path, Resource resource, List <String> contentType, int status) throws URISyntaxException {
+        MultivaluedMap <String, String> acceptHeader = new MultivaluedMapImpl<>();
+        acceptHeader.put("Content-Type", contentType);
+        HttpHeaders headers = new ResteasyHttpHeaders(acceptHeader);
+
+        Response returned = toTest.postResource(headers, path, resource);
 
         assertEquals(status, returned.getStatus());
     }
 
     @Test
     public void postResourceTest() throws URISyntaxException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection";
         int status = 201;
         Resource resource = generateResource("a", null, true, null);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceTest2() throws URISyntaxException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection";
         int status = 201;
         Resource resource = generateResource("a", null, true, null);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceBadRequestTest() throws URISyntaxException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "";
         int status = 400;
         Resource resource = generateResource("a", null, true, null);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceBadRequestTest2() throws URISyntaxException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = null;
         int status = 400;
         Resource resource = generateResource("a", null, true, null);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceConflictTest() throws URISyntaxException, DatasourceException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection2";
         int status = 409;
         Resource resource = generateResource("a", null, true, null);
 
         when(mongoResourceDAO.isResource(path)).thenReturn(true);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceConflictTest2() throws URISyntaxException, DatasourceException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection2";
         int status = 409;
         Resource resource = generateResource("a", null, true, null);
@@ -485,89 +509,115 @@ public class CollectionServiceTest {
         when(mongoResourceDAO.isResource(path)).thenReturn(true);
         when(mongoCollectionDAO.getCollection(path+resource.getId())).thenReturn(null);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceDatasourceExceptionTest() throws URISyntaxException, DatasourceException, SameIdException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection2";
         int status = 500;
         Resource resource = generateResource("a", null, true, null);
 
         doThrow(DatasourceException.class).when(mongoResourceDAO).insertResource(resource);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceURISyntaxExceptionTest() throws URISyntaxException, DatasourceException, SameIdException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection2";
         int status = 500;
         Resource resource = generateResource("a", null, true, null);
 
         doThrow(URISyntaxException.class).when(mongoResourceDAO).insertResource(resource);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
     @Test
     public void postResourceSameIdExceptionTest() throws URISyntaxException, DatasourceException, SameIdException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection2";
         int status = 409;
         Resource resource = generateResource("a", null, true, null);
 
         doThrow(SameIdException.class).when(mongoResourceDAO).insertResource(resource);
 
-        postResource(path, resource, status);
+        postResource(path, resource, contentType, status);
     }
 
-    private void postResourceCollection(String path, ResourceCollection resourceCollection, int status) {
-        Response response = toTest.postResource(path, resourceCollection);
+    private void postResourceCollection(String path, ResourceCollection resourceCollection,List <String> contentType, int status) {
+        MultivaluedMap <String, String> acceptHeader = new MultivaluedMapImpl<>();
+        acceptHeader.put("Content-Type", contentType);
+        HttpHeaders headers = new ResteasyHttpHeaders(acceptHeader);
+
+        Response response = toTest.postResource(headers, path, resourceCollection);
 
         assertEquals(status, response.getStatus());
     }
 
     @Test
     public void postResourceCollectionNoPathTest() {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         int status = 201;
         ResourceCollection resourceCollection = generateResourceCollection("collection", null, true);
 
-        Response response = toTest.postCollection(resourceCollection);
-
-        assertEquals(status, response.getStatus());
+        postResourceCollection("", resourceCollection, contentType, status);
     }
 
     @Test
     public void postResourceCollectionTest() {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "";
         int status = 201;
         ResourceCollection resourceCollection = generateResourceCollection("collection", null, true);
 
-        postResourceCollection(path, resourceCollection, status);
+        postResourceCollection(path, resourceCollection, contentType, status);
     }
 
     @Test
     public void postResourceCollectionTest2() {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection";
         int status = 201;
         ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
 
-        postResourceCollection(path, resourceCollection, status);
+        postResourceCollection(path, resourceCollection, contentType, status);
     }
 
     @Test
     public void postResourceCollectionConflictTest() throws DatasourceException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection3";
         int status = 409;
         ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
 
         when(mongoResourceDAO.isResource(path)).thenReturn(true);
 
-        postResourceCollection(path, resourceCollection, status);
+        postResourceCollection(path, resourceCollection, contentType, status);
     }
 
     @Test
     public void postResourceCollectionConflictTest2() throws DatasourceException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection3";
         int status = 409;
         ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
@@ -575,242 +625,280 @@ public class CollectionServiceTest {
         when(mongoResourceDAO.isResource(path)).thenReturn(false);
         when(mongoCollectionDAO.getCollection(path+"/"+resourceCollection.getName())).thenReturn(resourceCollection);
 
-        postResourceCollection(path, resourceCollection, status);
+        postResourceCollection(path, resourceCollection, contentType, status);
     }
 
     @Test
     public void postResourceCollectionDatasourceExceptionTest() throws DatasourceException, SameIdException, SameIdException, SameIdException, SameIdException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection3";
         int status = 500;
         ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
 
         doThrow(DatasourceException.class).when(mongoCollectionDAO).insertCollection(resourceCollection);
 
-        postResourceCollection(path, resourceCollection, status);
+        postResourceCollection(path, resourceCollection, contentType, status);
     }
 
     @Test
     public void postResourceCollectionURISyntaxExceptionTest() throws DatasourceException, SameIdException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection3";
         int status = 500;
         ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
 
         doThrow(URISyntaxException.class).when(mongoCollectionDAO).insertCollection(resourceCollection);
 
-        postResourceCollection(path, resourceCollection, status);
+        postResourceCollection(path, resourceCollection, contentType, status);
     }
 
     @Test
     public void postResourceCollectionSameIdExceptionTest() throws DatasourceException, SameIdException {
+        List <String> contentType = new LinkedList<>();
+        contentType.add("application/json");
+
         String path = "collection/collection3";
         int status = 409;
         ResourceCollection resourceCollection = generateResourceCollection("collection2", null, true);
 
         doThrow(SameIdException.class).when(mongoCollectionDAO).insertCollection(resourceCollection);
 
-        postResourceCollection(path, resourceCollection, status);
+        postResourceCollection(path, resourceCollection, contentType, status);
+    }
+
+    private void putResourceContent(String path, List <String> accepts, String contentType, String content, int status) {
+        MultivaluedMap <String, String> acceptHeader = new MultivaluedMapImpl<>();
+        acceptHeader.put("Accept", accepts);
+        HttpHeaders headers = new ResteasyHttpHeaders(acceptHeader);
+
+        Response returned = toTest.putResourceContent(headers, path, contentType, content);
+
+        assertEquals(status, returned.getStatus());
     }
 
     @Test
     public void putResourceTest() throws URISyntaxException, DatasourceException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
-        Resource resource = generateResource(accept, null, true, null);
+        String contentType = "application/rdf+xml";
+        Resource resource = generateResource(contentType, null, true, null);
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
-        returned = toTest.putResource(accept, path, "content");
-
-        assertEquals(200, returned.getStatus());
+        putResourceContent(path, accpeted, contentType, "content", 200);
     }
 
     @Test
     public void putResourceNotRDFTest() throws URISyntaxException, DatasourceException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "accept";
-        Resource resource = generateResource(accept, null, true, null);
+        String contentType = "application/not-rdf";
+        Resource resource = generateResource("application/not-rdf", null, true, null);
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
-        returned = toTest.putResource(accept, path, "content");
-
-        assertEquals(200, returned.getStatus());
+        putResourceContent(path, accpeted, contentType, "content", 200);
     }
 
     @Test
     public void putResourceNullTest() throws URISyntaxException, DatasourceException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
+        String contentType = "application/rdf+xml";
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(null);
 
-        returned = toTest.putResource(accept, path, "content");
+        putResourceContent(path, accpeted, contentType, "content", 404);
 
-        assertEquals(404, returned.getStatus());
     }
 
     @Test
     public void putResourceNoContentTypeTest() throws URISyntaxException, DatasourceException {
-        Response returned;
         String path = "a/b/c";
-        String accept = null;
+        String contentType = null;
+        Resource resource = generateResource("application/rdf+xml", null, true, null);
 
-        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(null);
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
-        returned = toTest.putResource(accept, path, "content");
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
-        assertEquals(400, returned.getStatus());
+        putResourceContent(path, accpeted, contentType, "content", 400);
     }
 
     @Test
     public void putResourceNoContentTypeTest2() throws URISyntaxException, DatasourceException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "";
+        String contentType = "";
+        Resource resource = generateResource("application/rdf+xml", null, true, null);
 
-        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(null);
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
-        returned = toTest.putResource(accept, path, "content");
+        when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
-        assertEquals(400, returned.getStatus());
+        putResourceContent(path, accpeted, contentType, "content", 400);
     }
 
     @Test
     public void putResourceErrorTest() throws URISyntaxException, DatasourceException, SameIdException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
+        String contentType = "application/xml";
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
         doThrow(DatasourceException.class).when(mongoResourceDAO).getResourceContent(path);
 
-        returned = toTest.putResource(accept, path, "content");
+        putResourceContent(path, accpeted, contentType, "content", 500);
+    }
 
-        assertEquals(500, returned.getStatus());
+    private void putResource(String path, List <String> accepts, Resource resource, int status) {
+        MultivaluedMap <String, String> acceptHeader = new MultivaluedMapImpl<>();
+        acceptHeader.put("Accept", accepts);
+        HttpHeaders headers = new ResteasyHttpHeaders(acceptHeader);
+
+        Response returned = toTest.putResource(headers, path, resource);
+
+        assertEquals(status, returned.getStatus());
     }
 
     @Test
     public void putResourceMetaTest() throws DatasourceException, SameIdException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
         Resource oldResource = generateResource("old", null, true, null);
         Resource newResource = generateResource("new", null, true, null);
         newResource.setContentMimeType(oldResource.getContentMimeType());
         newResource.setContentUrl(oldResource.getContentUrl());
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
         when(mongoResourceDAO.insertResource(anyObject())).thenReturn(null);
 
-        returned = toTest.putResource(accept, path, newResource);
-
-        assertEquals(200, returned.getStatus());
-    }
-
-    @Test
-    public void putResourceMetaMimeErrorTest() throws DatasourceException, SameIdException {
-        Response returned;
-        String path = "a/b/c";
-        String accept = "application/rdf+xml";
-        Resource oldResource = generateResource("old", null, true, null);
-        Resource newResource = generateResource("new", null, true, null);
-        newResource.setContentUrl(oldResource.getContentUrl());
-
-        when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
-
-        returned = toTest.putResource(accept, path, newResource);
-
-        assertEquals(403, returned.getStatus());
+        putResource(path, accpeted, newResource, 200);
     }
 
     @Test
     public void putResourceMetaUrlErrorTest() throws DatasourceException, SameIdException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
+        Resource oldResource = generateResource("old", null, true, null);
+        Resource newResource = generateResource("new", null, true, null);
+        newResource.setContentUrl(oldResource.getContentUrl());
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
+
+        when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
+
+        putResource(path, accpeted, newResource, 403);
+
+    }
+
+    @Test
+    public void putResourceMetaMimeErrorTest() throws DatasourceException, SameIdException {
+        String path = "a/b/c";
         Resource oldResource = generateResource("old", null, true, null);
         Resource newResource = generateResource("new", null, true, null);
         newResource.setContentMimeType(oldResource.getContentMimeType());
 
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
+
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
 
-        returned = toTest.putResource(accept, path, newResource);
-
-        assertEquals(403, returned.getStatus());
+        putResource(path, accpeted, newResource, 403);
     }
 
     @Test
     public void putResourceMetaErrorTest() throws DatasourceException {
-        Response returned;
         String path = "a/b/c";
-        String accept = "application/rdf+xml";
         Resource oldResource = generateResource("old", null, true, null);
         Resource newResource = generateResource("new", null, true, null);
         newResource.setContentMimeType(oldResource.getContentMimeType());
         newResource.setContentUrl(oldResource.getContentUrl());
 
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
+
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
         doThrow(DatasourceException.class).when(mongoResourceDAO).updateResource(eq(path), anyObject());
 
-        returned = toTest.putResource(accept, path, newResource);
+        putResource(path, accpeted, newResource, 500);
+    }
 
-        assertEquals(500, returned.getStatus());
+    private void deleteResource(String path, List <String> accepts, int status) {
+        MultivaluedMap <String, String> acceptHeader = new MultivaluedMapImpl<>();
+        acceptHeader.put("Accept", accepts);
+        HttpHeaders headers = new ResteasyHttpHeaders(acceptHeader);
+
+        Response returned = toTest.delete(headers, path);
+
+        assertEquals(status, returned.getStatus());
     }
 
     @Test
     public void deleteResourceTest() throws DatasourceException {
-        Response returned;
         String path = "a/b/c";
         Resource resource = generateResource(path, null, true, null);
 
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
+
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
 
-        returned = toTest.delete(path);
-
-        assertEquals(204, returned.getStatus());
+        deleteResource(path, accpeted, 204);
     }
 
     @Test
     public void deleteResourceCollectionTest() throws DatasourceException {
-        Response returned;
         String path = "a/b/c";
         ResourceCollection collection = generateResourceCollection(path, null, true);
+
+        List <String> accpeted = new LinkedList<>();
 
         when(mongoResourceDAO.getResource(path)).thenReturn(null);
         when(mongoCollectionDAO.findCollection(path)).thenReturn(collection);
 
-        returned = toTest.delete(path);
-
-        assertEquals(204, returned.getStatus());
+        deleteResource(path, accpeted, 204);
     }
 
     @Test
     public void deleteNotFoundTest() throws DatasourceException {
-        Response returned;
         String path = "a/b/c";
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(null);
         when(mongoCollectionDAO.findCollection(path)).thenReturn(null);
 
-        returned = toTest.delete(path);
-
-        assertEquals(404, returned.getStatus());
+        deleteResource(path, accpeted, 404);
     }
 
     @Test
     public void deleteResourceErrorTest() throws DatasourceException {
-        Response returned;
         String path = "a/b/c";
         Resource resource = generateResource(path, null, true, null);
+
+        List <String> accpeted = new LinkedList<>();
+        accpeted.add("application/json");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
         doThrow(DatasourceException.class).when(mongoResourceDAO).deleteResource(eq(path));
 
-        returned = toTest.delete(path);
-
-        assertEquals(500, returned.getStatus());
+        deleteResource(path, accpeted, 500);
     }
 
     private Resource generateResource(String string, Date date, boolean creationDate, String mediaType) {

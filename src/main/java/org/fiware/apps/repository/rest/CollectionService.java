@@ -34,7 +34,6 @@ package org.fiware.apps.repository.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.*;
@@ -56,7 +55,6 @@ import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.AbstractResource;
-import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 import org.fiware.apps.repository.settings.RepositorySettings;
@@ -74,82 +72,63 @@ public class CollectionService {
     @Path("/")
     @Produces({"application/xml", "application/json"})
     public Response getResourceRoot(@Context HttpHeaders headers) {
-        List <MediaType> accepts = headers.getAcceptableMediaTypes();
-        if(accepts.isEmpty()) {
-            accepts = new LinkedList();
-            accepts.add(MediaType.APPLICATION_XML_TYPE);
-        }
-
-        return RestHelper.sendError("Please specify a collection or a resource", Status.NOT_FOUND, accepts);
+        return RestHelper.sendError("Please specify a collection or a resource", Status.NOT_FOUND, headers.getAcceptableMediaTypes());
     }
 
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response getResource(@Context UriInfo uriInfo, @Context HttpHeaders headers, @PathParam("path") String path) {
-        return getResource(path, headers.getAcceptableMediaTypes(), uriInfo);
+    public Response getResource(@Context UriInfo uriInfo,
+            @Context HttpHeaders headers,
+            @PathParam("path") String path) {
+
+        List accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = RestHelper.addDefaultAcceptedTypes();
+        }
+
+        return getResourceOrCollection(path, accepts, uriInfo);
     }
 
     @GET
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
-    public Response getResourceMeta(@Context UriInfo uriInfo, @Context HttpHeaders headers, @PathParam("path") String path) {
-        List <MediaType> accepts = headers.getAcceptableMediaTypes();
-        //If Accept header is empty, add default media type.
+    public Response getResourceMeta(@Context UriInfo uriInfo,
+            @Context HttpHeaders headers,
+            @PathParam("path") String path) {
+
+        List accepts = headers.getAcceptableMediaTypes();
         if(accepts.isEmpty()) {
-            accepts = new LinkedList();
-            accepts.add(MediaType.valueOf("application/xml"));
+            accepts = RestHelper.addDefaultAcceptedTypes();
         }
 
-        for (MediaType type : accepts) {
-            if(RestHelper.isResourceOrCollectionType(type.getType()+"/"+type.getSubtype())) {
-                return getResourceMeta(path, type.getType()+"/"+type.getSubtype(), uriInfo);
-            }
-            if("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) {
-                return getResourceMeta(path, "application/xml", uriInfo);
-            }
-        }
-
-        return RestHelper.sendError("", Status.NOT_ACCEPTABLE, accepts);
+        return getResourceMeta(path, accepts, uriInfo);
     }
 
-    private Response getResource(String path, List <MediaType> types, UriInfo uriInfo) {
-
-        //Check if the path is a resource or a resourceCollection
+    private Response getResourceOrCollection(String path, List <MediaType> accepteds, UriInfo uriInfo) {
         Resource resource = null;
+        Resource resourceContent = null;
+
+        // Check if path is a resource or a collection.
         try {
             resource = mongoResourceDAO.getResource(path);
         } catch (DatasourceException ex) {
-            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, types);
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
+
         if (resource == null) {
-            //If Accept header is empty, add default media type.
-            if(types.isEmpty()) {
-                types = new LinkedList();
-                types.add(MediaType.valueOf("application/xml"));
-            }
-            //Ask the resourceCollection in the first compatible type
-            for (MediaType type : types) {
-                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
-
-                if(RestHelper.isResourceOrCollectionType(typeString)) {
-                    return getCollection(path, typeString, uriInfo);
-                }
-            }
-
-            return RestHelper.sendError("", Status.NOT_ACCEPTABLE, types);
-        }
-
-        //If Accept header is empty, add default media type.
-        if(types.isEmpty()) {
-            types = new LinkedList();
-            types.add(MediaType.valueOf("application/rdf+xml"));
+            return getCollection(path, accepteds, uriInfo);
         }
 
         try {
-            //Get the resource in the first compatible type
-            for (MediaType type : types) {
+            for (MediaType accepted : accepteds) {
+                String typeString = accepted.getType()+"/"+accepted.getSubtype();
 
-                Resource resourceContent;
-                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+                if ("*/*".equalsIgnoreCase(typeString)) {
+                    if (RestHelper.isRDF(resource.getContentMimeType())) {
+                        typeString = RestHelper.RdfDefaultType;
+                    } else {
+                        typeString = resource.getContentMimeType();
+                    }
+                }
 
                 //Check is posible to obtain the content from Mongo or from Virtuoso and return it.
                 if (typeString.equalsIgnoreCase(resource.getContentMimeType())) {
@@ -157,124 +136,156 @@ public class CollectionService {
                     if (resourceContent.getContent() != "".getBytes()) {
                         return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
                     } else {
-                        return RestHelper.sendError("", Status.NO_CONTENT, types);
+                        return RestHelper.sendError("No content", Status.NO_CONTENT, accepteds);
                     }
                 } else if (RestHelper.isRDF(typeString)) {
                     resourceContent = virtuosoResourceDAO.getResource(resource.getContentUrl(), RestHelper.typeMap.get(typeString));
                     if (resourceContent != null) {
                         return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
                     } else {
-                        return RestHelper.sendError("", Status.NO_CONTENT, types);
+                        return RestHelper.sendError("No content", Status.NO_CONTENT, accepteds);
                     }
                 }
             }
 
-            //If there are not any compatible type, returns NOT_ACCEPTABLE.
-            return RestHelper.sendError("", Status.NOT_ACCEPTABLE, types);
         } catch (DatasourceException ex) {
-            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, types);
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
 
+        return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepteds);
     }
 
-    private Response getResourceMeta(String path, String type, UriInfo uriInfo) {
+    private Response getResourceMeta(String path, List <MediaType> accepteds, UriInfo uriInfo) {
+        Resource resource = null;
+
         try {
-            Resource resource = mongoResourceDAO.getResource(path);
-            if (resource != null) {
-                return RestHelper.multiFormatResponse(resource, Resource.class, type, uriInfo);
-            } else {
-                return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Resource not found")).build();
+            // Get the metadata of a resource
+            resource = mongoResourceDAO.getResource(path);
+
+            if (resource == null) {
+                return RestHelper.sendError("Resource not found.", Status.NOT_FOUND, accepteds);
             }
-        } catch (DatasourceException | JAXBException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+
+            for(MediaType accepted : accepteds) {
+                String typeString = ("*/*".equalsIgnoreCase(accepted.getType()+"/"+accepted.getSubtype())) ? RestHelper.ResourcesDefaultType : accepted.getType()+"/"+accepted.getSubtype();
+
+                if (RestHelper.isResourceOrCollectionType(typeString)) {
+                    return RestHelper.multiFormatResponse(resource, Resource.class, typeString, uriInfo);
+                }
+            }
+        } catch (JAXBException | DatasourceException ex) {
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
+
+        return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepteds);
     }
 
-    private Response getCollection(String path, String type, UriInfo uriInfo) {
+    private Response getCollection(String path, List <MediaType> accepteds, UriInfo uriInfo) {
+        ResourceCollection collection = null;
+
         try {
-            ResourceCollection resourceCollection = mongoCollectionDAO.getCollection(path);
-            if (resourceCollection != null) {
-                return RestHelper.multiFormatResponse(resourceCollection, ResourceCollection.class, type, uriInfo);
-            } else {
-                return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Resource or Collection not found")).build();
+            //Get a collection
+            collection = mongoCollectionDAO.getCollection(path);
+            if (collection == null) {
+                return RestHelper.sendError("Resource or collection not found.", Status.NOT_FOUND, accepteds);
             }
-        } catch (DatasourceException | JAXBException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+
+            for(MediaType accepted : accepteds) {
+                String typeString = ("*/*".equalsIgnoreCase(accepted.getType()+"/"+accepted.getSubtype())) ? RestHelper.ResourcesDefaultType : accepted.getType()+"/"+accepted.getSubtype();
+
+                if (RestHelper.isResourceOrCollectionType(typeString)) {
+                    return RestHelper.multiFormatResponse(collection, ResourceCollection.class, typeString, uriInfo);
+                }
+            }
+        } catch (JAXBException | DatasourceException ex) {
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
+
+        return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepteds);
     }
 
     @POST
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response postResource(@PathParam("path") String path, AbstractResource absResource) {
+    public Response postResource(@Context HttpHeaders headers,
+            @PathParam("path") String path,
+            AbstractResource absResource) {
+
+        List accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = RestHelper.addDefaultAcceptedTypes();
+        }
+
         if(absResource instanceof Resource) {
-            return insertResource((Resource) absResource, path);
+            return insertResource((Resource) absResource, path, accepts);
         }
         if (absResource instanceof ResourceCollection) {
-            return insertCollection((ResourceCollection) absResource, path);
+            return insertCollection((ResourceCollection) absResource, path, accepts);
         }
-        return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, absResource.getClass().toString())).build();
+
+        return RestHelper.sendError("The content is neither a resource nor collection.", Status.INTERNAL_SERVER_ERROR, accepts);
     }
 
     @POST
     @Consumes({"application/xml", "application/json"})
     @Path("/")
-    public Response postCollection(ResourceCollection resourceCollection) {
-        return insertCollection(resourceCollection, "");
+    public Response postCollection(@Context HttpHeaders headers,
+            ResourceCollection resourceCollection) {
+
+        List accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = RestHelper.addDefaultAcceptedTypes();
+        }
+
+        return insertCollection(resourceCollection, "", accepts);
     }
 
-    private Response insertResource(Resource resource, String path) {
-        if(!resource.checkName()) {
-            return Response.status(Status.BAD_REQUEST).type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.BAD_REQUEST, "Field name do not comply the pattern."))
-                    .build();
-        }
+    private Response insertResource(Resource resource,
+            String path,
+            List <MediaType> accepteds) {
+
         try {
-            // Create a new resource with the resource metadata given.
-            // Some metadata can not be given by the user.
-            if(mongoResourceDAO.isResourceByContentUrl(resource.getContentUrl())) {
-                return Response.status(Status.CONFLICT).type(MediaType.APPLICATION_XML)
-                        .entity(new RepositoryException(Status.CONFLICT, "Resource with field contentUrl '"+resource.getContentUrl()+"' already exists."))
-                        .build();
+            if (!resource.checkName()) {
+                return RestHelper.sendError("Field name do not comply the pattern.", Status.BAD_REQUEST, accepteds);
             }
 
+            if(mongoResourceDAO.isResourceByContentUrl(resource.getContentUrl())) {
+                return RestHelper.sendError("Resource with field contentUrl '"+resource.getContentUrl()+"' already exists.", Status.CONFLICT, accepteds);
+            }
+
+            //Clean the resource, some metadata can not be given by the user
             resource.setId(path+"/"+resource.getName());
             resource.setContentMimeType("");
             resource.setCreationDate(new Date());
 
             if (path == null || path.equalsIgnoreCase("")) {
-                return Response.status(Status.BAD_REQUEST).build();
+                return RestHelper.sendError("Resource must be created in a collection.", Status.BAD_REQUEST, accepteds);
             }
             if ((!checkPath(path) && !path.equalsIgnoreCase("")) ||
                     mongoCollectionDAO.getCollection(resource.getId()) != null ||
                     mongoResourceDAO.getResource(resource.getId()) != null) {
-                return Response.status(Status.CONFLICT).build();
+                return RestHelper.sendError("Path is a resource.", Status.CONFLICT, accepteds);
             }
 
             mongoResourceDAO.insertResource(resource);
-            return Response.status(Status.CREATED).contentLocation(new URI(resource.getId())).build();
+
+            return Response.status(Status.CREATED).type(MediaType.APPLICATION_JSON).contentLocation(new URI(resource.getId())).build();
+
         } catch (DatasourceException | URISyntaxException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage()))
-                    .build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT)
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.CONFLICT, ex.getMessage()))
-                    .build();
+            return RestHelper.sendError("Resource already exists.", Status.CONFLICT, accepteds);
         }
     }
 
-    private Response insertCollection(ResourceCollection resourceCollection, String path) {
-        if(!resourceCollection.checkName()) {
-            return Response.status(Status.BAD_REQUEST)
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.BAD_REQUEST, "Field name do not comply the pattern."))
-                    .build();
-        }
-        try {
+    private Response insertCollection(ResourceCollection resourceCollection,
+            String path,
+            List <MediaType> accepteds) {
 
+        try {
+            if(!resourceCollection.checkName()) {
+                return RestHelper.sendError("Field name do not comply the pattern.", Status.BAD_REQUEST, accepteds);
+            }
 
             if (!path.equalsIgnoreCase("")) {
                 resourceCollection.setId(path+"/"+resourceCollection.getName());
@@ -285,23 +296,16 @@ public class CollectionService {
             if (!checkPath(path) ||
                     mongoCollectionDAO.getCollection(resourceCollection.getId()) != null ||
                     mongoResourceDAO.getResource(resourceCollection.getId()) != null) {
-                return Response.status(Status.CONFLICT).build();
+                return RestHelper.sendError("Path is a resource.", Status.CONFLICT, accepteds);
             }
 
             mongoCollectionDAO.insertCollection(resourceCollection);
             return Response.status(Status.CREATED).contentLocation(new URI(resourceCollection.getId())).build();
         } catch (DatasourceException | URISyntaxException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage()))
-                    .build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         } catch (SameIdException ex) {
-            return Response.status(Status.CONFLICT)
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.CONFLICT, ex.getMessage()))
-                    .build();
+            return RestHelper.sendError("Collection already exists.", Status.CONFLICT, accepteds);
         }
-
     }
 
     private boolean checkPath(String path) throws DatasourceException {
@@ -322,33 +326,53 @@ public class CollectionService {
 
     @PUT
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, String content/*, @MultipartForm FileUploadForm form*/) {
+    public Response putResourceContent(@Context HttpHeaders headers,
+            @PathParam("path") String path,
+            @HeaderParam("Content-Type") String contentType,
+            String content) {
+
+        List accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = RestHelper.addDefaultAcceptedTypes();
+        }
+
         if (contentType == null || contentType.equalsIgnoreCase("")) {
-            return Response.status(Status.BAD_REQUEST).build();
+            return RestHelper.sendError("No content to insert.", Status.BAD_REQUEST, accepts);
         } else {
-            return updateResourceContent(path, content, contentType);
+            return updateResourceContent(path, content, contentType, accepts);
         }
     }
 
     @PUT
     @Consumes({"application/xml", "application/json"})
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}.meta")
-    public Response putResource(@HeaderParam("Content-Type") String contentType, @PathParam("path") String path, Resource resource) {
-        return updateResourceMeta(path, (Resource) resource);
+    public Response putResource(@Context HttpHeaders headers,
+            @PathParam("path") String path,
+            Resource resource) {
+
+        List accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = RestHelper.addDefaultAcceptedTypes();
+        }
+
+        return updateResourceMeta(path, (Resource) resource, accepts);
     }
 
-    private Response updateResourceContent(String path, String content, String type) {
-        // Update a resource content inserting in virtuoso triple store if content is RDF.
+    private Response updateResourceContent(String path,
+            String content,
+            String contentType,
+            List <MediaType> accepteds) {
+
         Resource resource;
         try {
             resource = mongoResourceDAO.getResourceContent(path);
             if (resource == null)
             {
-                return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
+                return RestHelper.sendError("Resource not found.", Status.NOT_FOUND, accepteds);
             }
             resource.setContent(content.getBytes());
-            resource.setContentMimeType(type);
-            if(RestHelper.isRDF(type)) {
+            resource.setContentMimeType(contentType);
+            if(RestHelper.isRDF(contentType)) {
                 virtuosoResourceDAO.updateResource(resource.getContentUrl(), content,
                         RestHelper.typeMap.get(resource.getContentMimeType()));
             }
@@ -358,18 +382,15 @@ public class CollectionService {
             mongoResourceDAO.updateResourceContent(resource);
 
         } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
         return Response.status(Status.OK).build();
     }
 
-    private Response updateResourceMeta(String path, Resource resource) {
+    private Response updateResourceMeta(String path, Resource resource, List <MediaType> accepteds) {
         //Update a resource metadata.
         if(!resource.checkName()) {
-            return Response.status(Status.BAD_REQUEST)
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(new RepositoryException(Status.BAD_REQUEST, "Field name do not comply the pattern."))
-                    .build();
+            return RestHelper.sendError("Field name do not comply the pattern.", Status.BAD_REQUEST, accepteds);
         }
         try {
             Resource aux = mongoResourceDAO.getResource(path);
@@ -377,7 +398,7 @@ public class CollectionService {
             {
                 resource.setId(path);
                 resource.setName(path.substring(path.lastIndexOf("/")+1, path.length()));
-                return postResource(path.substring(0, path.lastIndexOf("/")), resource);
+                return insertResource(resource ,path.substring(0, path.lastIndexOf("/")), accepteds);
             }
 
             resource.setId(path.substring(0, path.lastIndexOf("/"))+"/"+resource.getName());
@@ -385,13 +406,13 @@ public class CollectionService {
 
             if (!resource.getName().equalsIgnoreCase(aux.getName()) &&
                     (mongoResourceDAO.isResource(resource.getId()) || (mongoCollectionDAO.getCollection(resource.getId()) != null))) {
-                return Response.status(Status.CONFLICT).build();
+                return RestHelper.sendError("Resource or collection already exist.", Status.CONFLICT, accepteds);
             }
             if (!resource.getContentMimeType().equalsIgnoreCase("") && !resource.getContentMimeType().equals(aux.getContentMimeType())) {
-                return Response.status(Status.FORBIDDEN).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Response.Status.FORBIDDEN,"Changing ContentMimeType is forbidden")).build();
+                return RestHelper.sendError("Is forbidden change the Content Mime Type.", Status.FORBIDDEN, accepteds);
             }
             if (!resource.getContentUrl().equalsIgnoreCase("") && !resource.getContentUrl().equals(aux.getContentUrl())) {
-                return Response.status(Status.FORBIDDEN).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Response.Status.FORBIDDEN,"Changing UrlContent is forbidden")).build();
+                return RestHelper.sendError("Is forbidden change the Content Url.", Status.FORBIDDEN, accepteds);
             }
 
             resource.setContentUrl(aux.getContentUrl());
@@ -399,19 +420,26 @@ public class CollectionService {
 
             mongoResourceDAO.updateResource(path, resource);
         } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
         return Response.status(Status.OK).build();
     }
 
     @DELETE
     @Path("/{path:[a-zA-Z0-9_\\.\\-\\+\\/]*}")
-    public Response delete(@PathParam("path") String path) {
-        return deleteResource(path);
+    public Response delete(@Context HttpHeaders headers,
+            @PathParam("path") String path) {
+
+        List accepts = headers.getAcceptableMediaTypes();
+        if(accepts.isEmpty()) {
+            accepts = RestHelper.addDefaultAcceptedTypes();
+        }
+
+        return deleteResource(path, accepts);
     }
 
-    private Response deleteResource(String path)
-    {
+    private Response deleteResource(String path, List <MediaType> accepts) {
+
         // Check if the path is a resource or a collection and remove it.
         try {
             Resource resource = mongoResourceDAO.getResource(path);
@@ -423,12 +451,16 @@ public class CollectionService {
                 if (mongoCollectionDAO.findCollection(path) != null) {
                     mongoCollectionDAO.deleteCollection(path);
                 } else {
-                    return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"Collection or resource not found")).build();
+                    return RestHelper.sendError("Resource or Collection not found.", Status.NOT_FOUND, accepts);
                 }
             }
         } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_XML).entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepts);
         }
-        return Response.status(Status.NO_CONTENT).build();
+        return Response.noContent().build();
+    }
+
+    Response putResource(HttpHeaders headers, String path, String path0, Resource resource) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

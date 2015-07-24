@@ -49,6 +49,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
+import java.util.LinkedList;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.JsonGenerator;
@@ -59,6 +60,9 @@ import org.fiware.apps.repository.settings.RepositorySettings;
 
 public class RestHelper {
 
+    static String RdfDefaultType = "application/rdf+json";
+    static String ResourcesDefaultType = "application/json";
+    static String ErrorsDefaultType = "application/json";
 
     static HashMap<String, String> typeMap;
     static	{
@@ -424,6 +428,13 @@ public class RestHelper {
 
     }
 
+    public static List<MediaType> addDefaultAcceptedTypes() {
+        List <MediaType> types = new LinkedList();
+        types.add(MediaType.valueOf("application/json"));
+        types.add(MediaType.valueOf("application/rdf+json"));
+        return types;
+    }
+
     public static Response sendError(String message, Response.Status status, List<MediaType> types) {
         for (MediaType type : types) {
             if("application/xml".equalsIgnoreCase(type.getType()+"/"+type.getSubtype()) ||
@@ -431,7 +442,7 @@ public class RestHelper {
                 return Response.status(status).type(type).entity(new RepositoryException(status, message)).build();
             }
         }
-        return Response.status(status).type(MediaType.APPLICATION_XML).entity(new RepositoryException(status, message)).build();
+        return Response.status(status).type(MediaType.APPLICATION_JSON).entity(new RepositoryException(status, message)).build();
     }
 
 
