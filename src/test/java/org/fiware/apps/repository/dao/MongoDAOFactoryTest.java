@@ -29,11 +29,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.dao;
 
+import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
 import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
 import org.junit.*;
@@ -53,6 +52,7 @@ public class MongoDAOFactoryTest {
 
     MongoDAOFactory toTest;
     @Mock Mongo mongo;
+    @Mock DB db;
     @Mock MongoResourceDAO mongoResourceDAO;
     @Mock MongoCollectionDAO mongoCollectionDAO;
 
@@ -68,8 +68,10 @@ public class MongoDAOFactoryTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         mongo = mock(Mongo.class);
+        db = mock(DB.class);
+        PowerMockito.whenNew(Mongo.class).withAnyArguments().thenReturn(mongo);
 
     }
 
@@ -78,20 +80,19 @@ public class MongoDAOFactoryTest {
     }
 
     @Test (expected = MongoException.class)
-    public void createConnection1Test() {
+    public void createConnectionException1Test() {
         try {
-            PowerMockito.whenNew(Mongo.class).withAnyArguments().thenReturn(mongo);
             when(mongo.getDB(anyString())).thenThrow(UnknownHostException.class);
         } catch (Exception ex) {
             fail(ex.getLocalizedMessage());
         }
         MongoDAOFactory.createConnection();
+
     }
 
     @Test (expected = MongoException.class)
-    public void createConnection2Test() {
+    public void createConnectionException2Test() {
         try {
-            PowerMockito.whenNew(Mongo.class).withAnyArguments().thenReturn(mongo);
             when(mongo.getDB(anyString())).thenThrow(MongoException.class);
         } catch (Exception ex) {
             fail(ex.getLocalizedMessage());
@@ -101,20 +102,8 @@ public class MongoDAOFactoryTest {
 
     @Test
     public void createConnection3Test() {
-        try {
-            PowerMockito.whenNew(Mongo.class).withAnyArguments().thenReturn(mongo);
-        } catch (Exception ex) {
-            fail(ex.getLocalizedMessage());
-        }
         MongoDAOFactory.createConnection();
         verify(mongo).getDB(anyString());
-    }
-
-    @Test
-    public void createConnection4Test() {
-
-        MongoDAOFactory.createConnection();
-        verify(mongo, times(0)).getDB(anyString());
     }
 
     @Test

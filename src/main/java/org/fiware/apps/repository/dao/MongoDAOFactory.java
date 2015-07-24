@@ -25,7 +25,7 @@ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.dao;
 
@@ -41,19 +41,10 @@ import com.mongodb.MongoException;
 
 public class MongoDAOFactory extends DAOFactory {
 
-    static DB db = null;
-
-    public ResourceDAO getResourceDAO() {
-        return new MongoResourceDAO();
-    }
-
-
-    public static DB createConnection() {
-        if(db !=null){
-            return db;
-        }
-
+    public synchronized static DB createConnection() {
         Mongo m;
+        DB db;
+        
         try {
             m = new Mongo(RepositorySettings.getProperty("mongodb.host"),
                     Integer.parseInt(RepositorySettings.getProperty("mongodb.port")));
@@ -62,9 +53,12 @@ public class MongoDAOFactory extends DAOFactory {
             throw new MongoException(ex.getLocalizedMessage());
         }
         return db;
-
     }
 
+    @Override
+    public ResourceDAO getResourceDAO() {
+        return new MongoResourceDAO();
+    }
 
     @Override
     public CollectionDAO getCollectionDAO() {
