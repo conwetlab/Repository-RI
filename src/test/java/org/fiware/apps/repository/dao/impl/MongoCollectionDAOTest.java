@@ -532,6 +532,7 @@ public class MongoCollectionDAOTest {
         else
             when(this.dBObject.get("creationDate")).thenReturn(null);
         when(this.dBObject.get("id")).thenReturn(string + "Id");
+        when(this.dBObject.get("name")).thenReturn(string + "name");
         when(this.dBObject.get("_id")).thenReturn("507f1f77bcf86cd799439011");
         when(this.dBObject.get("creator")).thenReturn(string + "Creator");
     }

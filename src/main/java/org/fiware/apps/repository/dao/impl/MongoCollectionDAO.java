@@ -94,6 +94,7 @@ public class MongoCollectionDAO implements CollectionDAO{
 
             obj.put("creator", r.getCreator());
             obj.put("id", r.getId());
+            obj.put("name", r.getName());
             if(r.getCreationDate()!=null){
                 obj.put("creationDate", r.getCreationDate());
             }else{
@@ -144,7 +145,7 @@ public class MongoCollectionDAO implements CollectionDAO{
         }
         catch (Exception e){
             db.requestDone();
-            throw new DatasourceException(e.getMessage(), ResourceCollection.class );
+            throw new DatasourceException(e.getMessage(), ResourceCollection.class);
         }
 
         db.requestDone();
@@ -164,7 +165,7 @@ public class MongoCollectionDAO implements CollectionDAO{
 
         }catch (IllegalArgumentException e){
             db.requestDone();
-            throw new DatasourceException("Error deleting Collection with ID " + id + " " + e.getMessage(), ResourceCollection.class );
+            throw new DatasourceException("Error deleting Collection with ID " + id + " " + e.getMessage(), ResourceCollection.class);
         }
     }
 
@@ -184,7 +185,7 @@ public class MongoCollectionDAO implements CollectionDAO{
             obj = mongoCollection.findOne(query);
         }catch (Exception e){
             db.requestDone();
-            throw new DatasourceException("Error parsing " + id + " " + e.getMessage(), ResourceCollection.class );
+            throw new DatasourceException("Error parsing " + id + " " + e.getMessage(), ResourceCollection.class);
         }
 
         if(obj == null){
@@ -193,6 +194,7 @@ public class MongoCollectionDAO implements CollectionDAO{
         }
 
         r.setId(obj.get("id").toString());
+        r.setName(obj.get("name").toString());
         r.setCreator(obj.get("creator").toString());
         if(obj.get("creationDate")!=null){
             r.setCreationDate((Date) obj.get("creationDate"));
@@ -215,6 +217,7 @@ public class MongoCollectionDAO implements CollectionDAO{
             BasicDBObject obj = new BasicDBObject();
             obj.put("id", r.getId());
             obj.put("creator", r.getCreator());
+            obj.put("name", r.getName());
             if(r.getCreationDate()!=null){
                 obj.put("creationDate", r.getCreationDate());
             }else{
@@ -227,7 +230,7 @@ public class MongoCollectionDAO implements CollectionDAO{
             return true;
         }catch (Exception e){
             db.requestDone();
-            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), ResourceCollection.class );
+            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), ResourceCollection.class);
         }
 
     }
@@ -236,11 +239,19 @@ public class MongoCollectionDAO implements CollectionDAO{
 
         if((r.getId().contains("/"))&&(getCollection(r.getId().substring(0, r.getId().lastIndexOf("/"))) == null)){
             r.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
+
+            if (r.getId().contains("/")) {
+                r.setName(r.getId().substring(r.getId().lastIndexOf("/")+1));
+            } else {
+                r.setName(r.getId());
+            }
+
             try{
                 db.requestStart();
                 BasicDBObject obj = new BasicDBObject();
                 obj.put("id", r.getId());
                 obj.put("creator", r.getCreator());
+                obj.put("name", r.getName());
                 if(r.getCreationDate()!=null){
                     obj.put("creationDate", r.getCreationDate());
                 }else{
@@ -251,7 +262,7 @@ public class MongoCollectionDAO implements CollectionDAO{
                 return insertCollectionRecursive(r);
             }catch (Exception e){
                 db.requestDone();
-                throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), ResourceCollection.class );
+                throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), ResourceCollection.class);
             }
         }else{
             return true;
@@ -279,6 +290,7 @@ public class MongoCollectionDAO implements CollectionDAO{
                 if((obj!=null)&&(obj.get("id")!=null)){
                     ResourceCollection rcol = new ResourceCollection();
                     rcol.setId(obj.get("id").toString());
+                    rcol.setName(obj.get("name").toString());
                     rcol.setCreator(obj.get("creator").toString());
                     if(obj.get("creationDate")!=null){
                         rcol.setCreationDate((Date) obj.get("creationDate"));
@@ -289,7 +301,7 @@ public class MongoCollectionDAO implements CollectionDAO{
         }
         catch (Exception e){
             db.requestDone();
-            throw new DatasourceException(e.getMessage(), ResourceCollection.class );
+            throw new DatasourceException(e.getMessage(), ResourceCollection.class);
         }
         db.requestDone();
         return resourceCollections;
