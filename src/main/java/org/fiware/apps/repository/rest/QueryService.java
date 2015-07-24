@@ -30,13 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.fiware.apps.repository.rest;
 
-import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.shared.JenaException;
-import com.hp.hpl.jena.vocabulary.DCTerms;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.*;
 
 import javax.ws.rs.core.Context;
@@ -49,7 +44,6 @@ import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
-import org.fiware.apps.repository.model.RepositoryException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
 
@@ -76,82 +70,80 @@ public class QueryService {
     public Response obtainResource(@Context HttpHeaders headers, @PathParam("path") String path) {
         List <MediaType> accepts = headers.getAcceptableMediaTypes();
         if(accepts.isEmpty()) {
-            accepts = new LinkedList();
-            accepts.add(MediaType.valueOf("application/rdf+xml"));
+            accepts = RestHelper.addDefaultAcceptedTypes();
         }
-
 
         try {
             Resource resource;
             for (MediaType type : accepts) {
-                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? RestHelper.RdfDefaultType : type.getType()+"/"+type.getSubtype();
 
                 if(RestHelper.isRDF(typeString)) {
                     resource = virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(typeString));
                     if (resource != null) {
                         return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(MediaType.valueOf(typeString)).build();
                     } else {
-                        return Response.status(Response.Status.NOT_FOUND).type("application/xml").entity(new RepositoryException(Response.Status.NOT_FOUND,"MENSAJE")).build();
+                        return RestHelper.sendError("Content Url not found.", Status.NOT_FOUND, accepts);
                     }
                 }
             }
         } catch (DatasourceException ex) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).type("application/xml").entity(new RepositoryException(Status.INTERNAL_SERVER_ERROR, ex.getMessage())).build();
+            return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepts);
         }
-        return Response.status(Status.NOT_ACCEPTABLE).build();
+        return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepts);
     }
 
-    private Response executeAnyQuery(String query, List <MediaType> types) {
+    private Response executeAnyQuery(String query, List <MediaType> accepts) {
         if (query == null) {
-            return Response.status(Status.BAD_REQUEST).build();
+            return RestHelper.sendError("Query is empty.", Status.BAD_REQUEST, accepts);
         }
 
         // Check type sparql query and execute the method.
         if (query.toLowerCase().contains("select")) {
-            for (MediaType type : types) {
-                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
+            for (MediaType type : accepts) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? RestHelper.ResourcesDefaultType : type.getType()+"/"+type.getSubtype();
                 if (typeString.equalsIgnoreCase("application/xml") || typeString.equalsIgnoreCase("application/json")) {
                     try {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
                                 .entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
                     } catch (JenaException ex) {
-                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf(typeString)).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                        return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);
                     }
                 }
             }
-            return Response.status(Status.NOT_ACCEPTABLE).build();
+            return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepts);
         }
         if (query.toLowerCase().contains("construct")) {
-            for (MediaType type : types) {
-                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+            for (MediaType type : accepts) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? RestHelper.RdfDefaultType : type.getType()+"/"+type.getSubtype();
                 if (RestHelper.isRDF(typeString)) {
                     try {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
                                 .entity(virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(typeString))).build();
                     } catch (JenaException ex) {
-                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf("application/json")).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                        return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);
                     }
                 }
             }
-            return Response.status(Status.NOT_ACCEPTABLE).build();
+            return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepts);
         }
         if (query.toLowerCase().contains("describe")) {
-            for (MediaType type : types) {
-                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/rdf+xml" : type.getType()+"/"+type.getSubtype();
+            for (MediaType type : accepts) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? RestHelper.RdfDefaultType : type.getType()+"/"+type.getSubtype();
                 if (RestHelper.isRDF(typeString)) {
                     try {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
                                 .entity(virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(typeString))).build();
                     } catch (JenaException ex) {
-                        return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf("application/json")).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                        return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);
                     }
                 }
             }
-            return Response.status(Status.NOT_ACCEPTABLE).build();
+            return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepts);
         }
         if (query.toLowerCase().contains("ask")) {
-            for (MediaType type : types) {
-                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? "application/xml" : type.getType()+"/"+type.getSubtype();
+            for (MediaType type : accepts) {
+                String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? RestHelper.ResourcesDefaultType : type.getType()+"/"+type.getSubtype();
                 try {
                     if (typeString.equalsIgnoreCase("application/json")) {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
@@ -161,12 +153,12 @@ public class QueryService {
                                 .entity(Boolean.toString(virtuosoResourceDAO.executeQueryAsk(query))).build();
                     }
                 } catch (JenaException ex) {
-                    return Response.status(Status.BAD_REQUEST).type(MediaType.valueOf(typeString)).entity(new RepositoryException(Status.BAD_REQUEST, ex.getMessage())).build();
+                    return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);
                 }
             }
-            return Response.status(Status.NOT_ACCEPTABLE).build();
+            return RestHelper.sendError("Not acceptable.", Status.NOT_ACCEPTABLE, accepts);
         }
-        return Response.status(Status.BAD_REQUEST).build();
+        return RestHelper.sendError("Query do not match any query form (SELECT, CONSTRUCT, DESCRIBE, ASK).", Status.BAD_REQUEST, accepts);
     }
 
 
