@@ -35,8 +35,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RepositorySettings {
         private static Properties properties;
@@ -51,7 +49,25 @@ public class RepositorySettings {
                 properties = new Properties();
                 properties.load(new FileInputStream(new File("/etc/default/Repository-RI.properties")));
             } catch (IOException ex) {
-                Logger.getLogger(RepositorySettings.class.getName()).log(Level.SEVERE, null, ex);
+                //Insert default properties.
+                properties = new Properties();
+
+                // MongoDB
+                properties.setProperty("mongodb.host", "127.0.0.1");
+                properties.setProperty("mongodb.db", "test");
+                properties.setProperty("mongodb.port", "27017");
+
+                //Virtuoso DB
+                properties.setProperty("virtuoso.host", "jdbc:virtuoso://localhost:");
+                properties.setProperty("virtuoso.port", "1111");
+                properties.setProperty("virtuoso.user", "dba");
+                properties.setProperty("virtuoso.pass", "dba");
+
+                //Oauth2
+                properties.setProperty("oauth2.server", "https://account.lab.fiware.org");
+                properties.setProperty("oauth2.key", "61686dc9f9734d0ba3237ae573c63a1c");
+                properties.setProperty("oauth2.secret", "01c8253c51bc42e48561bbc6ded05a84");
+                properties.setProperty("oauth2.callbackURL", "http://localhost:8080/FiwareRepository/v2/callback");
             }
         }
         return properties.getProperty(property);
