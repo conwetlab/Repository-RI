@@ -337,7 +337,7 @@ public class CollectionService {
         }
 
         if (contentType == null || contentType.equalsIgnoreCase("")) {
-            return RestHelper.sendError("No content to insert.", Status.BAD_REQUEST, accepts);
+            return RestHelper.sendError("Especify the content type.", Status.UNSUPPORTED_MEDIA_TYPE, accepts);
         } else {
             return updateResourceContent(path, content, contentType, accepts);
         }
@@ -458,9 +458,5 @@ public class CollectionService {
             return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepts);
         }
         return Response.noContent().build();
-    }
-
-    Response putResource(HttpHeaders headers, String path, String path0, Resource resource) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

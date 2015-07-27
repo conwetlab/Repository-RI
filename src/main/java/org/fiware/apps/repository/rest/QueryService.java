@@ -81,7 +81,11 @@ public class QueryService {
                 if(RestHelper.isRDF(typeString)) {
                     resource = virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(typeString));
                     if (resource != null) {
-                        return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(MediaType.valueOf(typeString)).build();
+                        if (resource.getContent() == null || resource.getContent().equals("".getBytes())) {
+                            return Response.status(Status.NO_CONTENT).build();
+                        } else {
+                            return Response.status(Response.Status.OK).header("content-length", resource.getContent().length).entity(resource.getContent()).type(MediaType.valueOf(typeString)).build();
+                        }
                     } else {
                         return RestHelper.sendError("Content Url not found.", Status.NOT_FOUND, accepts);
                     }
