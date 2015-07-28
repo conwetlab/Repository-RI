@@ -269,7 +269,7 @@ public class CollectionService {
 
             mongoResourceDAO.insertResource(resource);
 
-            return Response.status(Status.CREATED).type(MediaType.APPLICATION_JSON).contentLocation(new URI(resource.getId())).build();
+            return Response.status(Status.CREATED).type(MediaType.APPLICATION_JSON).contentLocation(new URI("collec/" + resource.getId())).build();
 
         } catch (DatasourceException | URISyntaxException ex) {
             return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
@@ -300,7 +300,7 @@ public class CollectionService {
             }
 
             mongoCollectionDAO.insertCollection(resourceCollection);
-            return Response.status(Status.CREATED).contentLocation(new URI(resourceCollection.getId())).build();
+            return Response.status(Status.CREATED).contentLocation(new URI("collec/" + resourceCollection.getId())).build();
         } catch (DatasourceException | URISyntaxException ex) {
             return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         } catch (SameIdException ex) {
