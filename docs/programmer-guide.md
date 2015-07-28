@@ -38,11 +38,12 @@ Content-type: application/json, application/xml, text/plain
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
-| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 404 | Not Found | The collection with the given path has not been found. |
+| 406 | Not Acceptable | The collection can not be generated in the given format. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Creating collections
@@ -74,11 +75,13 @@ Body: <pre>
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 201 | CREATED | The request has been fulfilled and resulted in a new resource being created. |
-| 409 | CONFLICT | Indicates that the request could not be processed because of conflict in the request, such as an edit conflict. |
-| 415 | UNSUPPORTED MEDIA TYPE | The request entity has a media type which the server or resource does not support. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 201 | OK | The collection has been created. The `location` header will contain the final URL that users can use to access this collection. |
+| 400 | Bad Request | The collection is not well formed or collection name is not valid. |
+| 409 | Conflict | The collection with the path and the name given already exist. |
+| 415 | Unsopported Media Type | The request entity has a media type which a collection does not support. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Removing collections
@@ -91,10 +94,11 @@ URI: http://[SERVER_HOST]FiwareRepository/v2/collec/{collection}
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 204 | NO CONTENT | The server successfully processed the request, but is not returning any content. Usually used as a response to a successful delete request. |
-| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 204 | No Content | The collection and all its content has been deleted. |
+| 404 | Not Found | The collection with the given path has not been found. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Managing Resources
@@ -121,11 +125,12 @@ Accept: application/json, application/xml, text/plain
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
-| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 404 | Not Found | The resource with the given path has not been found. |
+| 406 | Not Acceptable | The resource can not be generated in the given format. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Getting resources
@@ -139,11 +144,13 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 204 | NO CONTENT | The server successfully processed the request, but is not returning any content. |
-| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 204 | No Content | Your request has been processed, but the resource has not got content. |
+| 404 | Not Found | The resource with the given path has not been found. |
+| 406 | Not Acceptable | The resource content can not be generated in the given format. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Creating resources
@@ -180,11 +187,13 @@ Body: <pre>
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 201 | CREATED | The request has been fulfilled and resulted in a new resource being created. |
-| 409 | CONFLICT | Indicates that the request could not be processed because of conflict in the request, such as an edit conflict. |
-| 415 | UNSUPPORTED MEDIA TYPE | The request entity has a media type which the server or resource does not support. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 201 | Created | The resource has been created. The `location` header will contain the final URL that users can use to access this collection. |
+| 400 | Bad Request | The resource is not well formed or collection name is not valid. |
+| 409 | Conflict | The resource with the path and the name given already exist. |
+| 415 | Unsopported Media Type | The request entity has a media type which a resource does not support. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Updating resources metadata
@@ -219,11 +228,14 @@ Body: <pre>
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 403 | FORBIDDEN | The request was a valid request, but the server is refusing to respond to it. |
-| 415 | UNSUPPORTED MEDIA TYPE | The request entity has a media type which the server or resource does not support. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 400 | Bad Request | The request is not well formed or collection name is not valid. |
+| 403 | Forbidden | The request was a valid request, but the server is refusing to respond to it. |
+| 409 | Conflict | The resource with the path and the name given already exist. |
+| 415 | Unsopported Media Type | The request entity has a media type which a resource does not support. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Updating resources content
@@ -237,11 +249,13 @@ Content-Type: application/json, application/xml, application/rdf+xml, text/turtl
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 403 | FORBIDDEN | The request was a valid request, but the server is refusing to respond to it. |
-| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 400 | Bad Request | The resource content is not well formed. |
+| 404 | Not Found | The resource with the given path has not been found. |
+| 415 | Unsopported Media Type | The request entity has a media type which the resource content does not support. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Deleting resources
@@ -254,10 +268,11 @@ URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource}
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 204 | NO CONTENT | The server successfully processed the request, but is not returning any content. Usually used as a response to a successful delete request. |
-| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 204 | No Content | The resource and all its content has been deleted. |
+| 404 | Not Found | The resource with the given path has not been found. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Making SPARQL queries
@@ -280,11 +295,13 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 403 | FORBIDDEN | The request was a valid request, but the server is refusing to respond to it. |
-| 404 | NOT FOUND | The requested resource could not be found but may be available again in the future. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 204 | No Content | Your request has been processed, but the resource has not got content. |
+| 404 | Not Found | The resource with the given path has not been found. |
+| 406 | Not Acceptable | The resource content can not be generated in the given format. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
 ## Executing a short SPARQL query
@@ -298,11 +315,11 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
-| 500 | INTERNAL SERVER ERROR | A generic error message, given when an unexpected condition was encountered and no more specific message is suitable. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 400 | Bad Request | The query is not well formed. |
+| 406 | Not Acceptable | The query response can not be generated in the given format. |
 
 ---
 ## Executing a long SPARQL query
@@ -318,11 +335,12 @@ Body: "<pre>SELECT ?s ?p ?o WHERE {?s ?p ?o }</pre>"
 
 * Responses
 
-| Code | Description | Explanation |
-| ---- | ----------- | ----------- |
-| 200 | OK | The request was handled successfully and transmitted in response message. |
-| 406 | NOT ACCEPTABLE | The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. |
-| 500 | INTERNAL SERVER ERROR | A generic error message, given when an unexpected condition was encountered and no more specific message is suitable. |
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 400 | Bad Request | The query is not well formed. |
+| 406 | Not Acceptable | The query response can not be generated in the given format. |
+| 415 | Unsopported Media Type | The request entity has a media type which a query does not support. |
 
 ---
 ## Accessing the Repository with cURL
