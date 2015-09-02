@@ -60,7 +60,7 @@ import org.fiware.apps.repository.settings.RepositorySettings;
 
 public class RestHelper {
 
-    static String RdfDefaultType = "application/rdf+json";
+    static String RdfDefaultType = "application/rdf+xml";
     static String ResourcesDefaultType = "application/json";
     static String ErrorsDefaultType = "application/json";
 
