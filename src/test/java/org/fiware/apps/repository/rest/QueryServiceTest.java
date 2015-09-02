@@ -554,7 +554,7 @@ public class QueryServiceTest {
         HttpHeaders headers = new ResteasyHttpHeaders(acceptHeader);
 
         try {
-            when(virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get("application/rdf+json"))).thenReturn(resource);
+            when(virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(RestHelper.RdfDefaultType))).thenReturn(resource);
         } catch (DatasourceException ex) {
             fail(ex.getLocalizedMessage());
         }

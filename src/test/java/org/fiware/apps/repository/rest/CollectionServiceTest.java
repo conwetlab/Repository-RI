@@ -168,28 +168,28 @@ public class CollectionServiceTest {
     @Test
     public void getResourceMongoDefaultMediaTypeTest() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+json");
+        Resource resource = generateResource(path, null, true, "application/rdf+xml");
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
         when(mongoResourceDAO.getResourceContent(path)).thenReturn(resource);
 
-        getResourceOrCollection(path, accepts, "application/rdf+json", 200);
+        getResourceOrCollection(path, accepts, RestHelper.RdfDefaultType, 200);
     }
 
     @Test
     public void getResourceVirtuosoDefaultMediaTypeTest() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+xml");
+        Resource resource = generateResource(path, null, true, "application/rdf+json");
         resource.setContent("content".getBytes());
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
-        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/JSON")).thenReturn(resource);
+        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/XML")).thenReturn(resource);
 
-        getResourceOrCollection(path, accepts, "application/rdf+json", 200);
+        getResourceOrCollection(path, accepts, RestHelper.RdfDefaultType, 200);
     }
 
     @Test
@@ -209,13 +209,13 @@ public class CollectionServiceTest {
     @Test
     public void getResourceVirtuosoNoContentTest() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+xml");
+        Resource resource = generateResource(path, null, true, "application/rdf+json");
         resource.setContent("content".getBytes());
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
         when(mongoResourceDAO.getResource(path)).thenReturn(resource);
-        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/JSON")).thenReturn(null);
+        when(virtuosoResourceDAO.getResource(resource.getContentUrl(), "RDF/XML")).thenReturn(null);
 
         getResourceOrCollection(path, accepts, null, 204);
     }
@@ -247,7 +247,7 @@ public class CollectionServiceTest {
     @Test
     public void getResourceDatasourceExceptionTest2() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
-        Resource resource = generateResource(path, null, true, "application/rdf+json");
+        Resource resource = generateResource(path, null, true, "application/rdf+xml");
         List <String> accepts = new LinkedList<>();
         accepts.add("*/*");
 
@@ -733,7 +733,7 @@ public class CollectionServiceTest {
 
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
-        putResourceContent(path, accpeted, contentType, "content", 400);
+        putResourceContent(path, accpeted, contentType, "content", 415);
     }
 
     @Test
@@ -747,7 +747,7 @@ public class CollectionServiceTest {
 
         when(mongoResourceDAO.getResourceContent(eq(path))).thenReturn(resource);
 
-        putResourceContent(path, accpeted, contentType, "content", 400);
+        putResourceContent(path, accpeted, contentType, "content", 415);
     }
 
     @Test
