@@ -37,7 +37,7 @@ In order to have the Repository running, the following software is needed. Howev
 
 ---
 ## Software Requirements 
-To install the required version of Virtuoso, it is needed to compile it from its sources. In this way, the installation of Virtuoso has some extra requirements, that will be also installed throughout this document.
+To install the required version of Virtuoso, it is possible to download a compiled version for the suported Operative Systems or it is possible to compile it from the source code. In this way, the installation of Virtuoso has some extra requirements, that will be also installed throughout this document.
 
 * autoconf
 * automake
@@ -139,8 +139,15 @@ All the mandatory dependencies can be easily installed on a debian based Linux d
  # export INSPWD=$PWD
  # ./scripts/installTomcat8.sh
  # ./scripts/installJava8DebianWheezy.sh
- # ./scripts/installVirtuoso.sh
+ # ./scripts/installVirtuosoDebian.sh
  # apt-get install mongodb
+</pre>
+
+To install Virtuoso from the source code, it is possible to do it by using a generic script:
+
+<pre>
+ # ./scripts/preVirtuosoDebian.sh
+ # ./scripts/installVirtuoso.sh
 </pre>
 
 The variable <code>INSPWD</code> contains the path where the repository (Virtuoso, and Tomcat) has been installed.
@@ -160,6 +167,13 @@ All the mandatory dependencies can be easily installed on a debian based Linux d
  # apt-get install mongodb
 </pre>
 
+To install Virtuoso from the source code, it is possible to do it by using a generic script:
+
+<pre>
+ # ./scripts/preVirtuosoDebian.sh
+ # ./scripts/installVirtuoso.sh
+</pre>
+
 The variable <code>INSPWD</code> contains the path where the repository (Virtuoso, and Tomcat) has been installed.
 
 ---
@@ -176,6 +190,13 @@ Similarly, the different dependencies can be installed in CentOS/RedHat.
 # sudo rpm -ivh jdk-8u25-linux-x64.rpm
 # ./scripts/installVirtuoso.sh
 # ./scripts/installMongoCentos.sh
+</pre>
+
+To install Virtuoso from the source code, it is possible to do it by using a generic script:
+
+<pre>
+ # ./scripts/preVirtuosoCentos.sh
+ # ./scripts/installVirtuoso.sh
 </pre>
 
 ---
