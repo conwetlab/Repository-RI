@@ -1,25 +1,22 @@
 #! /bin/bash
 
-sudo yum update
-sudo yum -y install unzip
-sudo yum -y install zip
-sudo yum -y install maven
-    
+sudo apt-get update
+sudo apt-get -y install unzip
+sudo apt-get install zip
+sudo apt-get -y install maven
+
 set +e
 # Install java 8
-./scripts/installJavaCentos.sh
-cd $INSPWD
-
+./scripts/installJavaDebian.sh
+   
 # Install tomcat 8
 ./scripts/installTomcat8.sh
 
-# Install virtuoso
-./scripts/installVirtuosoCentos7.sh
-
-set -e
-
 # Install mongodb
-sudo ./scripts/installMongoCentos.sh
+sudo apt-get install -y mongodb
+
+# Install virtuoso
+./scripts/installVirtuosoUbuntu12.04.sh
 
 # Add the file settings
 sudo ./scripts/repositorySettings.sh    
@@ -46,5 +43,5 @@ cd $INSPWD/apache-tomcat/bin/
 ./startup.sh
 cd $INSPWD
 
-#Create taks
-sudo ./scripts/startupCentos.sh
+#Create startup tasks
+sudo ./scripts/startupDebian.sh

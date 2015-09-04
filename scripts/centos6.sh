@@ -13,11 +13,8 @@ cd $INSPWD
 # Install tomcat 8
 ./scripts/installTomcat8.sh
 
-# PreInstall Virtuoso
-sudo ./scripts/preVirtuosoCentos.sh
-
 # Install virtuoso
-./scripts/installVirtuoso.sh
+./scripts/installVirtuosoCentos6.sh
 
 set -e
 

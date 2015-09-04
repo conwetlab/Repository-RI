@@ -15,11 +15,8 @@ set +e
 # Install mongodb
 sudo apt-get install -y mongodb
 
-# PreInstallVirtuoso
-sudo ./scripts/preVirtuosoDebian.sh
-
 # Install virtuoso
-./scripts/installVirtuoso.sh
+./scripts/installVirtuosoDebian.sh
 
 # Add the file settings
 sudo ./scripts/repositorySettings.sh
