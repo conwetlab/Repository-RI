@@ -1,0 +1,2526 @@
+FORMAT: 1A
+HOST: repository.lab.fiware.org:80/FiwareRepository/v2
+TITLE: FIWARE Repository Open API Specification
+DATE: 30 September 2015
+VERSION: v4.3.3
+PREVIOUS_VERSION: v3.2.1
+APIARY_PROJECT: fiwarerepository
+
+# FIWARE Repository
+
+This document describes the basic concepts regarding the Repository GE and explains 
+the necessary steps to develop applications which makes use of the Repository backend 
+functionality. The Repository API is based on REST principles and generally returns XML
+or JSON encoded responses. Since REST is independent of a concrete programming language,
+you just have to know how to make an HTTP request in the programming language of your choice.
+
+## Editors
+
+* Francisco de la Vega, Universidad Politénica de Madrid
+* Javier Ortiz Sancho, Universidad Politénica de Madrid
+
+## Status
+
+This is a work in progress and is changing on a daily basis. You can check the latest
+available version on: https://github.com/conwetlab/Repository-RI/tree/develop. 
+Please send your comments to repository@conwet.com.
+
+This specification is licensed under the [FIWARE Open Specification License](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_%28implicit_patents_license%29)
+
+## Acknowledgements
+
+The editors would like to express their gratitude to the following people who actively contributed to this specification:
+Aitor Magán and Álvaro Arranz García 
+
+## Copyright
+
+* Copyright © 2015 by Universidad Politénica de Madrid
+
+## Specification
+
+### Authentication
+
+HTTP requests against the Repository API require the inclusion of specific authentication credentials when OAuth2 authentication is enabled.
+Repository-RI provides support for OAuth2 authentication being the default one in FIWARE Lab.
+
+### Synchronous Faults
+
+Checked erros can be returned in two different formats depending on `Accept` header 
+of the request. The two possible formats are `application/json` and `application/xml`, being the default format is `application/json`.
+
+JSON errors
+
+    {
+        "errorCode":Error Code,
+        "description":"Description of the mensaje error.",
+        "reasonPhrase":"Reason Phrase Error"
+    }
+
+XML errors
+    
+    <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    <exception>
+        <description>Description of the mensaje error.</description>
+        <errorCode>Error Code</errorCode>
+        <reasonPhrase>Reason Phrase Error</reasonPhrase>
+    </exception>
+
+### Used HTTP Codes
+
+| HTTP Code | Type | Description |
+|:---------:|:-----|:------------|
+| 200 | OK | Your request has been completed properly. |
+| 201 | Created | Your resource has been created. The `location` header will contain the final URL that users can use to access this collection. |
+| 204 | No Content | Your request has been processed, but a response is not available. |
+| 400 | Bad Request | The content of your request is not correct (e.g. There is a missing field) |
+| 401 | Unauthorized | You are not logged in or the Authorization token you are providing is not valid |
+| 403 | Forbidden | The request was a valid request, but the server is refusing to respond to it. |
+| 404 | Not Found | The resource with the given path has not been found. |
+| 406 | Not Acceptable | The request can not be generated in the given format. |
+| 409 | Conflict | The resource you are tring to create already exists. |
+| 415 | Unsopported Media Type | The request entity has a media type which the server does not support. |
+| 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
+
+## Group Collections
+
+Collections are ways to organise resources and other collections. Because of this, it is possible 
+to create, get and delete collections, and thus, it is possible to manage different collections 
+within the repository.
+
+Hereafter, it is described the format of a collection and some examples of its representations 
+in the following formats: `application/json` y `application/xml`.
+
++ **Collection atributes**
+    + **id** `string` - Path that identifies the collection.
+    + **name** `string` - Name that identifies the collection and also the collection which it is positioned in. Every collection name must comply the regular expresion `[a-zA-Z0-9_-]+`.
+    + **creationDate** `date` -  Date when the collection was created.
+    + **modificationDate** `date` - Date of the last mofication of the collection.
+    + **creator** `string` - Name of the creator of the collection.
+    + **collections** `collection` - List of collections that includes the collection.  
+    + **resources** `resource` - List of resources that includes the collection.
+
+When a collection is **created**, the user can not provide the following atributes: *id, modificationDate, 
+collection and resources*.
+
++ **Collection** `application/json`
+
+            {
+                "type":"collection",
+                "id":"exampleCollectionA/exampleCollectionB",
+                "name":"exampleCollectionB",
+                "creationDate":1437405229936,
+                "modificationDate":null,
+                "creator":"creatorExample",
+                "collections":[],
+                "resources":[]
+            }
+
+###### **Note**: It is necessary the attribute `type` to specify that the object is a collection.
+
++ **Collection** `application/xml`
+
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <collection id="exampleCollectionA/exampleCollectionB" xmlns:atom="http://www.w3.org/2005/Atom">
+                <creationDate>2015-07-20T17:13:49.936+02:00</creationDate>
+                <modificationDate></modificationDate>
+                <creator>creatorExample</creator>
+                <name>exampleCollectionB</name>
+                <collections/>
+                <resources/>
+            </collection>
+
+## Manage Collections [/collec/{collection}]
+
+### Get a Collection [GET]
+
++ Parameters
+    + collection: `exampleCollectionA` (required, string) - Collection ID.
+
++ Request
+
+    + Headers
+    
+            Accept: application/json
+
++ Response 200 (application/json)
+    
+    + Body
+    
+            {
+                "type":"collection",
+                "id":"exampleCollectionA",
+                "name":"exampleCollectionA",
+                "creationDate":1437405229936,
+                "modificationDate":null,
+                "creator":"Me",
+                "collections":[ {
+                                    "type":"collection",
+                                    "id":"exampleCollectionA/exampleCollectionB",
+                                    "name":"exampleCollectionB",
+                                    "creationDate":1437405245917,
+                                    "modificationDate":null,
+                                    "creator":"Me",
+                                    "collections":[],
+                                    "resources":[]},
+                                {   
+                                    "type":"collection",
+                                    "id":"exampleCollectionA/exampleCollectionC",
+                                    "name":"exampleCollectionC",
+                                    "creationDate":1437405266139,
+                                    "modificationDate":null,
+                                    "creator":"Me",
+                                    "collections":[],
+                                    "resources":[]
+                                }
+                            ],
+                "resources":[]
+            }
+    
++ Request
+
+    + Headers
+    
+            Accept: application/xml
+    
++ Response 200 (application/xml)
+    
+    + Body 
+    
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <collection id="exampleCollectionA" xmlns:atom="http://www.w3.org/2005/Atom">
+                <creationDate>2015-07-20T17:13:49.936+02:00</creationDate>
+                <creator>Me</creator>
+                <name>exampleCollectionA</name>
+                <collections>
+                    <collections id="exampleCollectionA/exampleCollectionB">
+                        <creationDate>2015-07-20T17:14:05.917+02:00</creationDate>
+                        <creator>Me</creator>
+                        <name>exampleCollectionB</name>
+                        <collections/>
+                        <resources/>
+                    </collections>
+                    <collections id="exampleCollectionA/exampleCollectionC">
+                        <creationDate>2015-07-20T17:14:26.139+02:00</creationDate>
+                        <creator>Me</creator>
+                        <name>exampleCollectionC</name>
+                        <collections/>
+                        <resources/>
+                    </collections>
+                </collections>
+                <resources/>
+            </collection>
+
++ Request
+
+    + Headers
+    
+            Accept: application/json
+
+
++ Response 404 (application/json)
+    
+    + Body
+    
+            {
+                errorCode: 404
+                description: "Resource or Collection not found"
+                reasonPhrase: "Not Found"
+            }
+
++ Request
+
+    + Headers
+    
+            Accept: data/binary
+    
++ Response 406 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 406
+                description: ""
+                reasonPhrase: "Not Acceptable"
+            }
+
+### Create a Collection [POST]
+
++ Parameters
+    + collection: `exampleCollectionA` (optional, string) - Collection ID.
+    
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            {
+               "type":"collection",
+               "creator":"creatorExample",
+               "creationDate":"",
+               "modificationDate":"",
+               "name":"exampleCollectionA"
+            }
+
++ Response 201
+
+    + Headers
+    
+            Content-Location: http://localhost:8080/FiwareRepository/v2/collec/exampleCollectionA
+            
++ Request (application/xml)
+
+    + Headers
+    
+            Accept: application/json
+            
+    + Body
+    
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <collection id="exampleCollectionA" xmlns:atom="http://www.w3.org/2005/Atom">
+                <creationDate>2015-07-20T17:13:49.936+02:00</creationDate>
+                <creator>creatorExample</creator>
+                <name>exampleCollectionA</name>
+                <collections/>
+                <resources/>
+            </collection>
+
++ Response 201
+
+    + Headers
+    
+            Content-Location: http://localhost:8080/FiwareRepository/v2/collec/exampleCollectionA
+            
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/json
+            
+    + Body
+    
+            {
+               "type":"collection",
+               "creator":"Creator",
+               "creationDate":"",
+               "modificationDate":"",
+               "name":"exampleCollectionA.meta"
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 400
+                description: "Field name do not comply the pattern."
+                reasonPhrase: "Bad Request"
+            }
+
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            {
+               "type":"collection",
+               "creator":"Creator",
+               "creationDate":"",
+               "modificationDate":"",
+               "name":"exampleCollectionA"
+            }
+            
++ Response 409 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 409
+                description: "Path is a resource."
+                reasonPhrase: "Conflict"
+            }
+    
++ Request (text/plain)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            {
+               "type":"collection",
+               "creator":"Creator",
+               "creationDate":"",
+               "modificationDate":"",
+               "name":"exampleCollectionA"
+            }
+            
++ Response 415
+
+### Remove a Collection [DELETE]
+
++ Parameters
+    + collection: `exampleCollectionA` (required, string) - Collection ID.
+
++ Request
+
+    + Headers
+    
+            Accept: application/json
+
++ Response 204
+
++ Response 404 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 404
+                description: "Resource or Collection not found."
+                reasonPhrase: "Not Found"
+            }
+
+## Group Resources
+
+Resources are ways to store date in the repository. This resources are composed by metadata 
+and the content. It is possible to create, get, update and delete resources, and thus, 
+it is possible to manage different resources within the repository.
+
+Hereafter, it is described the format of a resource and some examples of its representations 
+in the following formats: `application/json` y `application/xml`.
+
++ **Resource atributes**
+    + **id** `string` - Path that identifies the resource.
+    + **name** `string` - Name that identifies the resource and also the collection which it is positioned in. Every resource name must comply the regular expresion `((.*[^a-zA-Z0-9._-]+.*)|(.*.meta$))+`. 
+    + **creationDate** `date` -  Date when the resource was created.
+    + **modificationDate** `date` - Date of the last mofication of the resource.
+    + **creator** `string` - Name of the creator of the resource.
+    + **contentUrl** `string` - URL of the resource content. It can not be updated.
+    + **contentMimeType** `string` - Type of the resource content stored. It can not be updated manually.
+    + **contentFileName** `string` - Name of the file.
+    + **content** `byte[]` - The stored content in bytes array representation.
+
+  
+When a resource is **created**, the user can not provide the following atributes: *id, modificationDate, 
+contentMimeType and content*.
+
+When a resource is **modified**, the user can not provide and modify the following atributes: *id, 
+creationDate, modificationDate, contentUrl, contentMimeType, and content*. 
+
++ **Resource** `application/json`
+
+            {
+                type: "resource"
+                id: "exampleCollectionA/exampleResource"
+                name: "exampleResource"
+                creationDate: 1437491920036
+                modificationDate: 1437491920038
+                creator: "creatorExample"
+                contentUrl: "http://exampleUrl.com"
+                contentMimeType: "application/rdf+json"
+                contentFileName: "resourceFileName"
+                content: null
+            }
+
+###### **Note**: It is necessary the attribute `type` to specify that the object is a resource.
+
++ **Resource** `application/xml`
+
+            <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+            <resource id="exampleCollectionA/exampleResource">
+                <creationDate>2015-07-21T17:18:40.036+02:00</creationDate>
+                <creator>creatorExample</creator>
+                <modificationDate>2015-07-21T17:18:40.038+02:00</modificationDate>
+                <name>exampleResource</name>
+                <contentFileName>resourceFileName</contentFileName>
+                <contentMimeType>application/rdf+json</contentMimeType>
+                <contentUrl>http://exampleUrl.com</contentUrl>
+            </resource>
+
+## Manage Resources Metadata [/collec/{collection}/{resource}.meta]
+
+### Get a Resource [GET]
+
++ Parameters
+    + collection: `exampleCollectionA` (required, string) - Collection ID.
+    + resource: `exampleResource` (required, string) - Resource name.
+
++ Request
+
+    + Headers
+        
+            Accept: application/json
+
++ Response 200 (application/json)
+
+    + Body
+    
+            {
+                type: "resource"
+                id: "exampleCollectionA/exampleResource"
+                name: "exampleResource"
+                creationDate: 1437491920036
+                modificationDate: 1437491920038
+                creator: "Yo"
+                contentUrl: "http://exampleUrl.com"
+                contentMimeType: ""
+                contentFileName: "resourceFileName"
+                content: null
+            }
+
++ Request
+
+    + Headers
+        
+            Accept: application/xml
+
++ Response 200 (application/xml)
+
+    + Body
+    
+            <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+            <resource id="exampleCollectionA/exampleResource">
+                <creationDate>2015-07-21T17:18:40.036+02:00</creationDate>
+                <creator>Yo</creator>
+                <modificationDate>2015-07-21T17:18:40.038+02:00</modificationDate>
+                <name>exampleResource</name>
+                <contentFileName>resourceFileName</contentFileName>
+                <contentMimeType />
+                <contentUrl>http://exampleUrl.com</contentUrl>
+            </resource>
+
++ Request
+
+    + Headers
+        
+            Accept: text/plain, application/json
+
++ Response 200 (text/plain)
+
+    + Body
+    
+            Resource Information:
+            Resource Id:            exampleCollectionA/exampleResource
+            Creation Date:          Tue Jul 21 17:18:40 CEST 2015
+            Modification Date:      Tue Jul 21 17:18:40 CEST 2015
+            Filename:               resourceFileName                   
+            Mime Type:             
+
++ Request
+
+    + Headers
+        
+            Accept: text/html, application/json
+
++ Response 200 (text/plain)
+
+    + Body
+    
+            <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+            <html>
+                <head>
+                    <title>Resource: exampleCollectionA/exampleResource</title>
+                    <link rel="stylesheet" type="text/css" href="http://localhost:8080/FiwareRepository/v2/../style/style.css">
+                </head>
+                <body>
+                    <h1>Resource: exampleCollectionA/exampleResource</h1>
+                    <table class="tab">
+                        <th>Resource Id</th>
+                        <th>Creation Date</th>
+                        <th>Modification Date</th>
+                        <th>Content URL</th>
+                        <th>Filename</th>
+                        <th>Mime Type</th>
+                        <tr>
+                            <td><a href="http://localhost:8080/FiwareRepository/v2/collec/exampleCollectionA/exampleResource">exampleCollectionA/exampleResource</a></td>
+                            <td>Tue Jul 21 17:18:40 CEST 2015</td>
+                            <td>Tue Jul 21 17:18:40 CEST 2015</td>
+                            <td>http://exampleUrl.com</td>
+                            <td>resourceFileName</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    <br />
+                </body>
+            </html>
+            
++ Request
+
+    + Headers
+        
+            Accept: application/rdf+xml, application/json
+
++ Response 200 (application/rdf+xml)
+
+    + Body
+            
+            <rdf:RDF>
+                <rdf:Description rdf:about="http://localhost:8080/FiwareRepository/v2/collec/exampleCollectionA/exampleResource.meta">
+                    <j.0:format />
+                    <j.0:title>resourceFileName</j.0:title>
+                    <j.0:modified>not specified</j.0:modified>
+                    <j.0:date>Tue Jul 21 17:18:40 CEST 2015</j.0:date>
+                </rdf:Description>
+            </rdf:RDF>
+            
++ Request
+
+    + Headers
+        
+            Accept: application/json
+
++ Response 404 (application/json)
+
+    + Body
+    
+            {
+                "errorCode":404,
+                "description":"Resource not found",
+                "reasonPhrase":"Not Found"
+            }
+            
++ Request
+
+    + Headers
+        
+            Accept: application/rdf+json, application/json
+            
++ Response 406 (application/json)
+
+    + Body
+    
+            {
+                "errorCode":406,
+                "description":"",
+                "reasonPhrase":"Not Acceptable"
+            }
+
+### Create a Resource [POST]
+
++ Parameters
+    + collection: `exampleCollectionA` (required, string) - Collection ID.
+    + resource: `exampleResource` (required, string) - Resource name.
+
++ Request (application/xml)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <resource id="exampleCollectionA/exampleResource">
+                <creator>Creator</creator>
+                <creationDate></creationDate>
+                <modificationDate></modificationDate>
+                <name>exampleResource</name>
+                <contentUrl>http://exampleUrl.com</contentUrl>
+                <contentFileName>resourceFileName</contentFileName>
+            </resource>
+
++ Response 201
+
+    + Headers
+    
+            Content-Location: http://localhost:8080/FiwareRepository/v2/collec/exampleCollection/exampleResource
+
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/json
+            
+    + Body
+    
+            {
+                "type":"resource",
+                "creator":"Creator",
+                "creationDate":"",
+                "modificationDate":"",
+                "name":"exampleResource",
+                "contentUrl":"http://exampleUrl.com",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 201
+
+    + Headers
+    
+            Content-Location: http://localhost:8080/FiwareRepository/v2/collec/exampleCollection/exampleResource 
+
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            {
+                "type":"resource",
+                "creator":"Creator",
+                "creationDate":"",
+                "modificationDate":"",
+                "name":"exampleResource.meta",
+                "contentUrl":"http://exampleUrl.com",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 400
+                description: "Field name do not comply the pattern."
+                reasonPhrase: "Bad Request"
+            }
+
++ Request (application/json)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            {
+                "type":"resource",
+                "creator":"Creator",
+                "creationDate":"",
+                "modificationDate":"",
+                "name":"exampleResource",
+                "contentUrl":"http://exampleUrl.com",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 409 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 409
+                description: "Path is a resource."
+                reasonPhrase: "Conflict"
+            }
+
++ Request (application/data)
+
+    + Body
+    
+            {
+                "type":"resource",
+                "creator":"Creator",
+                "creationDate":"",
+                "modificationDate":"",
+                "name":"exampleResource",
+                "contentUrl":"http://exampleUrl.com",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 415
+
+### Update a Resource [PUT]
+
++ Request (application/xml)
+
+    + Body
+    
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <resource id="collectionA/collectionB/resource">
+                <creator>Creator</creator>
+                <name>exampleResource</name>
+                <contentFileName>resourceFileName</contentFileName>
+            </resource>
+
++ Response 200
+
++ Request (application/json)
+            
+    + Body
+    
+            {
+                "type":"resource",
+                "creator":"Creator",
+                "name":"exampleResource",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 200
+
++ Request (application/json)
+            
+    + Body
+    
+            {
+                "type":"resource"
+                "creator":"Creator",
+                "name":"exampleResource",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 400
+
++ Request (application/json)
+
+    + Body
+    
+            {
+                "type":"resource",
+                "creator":"Creator",
+                "name":"exampleResource",
+                "contentUrl":"http://exampleUrl.com",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 403
+
++ Request (application/data)
+
+    + Body
+    
+            {
+                "type":"resource",
+                "creator":"Creator",
+                "name":"exampleResource",
+                "contentFileName":"resourceFileName"
+            }
+
++ Response 415
+
+### Remove a Resource [DELETE]
+
++ Parameters
+    + collection: exampleCollectionA (required, string) - Collection ID.
+    + resource: exampleResource (required, string) - Resource name.
+
++ Response 204
+
++ Response 404 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 404
+                description: "Collection or resource not found"
+                reasonPhrase: "Not Found"
+            }
+
+## Manage Resources Content [/collec/{collection}/{resource}]
+
+In a resource it is posible to Get and Insert or Update resource content, and thus, it is posible to manage 
+different collections within the repository. Also it is posible to storage RDF content, to make 
+queries and get this content in RDF formats.  
+
+The repository accepts the following RDF formats:
+`application/rdf+json`, `application/rdf+xml`, `application/rdf+json`, `text/turtle`, `application/x-turtle`,
+`text/rdf+n3`, `text/n-triples`, `text/n3`.
+
+### Get a Resource Content [GET]
+
++ Parameters
+    + collection: exampleCollectionA (required, string) - Collection ID.
+    + resource: exampleResource (required, string) - Resource name.
+
++ Request
+
+    + Headers
+            
+            Accept: application/rdf+json, application/json
+            
++ Response 200 (application/rdf+json)
+
+    + Body
+    
+            { 
+              "http://www.app.fake/app/tictactoe" : { 
+                "http://www.app.fake/app#name" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Tictactoe"
+                }
+                 ] ,
+                "http://www.app.fake/app#year" : [ { 
+                  "type" : "literal" ,
+                  "value" : "2010"
+                }
+                 ] ,
+                "http://www.app.fake/app#country" : [ { 
+                  "type" : "literal" ,
+                  "value" : "USA"
+                }
+                 ] ,
+                "http://www.app.fake/app#company" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Company1"
+                }
+                 ] ,
+                "http://www.app.fake/app#price" : [ { 
+                  "type" : "literal" ,
+                  "value" : "0.99"
+                }
+                 ]
+              }
+               ,
+              "http://www.app.fake/app/parchis" : { 
+                "http://www.app.fake/app#name" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Parchis"
+                }
+                 ] ,
+                "http://www.app.fake/app#year" : [ { 
+                  "type" : "literal" ,
+                  "value" : "2010"
+                }
+                 ] ,
+                "http://www.app.fake/app#country" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Spain"
+                }
+                 ] ,
+                "http://www.app.fake/app#company" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Company2"
+                }
+                 ] ,
+                "http://www.app.fake/app#price" : [ { 
+                  "type" : "literal" ,
+                  "value" : "0.99"
+                }
+                 ]
+              }
+            }
+
++ Request
+
+    + Headers
+            
+            Accept: application/rdf+xml, application/json
+            
++ Response 200 (application/rdf+xml)
+
+    + Body
+    
+            <rdf:RDF>
+                <rdf:Description rdf:about="http://www.app.fake/app/tictactoe">
+                    <app:name>Tictactoe</app:name>
+                    <app:country>USA</app:country>
+                    <app:company>Company1</app:company>
+                    <app:price>0.99</app:price>
+                    <app:year>2010</app:year>
+                </rdf:Description>
+                <rdf:Description rdf:about="http://www.app.fake/app/parchis">
+                    <app:name>Parchis</app:name>
+                    <app:country>Spain</app:country>
+                    <app:company>Company2</app:company>
+                    <app:price>0.99</app:price>
+                    <app:year>2010</app:year>
+                </rdf:Description>
+            </rdf:RDF>
+            
++ Request
+
+    + Headers
+            
+            Accept: text/turtle, application/json
+            
++ Response 200 (text/turtle)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+        
++ Request
+
+    + Headers
+            
+            Accept: application/x-turtle, application/json
+            
++ Response 200 (application/x-turtle)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Request
+
+    + Headers
+            
+            Accept: text/rdf+n3, application/json
+            
++ Response 200 (text/rdf+n3)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Request
+
+    + Headers
+            
+            Accept: text/n-triples, application/json
+            
++ Response 200 (text/n-triples)
+
+    + Body
+    
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#name> "Parchis" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#name> "Tictactoe" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#country> "Spain" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#country> "USA" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#company> "Company2" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#company> "Company1" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#price> "0.99" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#price> "0.99" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#year> "2010" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#year> "2010" .
+
++ Request
+
+    + Headers
+            
+            Accept: text/n3, application/json
+            
++ Response 200 (text/n3)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Request
+
+    + Headers
+            
+            Accept: data/example, application/json
+            
++ Response 200 (data/example)
+
+    + Body
+    
+            Data example stored in the repository.
+            
++ Request
+    
+    + Headers
+            
+            Accept: application/rdf+xml
+
++ Response 204
+
++ Request
+
+    + Headers
+            
+            Accept: application/rdf+xml, application/json
+            
++ Response 404 (application/json)
+    
+    + Body
+    
+            {
+                "errorCode": 404,
+                "description": "Resource or Collection not found",
+                "reasonPhrase": "Not Found"
+            }
+
++ Request
+
+    + Headers
+            
+            Accept: application/not-rdf, application/json
+            
++ Response 406 (application/json)
+
+    + Body
+    
+            {
+                "errorCode": 406
+                "description": ""
+                "reasonPhrase": "Not Acceptable"
+            }
+
+### Insert or Update a Resource Content [PUT]
+
++ Parameters
+    + collection: exampleCollectionA (required, string) - Collection ID.
+    + resource: exampleResource (required, string) - Resource name.
+
++ Request (application/rdf+json)
+
+    + Body
+    
+            { 
+              "http://www.app.fake/app/tictactoe" : { 
+                "http://www.app.fake/app#name" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Tictactoe"
+                }
+                 ] ,
+                "http://www.app.fake/app#year" : [ { 
+                  "type" : "literal" ,
+                  "value" : "2010"
+                }
+                 ] ,
+                "http://www.app.fake/app#country" : [ { 
+                  "type" : "literal" ,
+                  "value" : "USA"
+                }
+                 ] ,
+                "http://www.app.fake/app#company" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Company1"
+                }
+                 ] ,
+                "http://www.app.fake/app#price" : [ { 
+                  "type" : "literal" ,
+                  "value" : "0.99"
+                }
+                 ]
+              }
+               ,
+              "http://www.app.fake/app/parchis" : { 
+                "http://www.app.fake/app#name" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Parchis"
+                }
+                 ] ,
+                "http://www.app.fake/app#year" : [ { 
+                  "type" : "literal" ,
+                  "value" : "2010"
+                }
+                 ] ,
+                "http://www.app.fake/app#country" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Spain"
+                }
+                 ] ,
+                "http://www.app.fake/app#company" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Company2"
+                }
+                 ] ,
+                "http://www.app.fake/app#price" : [ { 
+                  "type" : "literal" ,
+                  "value" : "0.99"
+                }
+                 ]
+              }
+            }
+            
++ Response 200
+
++ Request (application/rdf+xml)
+
+    + Body
+    
+            <rdf:RDF>
+                <rdf:Description rdf:about="http://www.app.fake/app/tictactoe">
+                    <app:name>Tictactoe</app:name>
+                    <app:country>USA</app:country>
+                    <app:company>Company1</app:company>
+                    <app:price>0.99</app:price>
+                    <app:year>2010</app:year>
+                </rdf:Description>
+                <rdf:Description rdf:about="http://www.app.fake/app/parchis">
+                    <app:name>Parchis</app:name>
+                    <app:country>Spain</app:country>
+                    <app:company>Company2</app:company>
+                    <app:price>0.99</app:price>
+                    <app:year>2010</app:year>
+                </rdf:Description>
+            </rdf:RDF>
+            
++ Response 200
+            
++ Request (text/turtle)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+                    
++ Response 200
+                    
++ Request (application/x-turtle)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Response 200
+
++ Request (text/rdf+n3)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Response 200
+
++ Request (text/n-triples)
+
+    + Body
+    
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#name> "Parchis" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#name> "Tictactoe" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#country> "Spain" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#country> "USA" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#company> "Company2" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#company> "Company1" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#price> "0.99" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#price> "0.99" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#year> "2010" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#year> "2010" .
+
++ Response 200
+
++ Request (text/n3)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Response 200
+
++ Request (data/example)
+
+    + Body
+    
+            Data example stored in the repository.
+            
++ Response 200
+
++ Request (data/example)
+
+    + Body
+    
+            Data example to store in the repository.
+            
++ Response 404
+
+## Group Queries
+
+It is posible to execute diferent `SPARQL` queries in the repository to obtain data form the resource contents
+stored in Virtuoso.  
+
+The format of the query response depends on the query forms.
+
++ **`SELECT` query**
+
+    A `SELECT` query can be generated in two diferent formats: `application/json` and `application/xml`.
+            
+    + `SELECT` query response `application/json`
+            
+            {
+                "vars":3,
+                "columns":[
+                    {
+                        "values":["http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"],
+                        "name":"p"
+                    },
+                    {
+                        "values":["http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"],
+                        "name":"o"
+                    },
+                    {
+                        "values":["http://www.openlinksw.com/virtrdf-data-formats#default-iid",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nullable",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank-nullable",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default"],
+                        "name":"s"
+                    }
+                ]
+            }
+            
+    + `SELECT` query response `application/xml`
+    
+            <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+            <selectQueryResponse>
+                <columns>
+                    <columns>
+                        <name>p</name>
+                        <values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                        </values>
+                    </columns>
+                    <columns>
+                        <name>o</name>
+                        <values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                        </values>
+                    </columns>
+                    <columns>
+                        <name>s</name>
+                        <values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid-nullable</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank-nullable</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default</values>
+                        </values>
+                    </columns>
+                </columns>
+            </selectQueryResponse>
+    
++ **`DESCRIBE` query**
+
+    A `DESCRIBE` query can be generated in all the suported RDF types by the repository.
+    
++ **`CONSTRUCT` query**
+
+    A `CONSTRUCT` query can be generated in all the suported RDF types by the repository.
+    
++ **`ASK` query**
+
+    An `ASK` query can be generated in two diferent formats: `application/json` and `application/xml`.
+            
+    + `ASK` query response `application/json`
+    + `ASK` query response `application/xml`
+
+## Execute SPARQL Queries [/service/query{?query}]
+
+### Execute SPARQL Short Query [GET]
+
++ Parameters
+    + query: SELECT+%3Fs+%3Fp+%3Fo+WHERE+%7B%3Fs+%3Fp+%3Fo%7D+LIMIT+10 (required, string) - Query codificada en base 64
+
++ Request
+    
+    + Headers
+    
+            Accept: application/json
+
++ Response 200 (application/json)
+
+    + Body 
+    
+            {
+                "vars":3,
+                "columns":[
+                    {
+                        "values":["http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"],
+                        "name":"p"
+                    },
+                    {
+                        "values":["http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"],
+                        "name":"o"
+                    },
+                    {
+                        "values":["http://www.openlinksw.com/virtrdf-data-formats#default-iid",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nullable",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank-nullable",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default"],
+                        "name":"s"
+                    }
+                ]
+            }
+            
++ Request
+    
+    + Headers
+    
+            Accept: application/xml
+
++ Response 200 (application/xml)
+
+    + Body 
+    
+            <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+            <selectQueryResponse>
+                <columns>
+                    <columns>
+                        <name>p</name>
+                        <values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                            <values>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</values>
+                        </values>
+                    </columns>
+                    <columns>
+                        <name>o</name>
+                        <values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                            <values>http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat</values>
+                        </values>
+                    </columns>
+                    <columns>
+                        <name>s</name>
+                        <values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid-nullable</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank-nullable</values>
+                            <values>http://www.openlinksw.com/virtrdf-data-formats#default</values>
+                        </values>
+                    </columns>
+                </columns>
+            </selectQueryResponse>
+
++ Request
+
+    + Parameters
+        + query: SELECT+%3Fs+%3Fp+%3Fo+WHERE+%7B%3Fs+%3Fp+%3Fo%7D+LIMITE+5 (optional, string) - Query codificada en base 64
+
+    + Headers
+    
+            Accept: application/json
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                errorCode: 400
+                description: "Can not create ResultSet.:virtuoso.jdbc4.VirtuosoException: SQ074: Line 2: SP030: SPARQL compiler, line 2: syntax error at 'LIMITE' before '5'"
+                reasonPhrase: "Bad Request"
+            }
+            
++ Request
+    
+    + Headers
+    
+            Accept: text/html
+
++ Response 406 (application/json)
+
+    + Body 
+        
+            {
+                "errorCode": 406
+                "description": ""
+                "reasonPhrase": "Not Acceptable"
+            }
+
+
+### Execute SPARQL Long Query [POST]
+
++ Request (text/plain)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            SELECT ?s ?p ?o WHERE {?s ?p ?o} LIMIT 5
+    
++ Response 200 (application/json)
+
+    + Body 
+    
+            {
+                "vars":3,
+                "columns":[
+                    {
+                        "values":["http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"],
+                        "name":"p"
+                    },
+                    {
+                        "values":["http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat",
+                            "http://www.openlinksw.com/schemas/virtrdf#QuadMapFormat"],
+                        "name":"o"
+                    },
+                    {
+                        "values":["http://www.openlinksw.com/virtrdf-data-formats#default-iid",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nullable",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default-iid-nonblank-nullable",
+                            "http://www.openlinksw.com/virtrdf-data-formats#default"],
+                        "name":"s"
+                    }
+                ]
+            }
+            
++ Request (text/plain)
+
+    + Headers
+    
+            Accept: application/rdf+json, application/json
+
+    + Body
+    
+            PREFIX app: <http://www.app.fake/app#>
+            CONSTRUCT { 
+                ?X app:relaseYear ?year .
+            }
+            FROM <http://appTest>
+            WHERE { 
+                OPTIONAL { ?X app:year ?year . }
+            }
+    
++ Response 200 (application/rdf+json)
+
+    + Body
+    
+            { 
+                "http://www.app.fake/app/parchis" : 
+                { 
+                    "http://www.app.fake/app#relaseYear" : [ 
+                    { 
+                        "type" : "literal" ,
+                        "value" : "2010"
+                    }
+                    ]
+                },
+                "http://www.app.fake/app/tictactoe" : 
+                { 
+                    "http://www.app.fake/app#relaseYear" : [ 
+                    { 
+                        "type" : "literal" ,
+                        "value" : "2010"
+                    }
+                    ]
+                }
+            }
+
+
++ Request (text/plain)
+
+    + Headers
+    
+            Accept: application/rdf+json, application/json
+
+    + Body
+    
+            
+    
++ Response 200 (application/rdf+json)
+
+    + Body 
+
++ Request (text/plain)
+
+    + Headers
+    
+            Accept: application/json
+
+    + Body
+    
+            PREFIX app: <http://www.app.fake/app#> 
+            ASK { 
+                <http://www.app.fake/app/tictactoe> app:price ?tictactoe .
+                <http://www.app.fake/app/parchis> app:price ?parchis .
+                FILTER(?tictactoe = ?parchis) . 
+            }
+    
++ Response 200 (application/json)
+
+    + Body
+        
+            true
+
+## Manage Resources by Content URL [/service/query/{contentURL}]
+
+Also it is posible to obtain the resource content if it is an accepted RDF format and it is stored in Virtuoso.  
+
+### Get Resource by Content URL [GET]
+
++ Parameters
+    + contentURL: http://exampleUrl.com (required, string) - Content URL.
+
++ Request
+
+    + Headers
+            
+            Accept: application/rdf+json, application/json
+            
++ Response 200 (application/rdf+json)
+
+    + Body
+    
+            { 
+              "http://www.app.fake/app/tictactoe" : { 
+                "http://www.app.fake/app#name" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Tictactoe"
+                }
+                 ] ,
+                "http://www.app.fake/app#year" : [ { 
+                  "type" : "literal" ,
+                  "value" : "2010"
+                }
+                 ] ,
+                "http://www.app.fake/app#country" : [ { 
+                  "type" : "literal" ,
+                  "value" : "USA"
+                }
+                 ] ,
+                "http://www.app.fake/app#company" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Company1"
+                }
+                 ] ,
+                "http://www.app.fake/app#price" : [ { 
+                  "type" : "literal" ,
+                  "value" : "0.99"
+                }
+                 ]
+              }
+               ,
+              "http://www.app.fake/app/parchis" : { 
+                "http://www.app.fake/app#name" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Parchis"
+                }
+                 ] ,
+                "http://www.app.fake/app#year" : [ { 
+                  "type" : "literal" ,
+                  "value" : "2010"
+                }
+                 ] ,
+                "http://www.app.fake/app#country" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Spain"
+                }
+                 ] ,
+                "http://www.app.fake/app#company" : [ { 
+                  "type" : "literal" ,
+                  "value" : "Company2"
+                }
+                 ] ,
+                "http://www.app.fake/app#price" : [ { 
+                  "type" : "literal" ,
+                  "value" : "0.99"
+                }
+                 ]
+              }
+            }
+
++ Request
+
+    + Headers
+            
+            Accept: application/rdf+xml, application/json
+            
++ Response 200 (application/rdf+xml)
+
+    + Body
+    
+            <rdf:RDF>
+                <rdf:Description rdf:about="http://www.app.fake/app/tictactoe">
+                    <app:name>Tictactoe</app:name>
+                    <app:country>USA</app:country>
+                    <app:company>Company1</app:company>
+                    <app:price>0.99</app:price>
+                    <app:year>2010</app:year>
+                </rdf:Description>
+                <rdf:Description rdf:about="http://www.app.fake/app/parchis">
+                    <app:name>Parchis</app:name>
+                    <app:country>Spain</app:country>
+                    <app:company>Company2</app:company>
+                    <app:price>0.99</app:price>
+                    <app:year>2010</app:year>
+                </rdf:Description>
+            </rdf:RDF>
+            
++ Request
+
+    + Headers
+            
+            Accept: text/turtle, application/json
+            
++ Response 200 (text/turtle)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+        
++ Request
+
+    + Headers
+            
+            Accept: application/x-turtle, application/json
+            
++ Response 200 (application/x-turtle)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Request
+
+    + Headers
+            
+            Accept: text/rdf+n3, application/json
+            
++ Response 200 (text/rdf+n3)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Request
+
+    + Headers
+            
+            Accept: text/n-triples, application/json
+            
++ Response 200 (text/n-triples)
+
+    + Body
+    
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#name> "Parchis" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#name> "Tictactoe" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#country> "Spain" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#country> "USA" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#company> "Company2" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#company> "Company1" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#price> "0.99" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#price> "0.99" .
+            <http://www.app.fake/app/parchis> <http://www.app.fake/app#year> "2010" .
+            <http://www.app.fake/app/tictactoe> <http://www.app.fake/app#year> "2010" .
+
++ Request
+
+    + Headers
+            
+            Accept: text/n3, application/json
+            
++ Response 200 (text/n3)
+
+    + Body
+    
+            @prefix rdfdf: <http://www.openlinksw.com/virtrdf-data-formats#> .
+            @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+            @prefix fn:    <http://www.w3.org/2005/xpath-functions/#> .
+            @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+            @prefix yago:  <http://dbpedia.org/class/yago/> .
+            @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+            @prefix ogc:   <http://www.opengis.net/> .
+            @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+            @prefix ogcgsf: <http://www.opengis.net/def/function/geosparql/> .
+            @prefix protseq: <http://purl.org/science/protein/bysequence/> .
+            @prefix xslwd: <http://www.w3.org/TR/WD-xsl> .
+            @prefix sql:   <sql:> .
+            @prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+            @prefix sc:    <http://purl.org/science/owl/sciencecommons/> .
+            @prefix sd:    <http://www.w3.org/ns/sparql-service-description#> .
+            @prefix ogcsf: <http://www.opengis.net/ont/sf#> .
+            @prefix nci:   <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
+            @prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+            @prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+            @prefix ogcgml: <http://www.opengis.net/ont/gml#> .
+            @prefix ogcgsr: <http://www.opengis.net/def/rule/geosparql/> .
+            @prefix rdfa:  <http://www.w3.org/ns/rdfa#> .
+            @prefix mf:    <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+            @prefix scovo: <http://purl.org/NET/scovo#> .
+            @prefix virtcxml: <http://www.openlinksw.com/schemas/virtcxml#> .
+            @prefix dbpprop: <http://dbpedia.org/property/> .
+            @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+            @prefix mesh:  <http://purl.org/commons/record/mesh/> .
+            @prefix sioc:  <http://rdfs.org/sioc/ns#> .
+            @prefix xsl10: <http://www.w3.org/XSL/Transform/1.0> .
+            @prefix product: <http://www.buy.com/rss/module/productV2/> .
+            @prefix void:  <http://rdfs.org/ns/void#> .
+            @prefix dawgt: <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> .
+            @prefix go:    <http://purl.org/obo/owl/GO#> .
+            @prefix dbpedia: <http://dbpedia.org/resource/> .
+            @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+            @prefix xsl1999: <http://www.w3.org/1999/XSL/Transform> .
+            @prefix xf:    <http://www.w3.org/2004/07/xpath-functions> .
+            @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            @prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+            @prefix ldp:   <http://www.w3.org/ns/ldp#> .
+            @prefix math:  <http://www.w3.org/2000/10/swap/math#> .
+            @prefix ogcgs: <http://www.opengis.net/ont/geosparql#> .
+            @prefix obo:   <http://www.geneontology.org/formats/oboInOwl#> .
+            @prefix bif:   <bif:> .
+            @prefix dc:    <http://purl.org/dc/elements/1.1/> .
+            
+            <http://www.app.fake/app/parchis>
+                    <http://www.app.fake/app#company>
+                            "Company2" ;
+                    <http://www.app.fake/app#country>
+                            "Spain" ;
+                    <http://www.app.fake/app#name>  "Parchis" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+            
+            <http://www.app.fake/app/tictactoe>
+                    <http://www.app.fake/app#company>
+                            "Company1" ;
+                    <http://www.app.fake/app#country>
+                            "USA" ;
+                    <http://www.app.fake/app#name>  "Tictactoe" ;
+                    <http://www.app.fake/app#price>
+                            "0.99" ;
+                    <http://www.app.fake/app#year>  "2010" .
+
++ Response 404 (application/json)
+
+    + Body
+            
+            {
+                "errorCode": 404
+                "description": "Content Url not found."
+                "reasonPhrase": "Not Found"
+            }
+
++ Response 406 (application/json)
+
+    + Body
+    
+            {
+                "errorCode": 406
+                "description": ""
+                "reasonPhrase": "Not Acceptable"
+            }
