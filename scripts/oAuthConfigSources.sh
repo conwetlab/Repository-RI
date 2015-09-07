@@ -41,4 +41,5 @@ if [  $X == "Y" ] || [ $X == "y" ]; then
 	echo "What is your Callback URL?"
 	read X
 	sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" /etc/default/Repository-RI.properties
+    fi
 fi
