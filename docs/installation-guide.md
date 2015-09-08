@@ -137,17 +137,19 @@ All the mandatory dependencies can be easily installed on a debian based Linux d
 
 <pre>
  # export INSPWD=$PWD
+ # export REPO_OS=debian
+ # ./scripts/installTools.sh
+ # ./scripts/installJava8.sh
  # ./scripts/installTomcat8.sh
- # ./scripts/installJava8DebianWheezy.sh
- # ./scripts/installVirtuosoDebian.sh
- # apt-get install mongodb
+ # ./scripts/installMongoDB.sh
+ # ./scripts/installVirtuoso7.sh
 </pre>
 
-To install Virtuoso from the source code, it is possible to do it by using a generic script:
+To install Virtuoso from the source code, it is possible to do it by using a Operative System version not supported:
 
 <pre>
- # ./scripts/preVirtuosoDebian.sh
- # ./scripts/installVirtuoso.sh
+ # export REPO_OS=""
+ # ./scripts/installVirtuoso7.sh
 </pre>
 
 The variable <code>INSPWD</code> contains the path where the repository (Virtuoso, and Tomcat) has been installed.
@@ -157,21 +159,23 @@ The variable <code>INSPWD</code> contains the path where the repository (Virtuos
 
 #### Ubuntu
 
-All the mandatory dependencies can be easily installed on a debian based Linux distribution using diferent scripts:
+All the mandatory dependencies can be easily installed on a debian based Linux distribution using diferent scripts, and replacing "XX.XX" by Ubuntu version. :
 
 <pre>
  # export INSPWD=$PWD
+ # export REPO_OS=ubuntuXX.XX
+ # ./scripts/installTools.sh
+ # ./scripts/installJava8.sh
  # ./scripts/installTomcat8.sh
- # ./scripts/installJavaDebian.sh
- # ./scripts/installVirtuoso.sh
- # apt-get install mongodb
+ # ./scripts/installMongoDB.sh
+ # ./scripts/installVirtuoso7.sh
 </pre>
 
-To install Virtuoso from the source code, it is possible to do it by using a generic script:
+To install Virtuoso from the source code, it is possible to do it by using a Operative System version not supported:
 
 <pre>
- # ./scripts/preVirtuosoDebian.sh
- # ./scripts/installVirtuoso.sh
+ # export REPO_OS=""
+ # ./scripts/installVirtuoso7.sh
 </pre>
 
 The variable <code>INSPWD</code> contains the path where the repository (Virtuoso, and Tomcat) has been installed.
@@ -181,22 +185,23 @@ The variable <code>INSPWD</code> contains the path where the repository (Virtuos
 
 #### CentOS/RedHat
 
-Similarly, the different dependencies can be installed in CentOS/RedHat.
+Similarly, the different dependencies can be installed in CentOS/RedHat, and replacing "X" by Centos version.
 
 <pre>
-# export INSPWD=$PWD
-# ./scripts/installTomcat8.sh
-# wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u25-b17/jdk-8u25-linux-x64.rpm"
-# sudo rpm -ivh jdk-8u25-linux-x64.rpm
-# ./scripts/installVirtuoso.sh
-# ./scripts/installMongoCentos.sh
+ # export INSPWD=$PWD
+ # export REPO_OS=centosX
+ # ./scripts/installTools.sh
+ # ./scripts/installJava8.sh
+ # ./scripts/installTomcat8.sh
+ # ./scripts/installMongoDB.sh
+ # ./scripts/installVirtuoso7.sh
 </pre>
 
-To install Virtuoso from the source code, it is possible to do it by using a generic script:
+To install Virtuoso from the source code, it is possible to do it by using a Operative System version not supported:
 
 <pre>
- # ./scripts/preVirtuosoCentos.sh
- # ./scripts/installVirtuoso.sh
+ # export REPO_OS=""
+ # ./scripts/installVirtuoso7.sh
 </pre>
 
 ---
