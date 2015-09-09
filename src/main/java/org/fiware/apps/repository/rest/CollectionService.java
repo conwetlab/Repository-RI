@@ -133,7 +133,7 @@ public class CollectionService {
                 //Check is posible to obtain the content from Mongo or from Virtuoso and return it.
                 if (typeString.equalsIgnoreCase(resource.getContentMimeType())) {
                     resourceContent = mongoResourceDAO.getResourceContent(path);
-                    if (resourceContent.getContent() != "".getBytes()) {
+                    if (resourceContent.getContent() != null && resourceContent.getContent() != "".getBytes()) {
                         return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
                     } else {
                         return RestHelper.sendError("No content", Status.NO_CONTENT, accepteds);
