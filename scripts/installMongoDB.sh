@@ -7,17 +7,9 @@ if [ $REPO_OS == "centos6" ] || [ $REPO_OS == "centos7" ]; then
 
     # Install MongoDB repository
     if [[ $ARCH == "x86_64" ]]; then
-            echo "[mongodb]
-    name=MongoDB Repository
-    baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-    gpgcheck=0
-    enabled=1" > /etc/yum.repos.d/mongodb.repo
+            sudo cat ./scripts/mongoDB/mongoDBx86_64 > /etc/yum.repos.d/mongodb.repo
     else
-            echo "[mongodb]
-    name=MongoDB Repository
-    baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/i686/
-    gpgcheck=0
-    enabled=1" > /etc/yum.repos.d/mongodb.repo
+            sudo cat ./scripts/mongoDB/mongoDBi686 > /etc/yum.repos.d/mongodb.repo
     fi
 
     sudo yum -y install mongodb-org
