@@ -207,6 +207,20 @@ public class CollectionServiceTest {
     }
 
     @Test
+    public void getResourceMongoContentNullTest() throws DatasourceException, URISyntaxException {
+        String path = "a/b/c";
+        Resource resource = generateResource(path, null, true, "");
+        resource.setContent(null);
+        List <String> accepts = new LinkedList<>();
+        accepts.add("application/rdf+xml");
+
+        when(mongoResourceDAO.getResource(path)).thenReturn(resource);
+        when(mongoResourceDAO.getResourceContent(path)).thenReturn(resource);
+
+        getResourceOrCollection(path, accepts, null, 204);
+    }
+
+    @Test
     public void getResourceVirtuosoNoContentTest() throws DatasourceException, URISyntaxException {
         String path = "a/b/c";
         Resource resource = generateResource(path, null, true, "application/rdf+json");
