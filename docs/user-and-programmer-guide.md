@@ -1,4 +1,4 @@
-# Repository - Programer Guide
+# Repository - User and Programer Guide
 
 .fx: cover
 
@@ -7,9 +7,38 @@
 ---
 ## Introduction
 
-* This document describes the basic concepts regarding the Repository GEri and explains the necessary steps to develop applications which makes use of the Repository backend functionality. The Repository API is based on REST principles and generally returns XML or JSON encoded responses. Since REST is independent of a concrete programming language, you just have to know how to make an HTTP request in the programming language of your choice.
+This document describes the basic concepts regarding the Repository GEri and explains the necessary steps to develop applications which makes use of the Repository backend functionality. The Repository API is based on REST principles and generally returns XML or JSON encoded responses. Since REST is independent of a concrete programming language, you just have to know how to make an HTTP request in the programming language of your choice.
 
-* To give you a feeling of how the Repository works and how you can interact with the system let us take a look at some examples, realized with the command line tool cURL and in Java. 'cURL' is a command which can be used to perform any kind of HTTP operation - and therefore is also usable for the Repository. The library libcurl enables the integration in C programs as well. Other easy way to interact with the Repository is using any REST client like some browsers extensions provide to the user. We describe the API REST to show you what operations is able to do, and what responses are given by the Repository.
+Despite the Repository is a Generic Enabler which provides pure backend functionality to other applications (e.g. Generic Enablers or end user facing applications), it is possible to browse between the existing collections and resources using the basic web interface provided.
+
+To give you a feeling of how the Repository works and how you can interact with the system let us take a look at some examples, realized with the command line tool cURL and in Java. 'cURL' is a command which can be used to perform any kind of HTTP operation - and therefore is also usable for the Repository. The library libcurl enables the integration in C programs as well. Other easy way to interact with the Repository is using any REST client like some browsers extensions provide to the user. We describe the API REST to show you what operations is able to do, and what responses are given by the Repository.
+
+---
+## Basic Browsing
+
+The Repository allows the client to choose the appropriate data format for retrieving meta information about a resource or a collection. One of this data format is <code>text/html</code> which provides a user friendly interface to see the diferent collection and resources stored in the repository.
+
+### Browsing Collections
+
+It is possible to visualize the existing collections in a given collection in the Repository by accessing the URL <code>http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}</code>
+
+.. image:: /images/collection.png
+   :align: center
+
+It is possible to visualize the existing resources contained in a given collection by accessing the URL <code>http://[SERVER_HOST]/FiwareRepository/v2/collec/{collectionA}/{collectionB}/</code>
+
+.. image:: /images/collectionCollection.png
+   :align: center
+
+### Browsing Resources
+
+It is possible to visualize the meta information of a given resource by accessing the URL <code>http://[SERVER_HOST]/FiwareRepository/v2/collec/{collectionA}/{collectionB}/{resource}</code>
+
+.. image:: /images/resourcemeta.png
+   :align: center
+
+.. note::
+   Depending on the configuration of the Repository RI instance, you may be redirected to the FIWARE Lab login page in order to be authenticated.
 
 ---
 ## API REST Operations
@@ -17,7 +46,7 @@
 .fx: section-title
 
 ---
-## Managing Collections
+### Managing Collections
 
 Following you can find  the description of the operations that can be performed over collections:
 
@@ -25,9 +54,11 @@ Following you can find  the description of the operations that can be performed 
 * POST  http://[SERVER_HOST]/FiwareRepository/v2/collec/  Create a collection.
 * DELETE  http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/ Delete a resource
 
-NOTE: Every collection name must comply the regular expresion <code>"[a-zA-Z0-9_-]+"</code>.
+.. note::
+   Every collection name must comply the regular expresion <code>"[a-zA-Z0-9_-]+"</code>.
+
 ---
-## Getting collections
+#### Getting collections
 
 * Request
 <pre>
@@ -46,7 +77,7 @@ Content-type: application/json, application/xml, text/plain
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Creating collections
+#### Creating collections
 
 * Request
 <pre>
@@ -84,7 +115,7 @@ Body: <pre>
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Removing collections
+#### Removing collections
 
 * Request
 <pre>
@@ -101,7 +132,7 @@ URI: http://[SERVER_HOST]FiwareRepository/v2/collec/{collection}
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Managing Resources
+### Managing Resources
 
 Following you can find  the description of the operations that can be performed over resources:
 
@@ -112,9 +143,11 @@ Following you can find  the description of the operations that can be performed 
 * PUT  http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource}  Replace content of a resource.
 * DELETE  http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource} Delete a resource
 
-NOTE: Every resource name must comply the regular expresion <code>"[a-zA-Z0-9._-]+"</code>.
+.. note::
+   Every resource name must comply the regular expresion <code>"[a-zA-Z0-9._-]+"</code>.
+
 ---
-## Getting resources metadata
+#### Getting resources metadata
 
 * Request
 <pre>
@@ -133,7 +166,7 @@ Accept: application/json, application/xml, text/plain
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Getting resources
+#### Getting resources
 
 * Request
 <pre>
@@ -153,12 +186,12 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Creating resources
+#### Creating resources
 
 * Request
 <pre>
 Verb: POST
-URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/
+URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}
 Content-Type: application/json, application/xml
 Body: <pre>
 	&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
@@ -196,7 +229,7 @@ Body: <pre>
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Updating resources metadata
+#### Updating resources metadata
 
 * Request
 <pre>
@@ -238,7 +271,7 @@ Body: <pre>
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Updating resources content
+#### Updating resources content
 
 * Request
 <pre>
@@ -258,7 +291,7 @@ Content-Type: application/json, application/xml, application/rdf+xml, text/turtl
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Deleting resources
+#### Deleting resources
 
 * Request
 <pre>
@@ -275,7 +308,7 @@ URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource}
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Making SPARQL queries
+### Making SPARQL queries
 
 * Following you can find the quering operations that can be executed.
 
@@ -284,7 +317,7 @@ URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}/{resource}
 * POST http://[SERVER_HOST]/FiwareRepository/v2/services/query | Execute a long query in the triple store.
 
 ---
-## Getting a resource by Url Content
+#### Getting a resource by Url Content
 
 * Request
 <pre>
@@ -304,7 +337,7 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 | 500 | Internal Server Error | There was an internal error in the system so your request cannot be completed. |
 
 ---
-## Executing a short SPARQL query
+#### Executing a short SPARQL query
 
 * Request
 <pre>
@@ -322,7 +355,7 @@ Accept: application/json, application/xml, application/rdf+xml, text/turtle, app
 | 406 | Not Acceptable | The query response can not be generated in the given format. |
 
 ---
-## Executing a long SPARQL query
+#### Executing a long SPARQL query
 
 * Request
 <pre>
@@ -342,13 +375,14 @@ Body: "<pre>SELECT ?s ?p ?o WHERE {?s ?p ?o }</pre>"
 | 406 | Not Acceptable | The query response can not be generated in the given format. |
 | 415 | Unsopported Media Type | The request entity has a media type which a query does not support. |
 
+
 ---
 ## Accessing the Repository with cURL
 
 .fx: section-title
 
 ---
-## Creating a resource
+### Creating a resource
 
 * Create a message body and save it to a file named resource.xml.
 
@@ -358,18 +392,16 @@ Body: "<pre>SELECT ?s ?p ?o WHERE {?s ?p ?o }</pre>"
 	    &lt;creator&gt;Creator&lt;/creator&gt;
         &lt;creationDate&gt;&lt;/creationDate&gt;
         &lt;modificationDate&gt;&lt;/modificationDate&gt;
-	    &lt;name&gt;Test resource&lt;/name&gt;
+	    &lt;name&gt;resource&lt;/name&gt;
         &lt;contentUrl&gt;http://testresourceurl.com/resource&lt;/contentUrl&gt;
 	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
     &lt;/resource&gt;
 </pre>
 
----
-## Creating a resource
 * Send the request to the server.
 
 <pre>
-curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http://[SERVER_HOST]/FiwareRepository/v2/collec                                                                        
+curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http://[SERVER_HOST]/FiwareRepository/v2/collec/collectionA/collectionB
 </pre>
 
 ---
@@ -399,7 +431,7 @@ curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http:/
 </pre>
 
 ---
-## Updating the content of a resource
+### Updating the content of a resource
 
 * Create a message body and save it to a file named resourceContent.xml.
 
@@ -430,7 +462,7 @@ curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http:/
 </pre>
 
 ---
-## Updating the content of a resource
+### Updating the content of a resource
 * Send the request to the server.
 
 <pre>
@@ -438,7 +470,7 @@ curl -v -H "Content-Type: application/rdf+xml" -X PUT --data-binary "@resourceCo
 </pre>
 
 ---
-## Updating the content of a resource
+### Updating the content of a resource
 * Response:
 
 <pre>
@@ -463,7 +495,7 @@ curl -v -H "Content-Type: application/rdf+xml" -X PUT --data-binary "@resourceCo
 </pre>
 
 ---
-## Getting a resource
+### Getting a resource content
 
 * Send the request to the server.
 
@@ -472,7 +504,7 @@ curl -v -H "Accept: application/rdf+xml" -X GET http://localhost:8080/FiwareRepo
 </pre>
 
 ---
-## Getting a resource
+### Getting a resource content
 * Response:
 
 <pre>
@@ -519,7 +551,7 @@ rdf:about="http://www.app.fake/app/App2"&gt;
 </pre>
 
 ---
-## Deleting a resource
+### Deleting a resource
 
 * Send the request to the server.
 
@@ -528,7 +560,7 @@ curl -v -X DELETE http://localhost:8080/FiwareRepository/v2/collec/collectionA/c
 </pre>
 
 ---
-## Deleting a resource
+### Deleting a resource
 * Response:
 
 <pre>
@@ -550,7 +582,7 @@ curl -v -X DELETE http://localhost:8080/FiwareRepository/v2/collec/collectionA/c
 </pre>  
 
 ---
-## Executing a Query
+### Executing a Query
 
 * Send the request to the server.
 
@@ -559,7 +591,7 @@ curl -v -H "Accept: application/json" -H "Content-Type: text/plain" -X POST --da
 </pre>
 
 ---
-## Executing a Query
+### Executing a Query
 * Response:
 
 <pre>
@@ -640,10 +672,11 @@ name: "s"
 
 ---
 ## Managing different data formats
+
 * HTTP content negotiation allows the client to choose the appropriate data format for retrieving meta information about a resource or a collection. Besides XML and JSON the Repository also supports human readable output formats using HTML rendering ('text/html' accept header) including hyperlinked representation and formatted text.
 
 ---
-## Text Representation
+### Text Representation
 
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}
 * Accept Header: text/plain
@@ -675,7 +708,7 @@ Resources:
 </pre>
 
 ---
-## JSON Representation
+### JSON Representation
 
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}
 * Accept Header: application/json
@@ -686,7 +719,7 @@ Resources:
   "resources": [
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource1",
       "content": null,
       "collection": null,
       "contentMimeType": "application\/rdf+xml",
@@ -699,7 +732,7 @@ Resources:
     },
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource2",
       "content": null,
       "collection": null,
       "contentMimeType": "plain\/text",
@@ -712,7 +745,7 @@ Resources:
     },
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource3",
       "content": null,
       "collection": null,
       "contentMimeType": "text\/turtle",
@@ -725,7 +758,7 @@ Resources:
     },
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource4",
       "content": null,
       "collection": null,
       "contentMimeType": "application\/rdf+xml",
@@ -747,6 +780,7 @@ Resources:
       ],
       "type":"collection",
       "id": "testCollection\/collectionA",
+      "name": "collectionA",
       "creationDate": 1363859273552,
       "creator": "",
       "modificationDate": null
@@ -760,6 +794,7 @@ Resources:
       ],
       "type":"collection"
       "id": "testCollection\/collectionB",
+      "name": "collectionB",
       "creationDate": 1363859273566,
       "creator": "",
       "modificationDate": null
@@ -773,6 +808,7 @@ Resources:
       ],
       "type":"collection"
       "id": "testCollection\/",
+      "name": "testCollection",
       "creationDate": 1363859273575,
       "creator": "",
       "modificationDate": null
@@ -787,7 +823,7 @@ Resources:
 </pre>
 
 ---
-## XML Representation
+### XML Representation
 
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}
 * Accept Header: application/json
@@ -801,18 +837,21 @@ Resources:
     &lt;collections&gt;
         &lt;collections id="testCollection/collectionA"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.552+01:00&lt;/creationDate&gt;
+            &lt;name&gt;collectionA&lt;/name&gt;
             &lt;creator/&gt;
             &lt;collections/&gt;
             &lt;resources/&gt;
         &lt;/collections&gt;
         &lt;collections id="testCollection/collectionB"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.566+01:00&lt;/creationDate&gt;
+            &lt;name&gt;collectionB&lt;/name&gt;
             &lt;creator/&gt;
             &lt;collections/&gt;
             &lt;resources/&gt;
         &lt;/collections&gt;
         &lt;collections id="testCollection/"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.575+01:00&lt;/creationDate&gt;
+            &lt;name&gt;testCollection&lt;/name&gt;
             &lt;creator/&gt;
             &lt;collections/&gt;
             &lt;resources/&gt;
@@ -826,7 +865,7 @@ Resources:
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;application/rdf+xml&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource1&lt;/name&gt;
         &lt;/resources&gt;
         &lt;resources id="testCollection/testResource2"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.515+01:00&lt;/creationDate&gt;
@@ -835,7 +874,7 @@ Resources:
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;plain/text&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource2&lt;/name&gt;
         &lt;/resources&gt;
         &lt;resources id="testCollection/testResource3"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.535+01:00&lt;/creationDate&gt;
@@ -844,7 +883,7 @@ Resources:
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;text/turtle&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource3&lt;/name&gt;
         &lt;/resources&gt;
         &lt;resources id="testCollection/testResource4"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.545+01:00&lt;/creationDate&gt;
@@ -853,7 +892,7 @@ Resources:
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;application/rdf+xml&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource4&lt;/name&gt;
         &lt;/resources&gt;
     &lt;/resources&gt;
 &lt;/collection&gt;
@@ -869,8 +908,9 @@ Resources:
 
 * When you insert some resource content in any of the accepted RDF formats, it is possible to retrieve that content in any of the allowed RDF formats, as explined in the following slides.
 
----
-## XML+RDF Representation
+--
+### XML+RDF Representation
+
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}/{resource}
 * Accept Header: application/rdf+xml
 * Result:
@@ -901,7 +941,8 @@ rdf:about="http://www.app.fake/app/App2"&gt;
 </pre>
 
 ---
-## Turtle Representation
+### Turtle Representation
+
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}/{resource}
 * Accept Header: "text/turtle"
 * Result:
@@ -976,7 +1017,8 @@ rdf:about="http://www.app.fake/app/App2"&gt;
 </pre>
 
 ---
-## N3 Representation
+### N3 Representation
+
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}/{resource}
 * Accept Header: "text/n3"
 * Result:
@@ -1051,7 +1093,8 @@ rdf:about="http://www.app.fake/app/App2"&gt;
 </pre>
 
 ---
-## N-Triples Representation
+### N-Triples Representation
+
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}/{resource}
 * Accept Header: "text/n-triples"
 * Result:
@@ -1076,10 +1119,12 @@ rdf:about="http://www.app.fake/app/App2"&gt;
 
 ---
 ## Retrieving Query response in different formats
+
 * When you execute a SPARQL query in the Repository, it genrates different responses depending on the type of query. If you execute a SELECT query, it returns a json object composed by n columns being n number of variables. If you execute a CONSTRUCT or a DESCRIBE query, you can specifythe RDF format as described in the previous slides.
 
 ---
-## Executing SELECT query
+### Executing SELECT query
+
 * Request URL: http://[REPOSITORY_URL]/v2/collec/{collection}/{resource}
 * Accept Header: "application/json"
 * Body: SELECT ?s ?p ?o WHERE {?s ?p ?o}
