@@ -36,7 +36,7 @@ Browsing Resources
 
 It is possible to visualize the meta information of a given resource by accessing the URL <code>http://[SERVER_HOST]/FiwareRepository/v2/collec/{collectionA}/{collectionB}/{resource}</code>
 
-.. image:: images/resourcemeta.png
+.. image:: /images/resourcemeta.png
    :align: center
 
 .. note::
@@ -196,11 +196,11 @@ Creating resources
 * Request
 <pre>
 Verb: POST
-URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/
+URI: http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}
 Content-Type: application/json, application/xml
 Body: <pre>
 	&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-    &lt;resource id="collectionA/collectionB/resource"&gt;
+    &lt;resource&gt;
 	    &lt;creator&gt;Creator&lt;/creator&gt;
         &lt;creationDate&gt;&lt;/creationDate&gt;
         &lt;modificationDate&gt;&lt;/modificationDate&gt;
@@ -397,11 +397,11 @@ Creating a resource
 
 <pre>
     &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-    &lt;resource id="collectionA/collectionB/resource"&gt;
+    &lt;resource&gt;
 	    &lt;creator&gt;Creator&lt;/creator&gt;
         &lt;creationDate&gt;&lt;/creationDate&gt;
         &lt;modificationDate&gt;&lt;/modificationDate&gt;
-	    &lt;name&gt;Test resource&lt;/name&gt;
+	    &lt;name&gt;resource&lt;/name&gt;
         &lt;contentUrl&gt;http://testresourceurl.com/resource&lt;/contentUrl&gt;
 	    &lt;contentFileName&gt;resourceFileName&lt;/contentFileName&gt;
     &lt;/resource&gt;
@@ -410,7 +410,7 @@ Creating a resource
 * Send the request to the server.
 
 <pre>
-curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http://[SERVER_HOST]/FiwareRepository/v2/collec                                                                        
+curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http://[SERVER_HOST]/FiwareRepository/v2/collec/collectionA/collectionB
 </pre>
 
 * Response
@@ -499,8 +499,8 @@ curl -v -H "Content-Type: application/rdf+xml" -X PUT --data-binary "@resourceCo
 </pre>
 
 
-Getting a resource
-==================
+Getting a resource content
+==========================
 
 * Send the request to the server.
 
@@ -717,7 +717,7 @@ JSON Representation
   "resources": [
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource1",
       "content": null,
       "collection": null,
       "contentMimeType": "application\/rdf+xml",
@@ -730,7 +730,7 @@ JSON Representation
     },
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource2",
       "content": null,
       "collection": null,
       "contentMimeType": "plain\/text",
@@ -743,7 +743,7 @@ JSON Representation
     },
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource3",
       "content": null,
       "collection": null,
       "contentMimeType": "text\/turtle",
@@ -756,7 +756,7 @@ JSON Representation
     },
     {
       "type":"resource",
-      "name": "",
+      "name": "testResource4",
       "content": null,
       "collection": null,
       "contentMimeType": "application\/rdf+xml",
@@ -778,6 +778,7 @@ JSON Representation
       ],
       "type":"collection",
       "id": "testCollection\/collectionA",
+      "name": "collectionA",
       "creationDate": 1363859273552,
       "creator": "",
       "modificationDate": null
@@ -791,6 +792,7 @@ JSON Representation
       ],
       "type":"collection"
       "id": "testCollection\/collectionB",
+      "name": "collectionB",
       "creationDate": 1363859273566,
       "creator": "",
       "modificationDate": null
@@ -804,6 +806,7 @@ JSON Representation
       ],
       "type":"collection"
       "id": "testCollection\/",
+      "name": "testCollection",
       "creationDate": 1363859273575,
       "creator": "",
       "modificationDate": null
@@ -833,18 +836,21 @@ XML Representation
     &lt;collections&gt;
         &lt;collections id="testCollection/collectionA"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.552+01:00&lt;/creationDate&gt;
+            &lt;name&gt;collectionA&lt;/name&gt;
             &lt;creator/&gt;
             &lt;collections/&gt;
             &lt;resources/&gt;
         &lt;/collections&gt;
         &lt;collections id="testCollection/collectionB"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.566+01:00&lt;/creationDate&gt;
+            &lt;name&gt;collectionB&lt;/name&gt;
             &lt;creator/&gt;
             &lt;collections/&gt;
             &lt;resources/&gt;
         &lt;/collections&gt;
         &lt;collections id="testCollection/"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.575+01:00&lt;/creationDate&gt;
+            &lt;name&gt;testCollection&lt;/name&gt;
             &lt;creator/&gt;
             &lt;collections/&gt;
             &lt;resources/&gt;
@@ -858,7 +864,7 @@ XML Representation
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;application/rdf+xml&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource1&lt;/name&gt;
         &lt;/resources&gt;
         &lt;resources id="testCollection/testResource2"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.515+01:00&lt;/creationDate&gt;
@@ -867,7 +873,7 @@ XML Representation
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;plain/text&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource2&lt;/name&gt;
         &lt;/resources&gt;
         &lt;resources id="testCollection/testResource3"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.535+01:00&lt;/creationDate&gt;
@@ -876,7 +882,7 @@ XML Representation
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;text/turtle&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource3&lt;/name&gt;
         &lt;/resources&gt;
         &lt;resources id="testCollection/testResource4"&gt;
             &lt;creationDate&gt;2013-03-21T10:47:53.545+01:00&lt;/creationDate&gt;
@@ -885,7 +891,7 @@ XML Representation
             &lt;contentFileName&gt;filename&lt;/contentFileName&gt;
             &lt;contentMimeType&gt;application/rdf+xml&lt;/contentMimeType&gt;
             &lt;contentUrl/&gt;
-            &lt;name/&gt;
+            &lt;name&gt;testResource4&lt;/name&gt;
         &lt;/resources&gt;
     &lt;/resources&gt;
 &lt;/collection&gt;
