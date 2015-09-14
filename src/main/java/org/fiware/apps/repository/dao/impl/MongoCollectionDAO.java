@@ -236,33 +236,37 @@ public class MongoCollectionDAO implements CollectionDAO{
     }
 
     private Boolean insertCollectionRecursive(ResourceCollection r) throws DatasourceException{
+        ResourceCollection res = new ResourceCollection();
 
         if((r.getId().contains("/"))&&(getCollection(r.getId().substring(0, r.getId().lastIndexOf("/"))) == null)){
-            r.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
+            res.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
 
-            if (r.getId().contains("/")) {
-                r.setName(r.getId().substring(r.getId().lastIndexOf("/")+1));
+            if (res.getId().contains("/")) {
+                res.setName(res.getId().substring(res.getId().lastIndexOf("/")+1));
             } else {
-                r.setName(r.getId());
+                res.setName(res.getId());
             }
+
+            res.setCreator(r.getCreator());
+            res.setCreationDate(r.getCreationDate());
 
             try{
                 db.requestStart();
                 BasicDBObject obj = new BasicDBObject();
-                obj.put("id", r.getId());
-                obj.put("creator", r.getCreator());
-                obj.put("name", r.getName());
-                if(r.getCreationDate()!=null){
-                    obj.put("creationDate", r.getCreationDate());
+                obj.put("id", res.getId());
+                obj.put("creator", res.getCreator());
+                obj.put("name", res.getName());
+                if(res.getCreationDate()!=null){
+                    obj.put("creationDate", res.getCreationDate());
                 }else{
                     obj.put("creationDate", new Date());
                 }
                 mongoCollection.insert(obj);
                 db.requestDone();
-                return insertCollectionRecursive(r);
+                return insertCollectionRecursive(res);
             }catch (Exception e){
                 db.requestDone();
-                throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), ResourceCollection.class);
+                throw new DatasourceException("Error parsing " + res.getId() + " " + e.getMessage(), ResourceCollection.class);
             }
         }else{
             return true;
