@@ -305,9 +305,9 @@ public class CollectionServicePostITTest {
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        client.deleteCollection("resourceCollectionIn/A/B/C/"+name, headers);
+        client.deleteCollection("resourceCollectionIn", headers);
         HttpResponse response = client.postCollection("resourceCollectionIn/A/B/C", IntegrationTestHelper.collectionToJson(resourceCollection), headers);
-        client.deleteCollection("resourceCollectionIn/A/B/C/"+name, headers);
+        client.deleteCollection("resourceCollectionIn", headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
         assertEquals("http://localhost:12345/FiwareRepository/v2/collec/resourceCollectionIn/A/B/C/resourceCollectionTestN", response.getHeaders("Content-Location")[0].getValue());
     }
