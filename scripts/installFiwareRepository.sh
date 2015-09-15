@@ -25,22 +25,18 @@ echo "Installing MongoDB."
 echo "-------------------------------------------------------------------------"
 ./scripts/installMongoDB.sh
 
-## Add the repository file settings
-echo "."
-echo "-------------------------------------------------------------------------"
-sudo ./scripts/addRepositorySettings.sh
+
 
 ## Installing Fiware Repository-RI
 if [ -d "$INSPWD/src" ]; then
 	# Installation from source code
-	./scripts/oAuthConfigSources.sh
 	mvn clean install
-	cp ./target/FiwareRepository.war $INSPWD/apache-tomcat/webapps/FiwareRepository.war
-else
-	# Installation from build
-	./scripts/oAuthConfig.sh
-	cp ./FiwareRepository.war $INSPWD/apache-tomcat/webapps/FiwareRepository.war
+	cp ./target/FiwareRepository.war ./FiwareRepository.war
 fi
+
+sudo ./scripts/addRepositorySettings.sh
+./scripts/oAuthConfig.sh
+cp ./FiwareRepository.war $INSPWD/apache-tomcat/webapps/FiwareRepository.war
 
 ## Starting Fiware Repository
 cd $INSPWD/virtuoso7/var/lib/virtuoso/db/
