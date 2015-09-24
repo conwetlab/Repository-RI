@@ -10,4 +10,3 @@ export CATALINA_HOME=$INSPWD/apache-tomcat
 echo "export CATALINA_HOME=\"$INSPWD/apache-tomcat\"" >> ~/.bashrc
 
 chmod +x $INSPWD/apache-tomcat/bin/*.sh
-$INSPWD/apache-tomcat/bin/startup.sh

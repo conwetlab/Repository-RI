@@ -63,4 +63,8 @@ else
     cd ..
     sudo rm -r virtuoso-opensource-stable-7
     sudo rm 7.zip
+
+    cd $INSPWD/virtuoso7/var/lib/virtuoso/db/
+    $INSPWD/virtuoso7/bin/virtuoso-t -f &
+    cd $INSPWD
 fi

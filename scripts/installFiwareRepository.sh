@@ -25,7 +25,7 @@ echo "Installing MongoDB."
 echo "-------------------------------------------------------------------------"
 ./scripts/installMongoDB.sh
 
-
+sudo ./scripts/addRepositorySettings.sh
 
 ## Installing Fiware Repository-RI
 if [ -d "$INSPWD/src" ]; then
@@ -34,7 +34,6 @@ if [ -d "$INSPWD/src" ]; then
 	cp ./target/FiwareRepository.war ./FiwareRepository.war
 fi
 
-sudo ./scripts/addRepositorySettings.sh
 ./scripts/oAuthConfig.sh
 cp ./FiwareRepository.war $INSPWD/apache-tomcat/webapps/FiwareRepository.war
 
