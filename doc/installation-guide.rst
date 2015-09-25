@@ -114,6 +114,10 @@ Finally, the installation script allows to configure the OAuth2 user authenticat
     What is your Callback URL?
     http://[host]:[port]/FiwareRepository/v2/callback
 
+
+.. note::
+   The existing scripts try to install tomcat 8.0.26, in case this version would not be available it will be needed to update the version in the script installTomcat8.sh
+
 Manually installing the Repository
 ==================================
 
