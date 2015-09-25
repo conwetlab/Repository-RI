@@ -2,6 +2,12 @@
 Installation and Administration Guide
 =====================================
 
+------------
+Introduction
+------------
+
+This Installation and Administration Guide covers Repository-RI version 4.4.3. Any feedback on this document is highly welcomed, including bugs, typos or things you think should be included but aren't. Please send it to the "Contact Person" email that appears in the `Catalogue page for this GEi <http://catalogue.fiware.org/enablers/repository-repository-ri>`__.
+
 -------------------
 System Requirements
 -------------------
@@ -21,6 +27,7 @@ The Repository has been tested in the following Operating Systems:
 
 * Ubuntu 12.04, 14.04
 * CentOS 6.3, 6.5, 7.0
+* Debian 7
 
 Software Requirements
 ===================== 
@@ -56,8 +63,8 @@ Getting the Repository software
 
 The packaged version of the Repository software can be downloaded from:
 
-* The FIWARE Files page (https://forge.fiware.org/frs/?group_id=7)
-* The FIWARE catalgue (http://catalogue.fiware.org/enablers/downloads-10).
+* `The FIWARE Files page <https://forge.fiware.org/frs/?group_id=7>`__
+* `The FIWARE catalgue <http://catalogue.fiware.org/enablers/repository-repository-ri/downloads>`__.
 
 This package contains the war file of the Repository as well as the intallation scripts used in this document.
 
@@ -78,7 +85,7 @@ Installing the Repository using scripts
 
 In order to facilitate the installation of the Repository, the script *install.sh* has been provided. This script installs all needed dependencies, configures the repository and deploys it. 
 
-Note that the installation script installs dependencies such as Java 1.8 or Tomcat. If you are installing the Repository in a system that is already in used, you may want to have more control over what dependecies are installed. In this case have a look at section *Manually Installing the Repository*.
+Note that the installation script installs dependencies such as Java 1.8 or Tomcat. If you are installing the Repository in a system that is already in use, you may want to have more control over what dependecies are installed. In this case have a look at section *Manually Installing the Repository*.
 
 To use the installation script execute the following command: ::
 
@@ -107,8 +114,11 @@ Finally, the installation script allows to configure the OAuth2 user authenticat
     What is your Callback URL?
     http://[host]:[port]/FiwareRepository/v2/callback
 
-Debian Manually installing the Repository
-=========================================
+Manually installing the Repository
+==================================
+
+Debian
+------
 
 All the mandatory dependencies can be easily installed on a debian based Linux distribution using diferent scripts: ::
 
@@ -120,15 +130,15 @@ All the mandatory dependencies can be easily installed on a debian based Linux d
     $ ./scripts/installMongoDB.sh
     $ ./scripts/installVirtuoso7.sh
 
-To install Virtuoso from the source code, it is possible to do it by using a Operative System version not supported: ::
+To install Virtuoso from the source code, it is also provided an script: ::
 
     $ export REPO_OS=""
     $ ./scripts/installVirtuoso7.sh
 
 The variable ``INSPWD`` contains the path where the repository (Virtuoso, and Tomcat) has been installed.
 
-Ubuntu Manually installing the Repository
-=========================================
+Ubuntu
+------
 
 All the mandatory dependencies can be easily installed on a debian based Linux distribution using diferent scripts, and replacing "XX.XX" by Ubuntu version. ::
 
@@ -140,15 +150,11 @@ All the mandatory dependencies can be easily installed on a debian based Linux d
     $ ./scripts/installMongoDB.sh
     $ ./scripts/installVirtuoso7.sh
 
-To install Virtuoso from the source code, it is possible to do it by using a Operative System version not supported: ::
-
-    $ export REPO_OS=""
-    $ ./scripts/installVirtuoso7.sh
 
 The variable ``INSPWD`` contains the path where the repository (Virtuoso, and Tomcat) has been installed.
 
-CentOS/RedHat Manually installing the Repository
-================================================
+CentOS/RedHat
+-------------
 
 Similarly, the different dependencies can be installed in CentOS/RedHat, and replacing "X" by Centos version. ::
 
@@ -160,10 +166,13 @@ Similarly, the different dependencies can be installed in CentOS/RedHat, and rep
     $ ./scripts/installMongoDB.sh
     $ ./scripts/installVirtuoso7.sh
 
-To install Virtuoso from the source code, it is possible to do it by using a Operative System version not supported: ::
+To install Virtuoso from the source code, it is also provided an script: ::
 
     $ export REPO_OS=""
     $ ./scripts/installVirtuoso7.sh
+
+The variable ``INSPWD`` contains the path where the repository (Virtuoso, and Tomcat) has been installed.
+
 
 -------------
 Configuration
@@ -218,7 +227,7 @@ Repository Configuration
 
 If you have installed the Repository manually, you have to deploy the Repository software to your Application Server. For that you have to copy the Repository WAR package into the "webapp" folder of Apache Tomcat. To install it on other Java Application Servers (e.g. JBoss), please refer to the specific application server guidelines.
 
-Also, you have to create a properties file located at ``/etc/default/Repository-RI.properties`` with the configuration of the repository. To create the properties file with basic configuration it is possible use the script ``repositorySettings.sh``.
+Also, you have to create a properties file located at ``/etc/default/Repository-RI.properties`` with the configuration of the repository. To create the properties file with basic configuration it is possible to use the script ``repositorySettings.sh``.
 
 The repository can use OAuth2 authentication with FIWARE Lab accounts. If you have used the automatic installation script you have been already asked to choose whether you want to use this authentication mechanism and to provide OAuth2 credentials in that case. 
 
