@@ -364,3 +364,106 @@ Test Text Response: ::
 
 You should receive meta information about the implicit created collection in text format. 
 You may use curl to also test the other supported content types (``application/json``, ``application/rdf+xml``, ``text/turtle``, ``text/n3``, ``text/html``, ``text/plain``, ``application/xml``)
+
+List of Running Processes
+=========================
+
+You can execute the command ``ps -ax | grep 'tomcat\|mongo\|virtuoso'`` to check that the Tomcat web server, the Mongo database, and Virtuoso Triple Store are running. It should show a message text similar to the following: ::
+
+     1048 ?        Ssl    0:51 /usr/bin/mongod --config /etc/mongodb.conf
+     1112 pts/1    SNl    0:01 virtuoso-t -f
+     1152 ?        Sl     0:03 /usr/lib/jvm/java-8-oracle/bin/java -Djava.util.logging.config.file=/home/jortiz/conwet/Repository-RI/apache-tomcat-8.0.26/conf/logging.properties -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Dhttp.nonProxyHosts=localhost|127.0.0.1|CONWETLABJORTIZ -Djava.endorsed.dirs=/home/jortiz/conwet/Repository-RI/apache-tomcat-8.0.26/endorsed -classpath /home/jortiz/conwet/Repository-RI/apache-tomcat-8.0.26/bin/bootstrap.jar:/home/jortiz/conwet/Repository-RI/apache-tomcat-8.0.26/bin/tomcat-juli.jar -Dcatalina.base=/home/jortiz/conwet/Repository-RI/apache-tomcat-8.0.26 -Dcatalina.home=/home/jortiz/conwet/Repository-RI/apache-tomcat-8.0.26 -Djava.io.tmpdir=/home/jortiz/conwet/Repository-RI/apache-tomcat-8.0.26/temp org.apache.catalina.startup.Bootstrap start
+     2031 pts/1    S+     0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=.cvs --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn tomcat\|mongo\|virtuoso
+
+
+Network interfaces Up & Open
+============================
+
+To check whether the ports in use are listening, execute the command ``netstat -ntpl``. The expected results must be somehow similar to the following: ::
+
+    tcp        0      0 127.0.0.1:28017         0.0.0.0:*               ESCUCHAR    -               
+    tcp        0      0 127.0.1.1:53            0.0.0.0:*               ESCUCHAR    -               
+    tcp        0      0 0.0.0.0:1111            0.0.0.0:*               ESCUCHAR    11271/virtuoso-t
+    tcp        0      0 127.0.0.1:631           0.0.0.0:*               ESCUCHAR    -               
+    tcp        0      0 0.0.0.0:8890            0.0.0.0:*               ESCUCHAR    11271/virtuoso-t
+    tcp        0      0 127.0.0.1:27017         0.0.0.0:*               ESCUCHAR    -               
+    tcp6       0      0 :::8080                 :::*                    ESCUCHAR    11286/java      
+    tcp6       0      0 ::1:631                 :::*                    ESCUCHAR    -               
+    tcp6       0      0 127.0.0.1:8005          :::*                    ESCUCHAR    11286/java      
+    tcp6       0      0 :::8009                 :::*                    ESCUCHAR    11286/java      
+
+
+Databases
+=========
+
+The last step in the sanity check (once that we have identified the processes and ports) is to check the databases that has to be up and accept queries. For that, we execute the following commands:
+
+* MongoDb ::
+
+    $ mongo
+    MongoDB shell version: 2.4.9
+    connecting to: test
+    Welcome to the MongoDB shell.
+    For interactive help, type "help".
+    For more comprehensive documentation, see
+    http://docs.mongodb.org/
+    Questions? Try the support group
+    http://groups.google.com/group/mongodb-user
+    > db
+
+
+It should show a message text similar to the following: ::
+
+    test
+
+
+* Virtuoso ::
+    
+    $isql
+    OpenLink Interactive SQL (Virtuoso), version 0.9849b.
+    Type HELP; for help and EXIT; to exit.
+    SQL> SPARQL SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?q ?l }};
+
+
+It should show a message text similar to the following: ::
+
+    g
+    LONG VARCHAR
+    _______________________________________________________________________________
+
+    http://www.openlinksw.com/schemas/virtrdf#
+    http://www.w3.org/ns/ldp#
+    http://localhost:8890/sparql
+    http://localhost:8890/DAV/
+    http://www.w3.org/2002/07/owl#
+
+    5 Rows. -- 90 msec.
+
+
+--------------------
+Diagnosis Procedures
+--------------------
+
+The Diagnosis Procedures are the first steps that a System Administrator has to take to locate the source of an error in a GE. Once the nature of the error is identified by these tests, the system admin can resort to more concrete and specific testing to pinpoint the exact point of error and a possible solution.
+
+The resource load of the Repository-RI strongly depends on the number of concurrent requests received as well as on the free main memory and disk space:
+
+* Mimimum available main memory: 1 GB
+* Mimimum available hard disk space: 2 GB
+
+Resource availability
+=====================
+
+State the amount of available resources in terms of RAM and hard disk that are necessary to have a healthy enabler. This means that bellow these thresholds the enabler is likely to experience problems or bad performance.
+
+Resource consumption
+====================
+
+Resource consumption strongly depends on the load, especially on the number of concurrent requests.
+
+The main memory consumption of the Tomcat application server should be between 48MB and 1024MB. These numbers can vary significantly if you use a different application server.
+
+I/O flows
+=========
+
+The only expected I/O flow is of type HTTP or HTTPS, on ports defined in Apache Tomcat configuration files, inbound and outbound. Requests interactivity should be low.
