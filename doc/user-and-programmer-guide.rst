@@ -10,18 +10,18 @@ This document describes the basic concepts regarding the Repository GEri and exp
 
 Despite the Repository is a Generic Enabler which provides pure backend functionality to other applications (e.g. Generic Enablers or end user facing applications), it is possible to browse between the existing collections and resources using the basic web interface provided.
 
-To give you a feeling of how the Repository works and how you can interact with the system let us take a look at some examples, realized with the command line tool cURL and in Java. 'cURL' is a command which can be used to perform any kind of HTTP operation - and therefore is also usable for the Repository. The library libcurl enables the integration in C programs as well. Other easy way to interact with the Repository is using any REST client like some browsers extensions provide to the user. We describe the API REST to show you what operations is able to do, and what responses are given by the Repository.
+To give you a feeling of how the Repository works and how you can interact with the system let us take a look at some examples, realized with the command line tool cURL. 'cURL' is a command which can be used to perform any kind of HTTP operation - and therefore is also usable for the Repository. The library libcurl enables the integration in C programs as well. Other easy way to interact with the Repository is using any REST client like some browsers extensions provide to the user. We describe the API REST to show you what operations is able to do, and what responses are given by the Repository.
 
---------------
-Basic Browsing
---------------
+----------
+User Guide
+----------
 
 The Repository allows the client to choose the appropriate data format for retrieving meta information about a resource or a collection. One of this data format is ``text/html`` which provides a user friendly interface to see the diferent collection and resources stored in the repository.
 
 Browsing Collections
 ====================
 
-It is possible to visualize the existing collections in a given collection in the Repository by accessing the URL ``http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}``
+It is possible to visualize the existing collections registered inside a given collection in the Repository by accessing the URL ``http://[SERVER_HOST]/FiwareRepository/v2/collec/{collection}``
 
 .. image:: /images/collection.png
    :align: center
@@ -42,9 +42,16 @@ It is possible to visualize the meta information of a given resource by accessin
 .. note::
    Depending on the configuration of the Repository RI instance, you may be redirected to the FIWARE Lab login page in order to be authenticated.
 
--------------------
-API REST Operations
--------------------
+---------------
+Programer Guide
+---------------
+
+The Repository offers pure backend functionality; in this way, the current section gives an overview of the operations that can be made with the API in order to integrate the functionality provided by the Repository with an existing solution.
+
+REST API Operations
++++++++++++++++++++
+
+This section contains an overview of the existing REST API. You can find detailed documentation of the API  in `Apiary <http://http://docs.fiwarerepository.apiary.io>`__ and in `GitHub Pages <http://conwetlab.github.io/Repository-RI/>`__.
 
 Managing Collections
 ====================
@@ -177,7 +184,7 @@ Getting resources metadata
 * Responses
 
 +-----------+-----------------------+--------------------------------------------------------------------------------+
-| HTTP Code | Type                  | Description                                                                    |                                                 
+| HTTP Code | Type                  | Description                                                                    |
 +===========+=======================+================================================================================+
 | 200       | OK 					| Your request has been completed properly. 									 |
 +-----------+-----------------------+--------------------------------------------------------------------------------+
@@ -298,7 +305,7 @@ Updating resources metadata
 * Responses
 
 +-----------+------------------------+--------------------------------------------------------------------------------+
-| HTTP Code | Type                   | Description                                                                    |                                                 
+| HTTP Code | Type                   | Description                                                                    |
 +===========+========================+================================================================================+
 | 200 		| OK 					 | Your request has been completed properly. 									  |
 +-----------+------------------------+--------------------------------------------------------------------------------+
@@ -326,7 +333,7 @@ Updating resources content
 * Responses
 
 +-----------+------------------------+---------------------------------------------------------------------------------+
-| HTTP Code | Type                   | Description                                                                     |                                                 
+| HTTP Code | Type                   | Description                                                                     |
 +===========+========================+=================================================================================+
 | 200 		| OK		 			 | Your request has been completed properly. 									   |
 +-----------+------------------------+---------------------------------------------------------------------------------+
@@ -350,7 +357,7 @@ Deleting resources
 * Responses
 
 +-----------+-----------------------+--------------------------------------------------------------------------------+
-| HTTP Code | Type                  | Description                                                                    |                                                 
+| HTTP Code | Type                  | Description                                                                    |
 +===========+=======================+================================================================================+
 | 204 		| No Content 			| The resource and all its content has been deleted. 							 |
 +-----------+-----------------------+--------------------------------------------------------------------------------+
@@ -363,7 +370,7 @@ Deleting resources
 Making SPARQL queries
 =====================
 
-* Following you can find the quering operations that can be executed.
+Following you can find the quering operations that can be executed.
 
 * GET  http://[SERVER_HOST]/FiwareRepository/v2/services/query/{contentUrl}
 * GET  http://[SERVER_HOST]/FiwareRepository/v2/services/query?query=[Query] Execute a query in the triple store.
@@ -382,7 +389,7 @@ Getting a resource by Url Content
 * Responses
 
 +-----------+-----------------------+--------------------------------------------------------------------------------+
-| HTTP Code | Type                  | Description                                                                    |                                                 
+| HTTP Code | Type                  | Description                                                                    | 
 +===========+=======================+================================================================================+
 | 200 		| OK 					| Your request has been completed properly. 									 |
 +-----------+-----------------------+--------------------------------------------------------------------------------+
@@ -443,9 +450,9 @@ Executing a long SPARQL query
 +-----------+------------------------+---------------------------------------------------------------------+
 
 
-----------------------------------
+
 Accessing the Repository with cURL
-----------------------------------
+++++++++++++++++++++++++++++++++++
 
 Creating a resource
 ===================
@@ -695,11 +702,10 @@ Executing a Query
 	-
 	}
 
--------------------------------
 Managing different data formats
--------------------------------
++++++++++++++++++++++++++++++++
 
-* HTTP content negotiation allows the client to choose the appropriate data format for retrieving meta information about a resource or a collection. Besides XML and JSON the Repository also supports human readable output formats using HTML rendering ('text/html' accept header) including hyperlinked representation and formatted text.
+HTTP content negotiation allows the client to choose the appropriate data format for retrieving meta information about a resource or a collection. Besides XML and JSON the Repository also supports human readable output formats using HTML rendering ('text/html' accept header) including hyperlinked representation and formatted text.
 
 Text Representation
 ===================
@@ -919,11 +925,11 @@ XML Representation
 		</resources>
 	</collection>
 
------------------------------------------------
-Retrieving Resouce content in different formats
------------------------------------------------
 
-* When you insert some resource content in any of the accepted RDF formats, it is possible to retrieve that content in any of the allowed RDF formats, as explined in the following slides.
+Retrieving Resouce RDF content in different formats
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+When you insert some resource content in any of the accepted RDF formats, it is also possible to retrieve that content in any of the allowed RDF formats. This section explains how to retireve resources in the different supported formats.
 
 XML+RDF Representation
 ======================
@@ -1123,11 +1129,11 @@ N-Triples Representation
     <http://www.app.fake/app/App1> <http://www.app.fake/app#year> "2010" .
     <http://www.app.fake/app/App2> <http://www.app.fake/app#year> "2010" .
 
-----------------------------------------------
-Retrieving Query response in different formats
-----------------------------------------------
 
-* When you execute a SPARQL query in the Repository, it genrates different responses depending on the type of query. If you execute a SELECT query, it returns a json object composed by n columns being n number of variables. If you execute a CONSTRUCT or a DESCRIBE query, you can specifythe RDF format as described in the previous slides.
+Retrieving Query response in different formats
+++++++++++++++++++++++++++++++++++++++++++++++
+
+When you execute a SPARQL query in the Repository, it genrates different responses depending on the type of query. If you execute a SELECT query, it returns a json object composed by n columns being n number of variables. If you execute a CONSTRUCT or a DESCRIBE query, you can specify the RDF format as described in the previous section.
 
 Executing SELECT query
 ======================
