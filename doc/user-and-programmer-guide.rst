@@ -251,7 +251,7 @@ Creating resources
             "modificationDate":"",
             "name":"TestResource",
             "contentUrl":"http://testresourceurl.com/resource",
-            "contetnFileName":"resourceFileName"
+            "contentFileName":"resourceFileName"
         }
 
 * Responses
@@ -299,7 +299,7 @@ Updating resources metadata
            "modificationDate":"",
            "name":"TestResource",
            "contentUrl":"http://testresourceurl.com/resource",
-           "contetnFileName":"resourceFileName"
+           "contentFileName":"resourceFileName"
         }
 
 
