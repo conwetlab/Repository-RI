@@ -31,7 +31,7 @@ Repository-RI provides a consistent uniform API to access USDL descriptions and 
 
 The instructions to install Repository-RI can be found at [the Installation Guide](http://repository-ri.readthedocs.org/en/latest/installation-guide.html). You can install the software in three different ways:
 
-* With the provided script (included in the `utils` folder)
+* With the provided script (`install.sh`)
 * With a [Docker Container](https://hub.docker.com/r/conwetlab/repository-ri/)
 * Manually
  
