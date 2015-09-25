@@ -24,7 +24,7 @@ You can find the User & Programmer's Manual and the Administration Guide on [rea
  
 ## GEi overall description
 
-Repository-RI provides functionality necessary for bringing together offering and demand for making business. These functions include basic services for create, store and obtain collections and resources which contains rdf descriptions, and a Sparql query service. Besides the core functions, the Repository-RI may offer value because of its "knowledge" about resources description framework and linked data.
+Repository-RI provides a consistent uniform API to access USDL descriptions and associated media files of applications offered in the FIWARE Business Framework. Its functionality includes basic services for create, store and obtain collections and resources which contains rdf descriptions, and a Sparql query service. Besides the core functions, the Repository-RI may offer value because of its "knowledge" about resources descriptions and linked data.
 
 
 ## Build and Install
@@ -35,8 +35,6 @@ The instructions to install Repository-RI can be found at [the Installation Guid
 * With a [Docker Container](https://hub.docker.com/r/conwetlab/repository-ri/)
 * Manually
  
-If you opt for building Repository, you can refer to [the Building from Sources Guide](http://repository-ri.readthedocs.org/en/latest/building-from-sources-guide.html)
-
 
 ## API Overview
 
@@ -99,6 +97,5 @@ mvn integration-test
 
 * [User & Programmers Manual](doc/user-programmer-guide.rst)
 * [Installation Guide](doc/installation-guide.rst)
-* [Building from Sources Guide](doc/building-from-sources-guide.rst)
 
 You can also find this documentation on [ReadTheDocs](http://repository-ri.readthedocs.org)
