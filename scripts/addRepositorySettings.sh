@@ -1,3 +1,3 @@
 #! /bin/bash
 
-sudo cp ./properties/Repository-RI.properties /etc/default/Repository-RI.properties
+sudo cp $INSPWD/scripts/properties/Repository-RI.properties /etc/default/Repository-RI.properties

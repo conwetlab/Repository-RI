@@ -76,9 +76,11 @@ Alternatively, it is possible to install the Repository from the sources publish
     # CentOS
     $ yum -y install git
 
+
 To download the source code usig git, execute the following command: ::
 
     $ git clone https://github.com/conwetlab/Repository-RI.git
+
 
 Installing the Repository using scripts
 =======================================
@@ -91,10 +93,12 @@ To use the installation script execute the following command: ::
 
     $ ./install.sh
 
+
 The installation script also optionally resolves the extra dependencies that are needed for the installation of Virtuoso.
 
     Some packages are needed for installing Virtuoso: autoconf, automake, libtoo, flex, bison, gperf, gawk, m4, make, openssl, openssl-devel
     Do you want to install them? Y/N
+
 
 Finally, the installation script allows to configure the OAuth2 user authentication. ::
 
@@ -115,8 +119,10 @@ Finally, the installation script allows to configure the OAuth2 user authenticat
     http://[host]:[port]/FiwareRepository/v2/callback
 
 
+=======
 .. note::
    The existing scripts try to install tomcat 8.0.26, in case this version would not be available it will be needed to update the version in the script installTomcat8.sh
+
 
 Manually installing the Repository
 ==================================
@@ -134,10 +140,12 @@ All the mandatory dependencies can be easily installed on a debian based Linux d
     $ ./scripts/installMongoDB.sh
     $ ./scripts/installVirtuoso7.sh
 
+
 To install Virtuoso from the source code, it is also provided an script: ::
 
     $ export REPO_OS=""
     $ ./scripts/installVirtuoso7.sh
+
 
 The variable ``INSPWD`` contains the path where the repository (Virtuoso, and Tomcat) has been installed.
 
@@ -170,10 +178,12 @@ Similarly, the different dependencies can be installed in CentOS/RedHat, and rep
     $ ./scripts/installMongoDB.sh
     $ ./scripts/installVirtuoso7.sh
 
+
 To install Virtuoso from the source code, it is also provided an script: ::
 
     $ export REPO_OS=""
     $ ./scripts/installVirtuoso7.sh
+
 
 The variable ``INSPWD`` contains the path where the repository (Virtuoso, and Tomcat) has been installed.
 
@@ -186,6 +196,7 @@ This configuration section assumes that the enviroment variable INSPWD exists, t
 
     $ export INSPWD=$PWD
 
+
 Please note that if you have used the script *install.sh* you can skip *Virtuoso 7 Configuration* and *Tomcat 8 Configuration* sections, since the specified actions are performed by the script. 
  
 Virtuoso 7 Configuration
@@ -196,6 +207,7 @@ The first step is to create and configure the Virtuoso database to store RDF con
     $ cd $INSPWD/virtuoso7/var/lib/virtuoso/db/
     $ $INSPWD/virtuoso7/bin/virtuoso-t -f &
     $ cd $INSPWD
+
 
 This allows you to start the Virtuoso database. To make avanced configuration you can edit the file ``$INSPWD/virtuoso7/var/lib/virtuoso/db/virtuoso.ini`` by your own.
 
@@ -210,6 +222,7 @@ If you want to relocate that folder, you have to edit ``/etc/mongodb.conf`` ::
     # Where to store the data.
     dbpath=/var/lib/mongodb
 
+
 Tomcat 8 Configuration
 ======================
 
@@ -219,6 +232,7 @@ To continue, the next step is to start and to configurate Tomcat 8. You may need
     $ ./shutdown.sh
     $ ./startup.sh
     $ cd
+
 
 To start Apache Tomcat 8 is necesary to have some variables well configurated like ``CATALINA_HOME, JAVA_HOME``. Maybe you will need configure them if you make a manual installation. 
 
@@ -254,6 +268,7 @@ To enable OAuth2 include ``securityOAuth2.xml`` ::
         </param-value>
     </context-param>
 
+
 To disable OAuth2 include ``noSecurity.xml`` ::
  
     <context-param>
@@ -263,6 +278,7 @@ To disable OAuth2 include ``noSecurity.xml`` ::
         </param-value>
     </context-param>
 
+
 You can modify OAuth2 credentials in the ``Repository-RI.properties`` file located at ``/etc/default/Repository-RI.properties`` ::
 
     oauth2.server=https://account.lab.fiware.org
@@ -270,8 +286,10 @@ You can modify OAuth2 credentials in the ``Repository-RI.properties`` file locat
     oauth2.secret=[Client secret]
     oauth2.callbackURL=http://[host]/FiwareRepository/v2/callback
 
+
 .. note::
    If you have decided to use OAuth2 authentication you will need to modify ``oauth2.callbackURL`` property to include the host where the Repository is going to run. 
+
 
 Finally, you can configure the MongoDB and Virtuoso instances the Repository is going to use in ``Repository-RI.properties``, which contains the following values by default. ::
 
@@ -285,6 +303,7 @@ Finally, you can configure the MongoDB and Virtuoso instances the Repository is 
     virtuoso.port=1111
     virtuoso.user=dba
     virtuoso.password=dba
+
 
 -----------------------
 Sanity check procedures
@@ -315,15 +334,18 @@ Create a file named resource.xml with resource content like this. ::
 	   <contentFileName>http://whereistheresource.com/ResourceExample</contentFileName>
     </resource>
 
+
 Send the request: ::
 
     curl -v -H "Content-Type: application/xml" -X POST --data "@resource.xml" http://[SERVER_URL]:8080/FiwareRepository/v2/collec/
+
 
 You should receive a HTTP/1.1 201 as status code
 
 Create a file named resourceContent.txt with arbitrary content. ::
 
     curl -v -H "Content-Type: text/plain" -X PUT --data "@resourceContent.txt" http://localhost:8080/FiwareRepository/v2/collec/collectionA/collectionB/ResourceExample
+
 
 You should receive a HTTP/1.1 200 as status code
 
