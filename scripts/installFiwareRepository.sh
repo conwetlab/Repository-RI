@@ -30,7 +30,7 @@ sudo ./scripts/addRepositorySettings.sh
 ## Installing Fiware Repository-RI
 if [ -d "$INSPWD/src" ]; then
 	# Installation from source code
-	mvn clean install
+	mvn clean install -DskipTests
 	cp ./target/FiwareRepository.war ./FiwareRepository.war
 fi
 
