@@ -25,7 +25,7 @@ echo "Installing MongoDB."
 echo "-------------------------------------------------------------------------"
 ./scripts/installMongoDB.sh
 
-sudo ./scripts/addRepositorySettings.sh
+./scripts/addRepositorySettings.sh
 
 ## Installing Fiware Repository-RI
 if [ -d "$INSPWD/src" ]; then
