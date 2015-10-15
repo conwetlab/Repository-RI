@@ -68,15 +68,15 @@ if [  $X == "Y" ] || [ $X == "y" ] || [ $X == "U" ] || [ $X == "u" ]; then
 
     echo "What is your FIWARE Client id?"
     read X
-    sed -i "/oauth2.key=/c\oauth2.key=$X" /etc/default/Repository-RI.properties
+    sudo sed -i "/oauth2.key=/c\oauth2.key=$X" /etc/default/Repository-RI.properties
 
     echo "What is your FIWARE Client Secret?"
     read X
-    sed -i "/oauth2.secret=/c\oauth2.secret=$X" /etc/default/Repository-RI.properties
+    sudo sed -i "/oauth2.secret=/c\oauth2.secret=$X" /etc/default/Repository-RI.properties
 
     echo "What is your Callback URL?"
     read X
-    sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" /etc/default/Repository-RI.properties
+    sudo sed -i "/oauth2.callbackURL=/c\oauth2.callbackURL=$X" /etc/default/Repository-RI.properties
 
 elif [  $X == "N" ] || [ $X == "n" ]; then
     # Desactivate oauth2
