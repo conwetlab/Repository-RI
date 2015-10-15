@@ -33,7 +33,7 @@
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>/etc/default/Repository-RI.properties</value>
+                <value>file:///etc/default/Repository-RI.properties</value>
             </list>
         </property>
     </bean>
