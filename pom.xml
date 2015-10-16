@@ -295,6 +295,31 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>skipIntegrationTestDB</id>
+            <activation>
+                <property>
+                    <name>skipITs</name>
+                </property>
+            </activation>
+            <properties>
+                <skipITDB>true</skipITDB>
+            </properties>
+        </profile>
+        <profile>
+            <id>skipIntegrationTestDB2</id>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                </property>
+            </activation>
+            <properties>
+                <skipITDB>true</skipITDB>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <finalName>FiwareRepository</finalName>
         <plugins>
@@ -366,6 +391,7 @@
                                     <arg value="-f"/>
                                 </exec>
                             </target>
+                            <skip>${skipITDB}</skip>
                         </configuration>
                         <goals>
                             <goal>run</goal>
@@ -382,6 +408,7 @@
                                     <arg value="-f"/>
                                 </exec>
                             </target>
+                            <skip>${skipITDB}</skip>
                         </configuration>
                         <goals>
                             <goal>run</goal>
@@ -402,6 +429,7 @@
                         </goals>
                         <configuration>
                             <executable>${basedir}/scripts/preIT.sh</executable>
+                            <skip>${skipITDB}</skip>
                         </configuration>
                     </execution>
                     <execution><!-- -->
@@ -412,6 +440,7 @@
                         </goals>
                         <configuration>
                             <executable>${basedir}/scripts/postIT.sh</executable>
+                            <skip>${skipITDB}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -423,6 +452,7 @@
                 <configuration>
                     <path>/</path>
                     <port>12345</port>
+                    <skip>${skipITDB}</skip>
                 </configuration>
                 <executions>
                     <execution>
@@ -432,7 +462,6 @@
                             <goal>run-war-only</goal>
                         </goals>
                         <configuration>
-                            
                             <fork>true</fork>
                         </configuration>
                     </execution>
