@@ -40,58 +40,33 @@ import java.util.logging.Logger;
 
 public class RepositorySettings {
     private static Properties properties;
-
-    public static String REPOSITORY_BASE_URL = "http://localhost:8080/FiwareRepository/";
     public final static String COLLECTION_SERVICE_NAME = "collec";
     public final static String QUERY_SERVICE_NAME = "query";
 
-    public static String getProperty(String property) {
-        if(properties == null) {
+    public RepositorySettings(String propertiesFile) {
+        properties = new Properties();
 
-            properties = new Properties();
-
-            // MongoDB
-            properties.setProperty("mongodb.host", "127.0.0.1");
-            properties.setProperty("mongodb.db", "test");
-            properties.setProperty("mongodb.port", "27017");
-
-            //Virtuoso DB
-            properties.setProperty("virtuoso.host", "jdbc:virtuoso://localhost:");
-            properties.setProperty("virtuoso.port", "1111");
-            properties.setProperty("virtuoso.user", "dba");
-            properties.setProperty("virtuoso.password", "dba");
-
-            //Oauth2
-            properties.setProperty("oauth2.server", "https://account.lab.fiware.org");
-            properties.setProperty("oauth2.key", "61686dc9f9734d0ba3237ae573c63a1c");
-            properties.setProperty("oauth2.secret", "01c8253c51bc42e48561bbc6ded05a84");
-            properties.setProperty("oauth2.callbackURL", "http://localhost:8080/FiwareRepository/v2/callback");
-
-            try (FileInputStream fis = new FileInputStream(new File("/etc/default/Repository-RI.properties"))) {
-                Properties fileProperties = new Properties();
-                fileProperties.load(fis);
-
-                checkProperty(fileProperties, "mongodb.host");
-                checkProperty(fileProperties, "mongodb.db");
-                checkProperty(fileProperties, "mongodb.port");
-                checkProperty(fileProperties, "virtuoso.host");
-                checkProperty(fileProperties, "virtuoso.port");
-                checkProperty(fileProperties, "virtuoso.user");
-                checkProperty(fileProperties, "virtuoso.password");
-                checkProperty(fileProperties, "oauth2.server");
-                checkProperty(fileProperties, "oauth2.key");
-                checkProperty(fileProperties, "oauth2.key");
-                checkProperty(fileProperties, "oauth2.key");
-
-                properties.putAll(fileProperties);
-            } catch (IllegalArgumentException ex) {
-                throw new IllegalArgumentException(ex.getMessage());
-            } catch (IOException ex) {
-                Logger.getLogger(RepositorySettings.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        for (DefaultProperties prop : DefaultProperties.values()) {
+            properties.setProperty(prop.getPropertyName(), prop.getValue());
         }
-        return properties.getProperty(property);
+
+        try (FileInputStream fis = new FileInputStream(new File(propertiesFile))) {
+            Properties fileProperties = new Properties();
+            fileProperties.load(fis);
+
+            for (DefaultProperties prop : DefaultProperties.values()) {
+                checkProperty(fileProperties, prop.getPropertyName());
+            }
+
+            properties.putAll(fileProperties);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException(ex.getMessage());
+        } catch (IOException ex) {
+            //Logger.getLogger(RepositorySettings.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
+
+    public Properties getProperties() { return properties; }
 
     private static String checkProperty(Properties properties, String name) {
         String value = properties.getProperty(name);
