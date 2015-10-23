@@ -32,10 +32,9 @@ package org.fiware.apps.repository.it.queryService;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.DatatypeConverter;
+import javax.servlet.ServletException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -52,14 +51,35 @@ import org.scribe.utils.OAuthEncoder;
 public class QueryServiceITTest {
 
     private IntegrationTestHelper client;
+    private String rdfXmlExample;
 
-    public QueryServiceITTest() {
+    public QueryServiceITTest() throws IOException, ServletException {
         client = new IntegrationTestHelper();
+        client.createEnviroment();
+
+        rdfXmlExample = "";
+        FileReader file = new FileReader("src/test/resources/storeRDF.rdf");
+        BufferedReader buffer = new BufferedReader(file);
+        while(buffer.ready()) {
+            rdfXmlExample = rdfXmlExample.concat(buffer.readLine()+"\n");
+        }
+        buffer.close();
     }
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        IntegrationTestHelper client = new IntegrationTestHelper();
+
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws IOException {
+
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        client.startEnviroment();
+
         Resource resource = IntegrationTestHelper.generateResource(null, "fileName", null, "http://appTest", null, "Me", null, null, "queryResourceTest");
 
         List <Header> headers = new LinkedList<>();
@@ -70,31 +90,19 @@ public class QueryServiceITTest {
         HttpResponse response = client.postResourceMeta("queryCollection", client.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
 
-        String auxString = "";
-        FileReader file = new FileReader("src/test/resources/storeRDF.rdf");
-        BufferedReader buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            auxString = auxString.concat(buffer.readLine()+"\n");
-        }
-        buffer.close();
-
+        //Insert rdf content in the resource
         headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/rdf+xml"));
-        response = client.putResourceContent("queryCollection/queryResourceTest", auxString, headers);
+        response = client.putResourceContent("queryCollection/queryResourceTest", rdfXmlExample, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
-    @AfterClass
-    public static void tearDownClass() throws IOException {
-
-    }
-
-    @Before
-    public void setUp() {
-    }
-
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        List <Header> headers = new LinkedList<>();
+        client.deleteCollection("queryCollection", headers);
+
+        client.stopEnviroment();
     }
 
     @Test
