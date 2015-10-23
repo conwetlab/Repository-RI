@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.ServletException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -52,54 +53,54 @@ import static org.junit.Assert.*;
 public class CollectionServiceITTest {
 
     private IntegrationTestHelper client;
-    private static String rdfxmlExample;
-    private static String rdfjsonExample;
+    private String rdfxmlExample;
+    private String rdfjsonExample;
 
-    public CollectionServiceITTest() {
+    public CollectionServiceITTest() throws IOException, ServletException {
         client = new IntegrationTestHelper();
+        client.createEnviroment();
+
+        rdfxmlExample = "";
+        FileReader file = new FileReader("src/test/resources/rdf+xml.rdf");
+        BufferedReader buffer = new BufferedReader(file);
+        while(buffer.ready()) {
+            rdfxmlExample = rdfxmlExample.concat(buffer.readLine());
+        }
+        buffer.close();
+
+        rdfjsonExample = "";
+        file = new FileReader("src/test/resources/rdf+json.rdf");
+        buffer = new BufferedReader(file);
+        while(buffer.ready()) {
+            rdfjsonExample = rdfjsonExample.concat(buffer.readLine());
+        }
+        buffer.close();
     }
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        //Delete test collection.
-        IntegrationTestHelper client = new IntegrationTestHelper();
-        List <Header> headers = new LinkedList<>();
-        client.deleteCollection("collectionTest1", headers);
-
-        String auxString = "";
-        FileReader file = new FileReader("src/test/resources/rdf+xml.rdf");
-        BufferedReader buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            auxString = auxString.concat(buffer.readLine());
-        }
-        buffer.close();
-        rdfxmlExample = auxString;
-
-        auxString = "";
-        file = new FileReader("src/test/resources/rdf+json.rdf");
-        buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            auxString = auxString.concat(buffer.readLine());
-        }
-        buffer.close();
-        rdfjsonExample = auxString;
 
     }
 
     @AfterClass
     public static void tearDownClass() throws IOException {
-        //Delete test collection.
-        IntegrationTestHelper client = new IntegrationTestHelper();
+
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        client.startEnviroment();
+
         List <Header> headers = new LinkedList<>();
         client.deleteCollection("collectionTest1", headers);
     }
 
-    @Before
-    public void setUp() {
-    }
-
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        List <Header> headers = new LinkedList<>();
+        client.deleteCollection("collectionTest1", headers);
+
+        client.stopEnviroment();
     }
 
     /*

@@ -4,6 +4,8 @@ import org.fiware.apps.repository.it.IntegrationTestHelper;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.ServletException;
+import org.apache.catalina.LifecycleException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -20,8 +22,10 @@ public class CollectionServiceDeleteITTest {
     private IntegrationTestHelper client;
     private final String collection = "collectionTestDelete";
 
-    public CollectionServiceDeleteITTest() {
+    public CollectionServiceDeleteITTest() throws IOException, ServletException {
         client = new IntegrationTestHelper();
+        client.createEnviroment();
+        
     }
 
     @BeforeClass
@@ -33,7 +37,8 @@ public class CollectionServiceDeleteITTest {
     }
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
+        client.startEnviroment();
 
         String fileName = "fileName";
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestDelete";
@@ -53,7 +58,8 @@ public class CollectionServiceDeleteITTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws LifecycleException {
+        client.stopEnviroment();
     }
 
     /*

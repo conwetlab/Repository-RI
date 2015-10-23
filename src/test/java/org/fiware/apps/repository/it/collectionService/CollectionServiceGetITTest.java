@@ -33,9 +33,9 @@ import org.fiware.apps.repository.it.IntegrationTestHelper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.ServletException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -50,22 +50,12 @@ import static org.junit.Assert.*;
 public class CollectionServiceGetITTest {
 
     private IntegrationTestHelper client;
-    private final static String collection = "collectionTestGet";
+    private final String collection = "collectionTestGet";
     private static String rdfxmlExample;
 
-    public CollectionServiceGetITTest() {
+    public CollectionServiceGetITTest() throws IOException, ServletException {
         client = new IntegrationTestHelper();
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws IOException {
-        IntegrationTestHelper client = new IntegrationTestHelper();
-
-        String fileName = "fileNameExample";
-        String contentUrl = "http://localhost:8080/contentUrl/resourceTestGet";
-        String creator = "Me";
-        String name = "resourceTest";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
+        client.createEnviroment();
 
         String auxString = "";
         FileReader file = new FileReader("src/test/resources/rdf+xml.rdf");
@@ -75,10 +65,27 @@ public class CollectionServiceGetITTest {
         }
         buffer.close();
         rdfxmlExample = auxString;
+    }
 
-        //Delete the collection
+    @BeforeClass
+    public static void setUpClass() throws IOException {
+
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        client.startEnviroment();
+
+        String fileName = "fileNameExample";
+        String contentUrl = "http://localhost:8080/contentUrl/resourceTestGet";
+        String creator = "Me";
+        String name = "resourceTest";
+        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
         List <Header> headers = new LinkedList<>();
-        client.deleteCollection(collection, headers);
 
         //Create a resource in the repository
         headers.add(new BasicHeader("Content-Type", "application/json"));
@@ -92,16 +99,13 @@ public class CollectionServiceGetITTest {
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        //Delete the collection
+        List <Header> headers = new LinkedList<>();
+        client.deleteCollection(collection, headers);
+
+        client.stopEnviroment();
     }
 
     /*

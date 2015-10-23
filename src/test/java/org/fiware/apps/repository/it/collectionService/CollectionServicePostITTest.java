@@ -31,9 +31,10 @@ package org.fiware.apps.repository.it.collectionService;
 
 import org.fiware.apps.repository.it.IntegrationTestHelper;
 import java.io.IOException;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.ServletException;
+import org.apache.catalina.LifecycleException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -51,18 +52,13 @@ public class CollectionServicePostITTest {
     private IntegrationTestHelper client;
     private static final String collection = "collectionTestPost";
 
-    public CollectionServicePostITTest() {
+    public CollectionServicePostITTest() throws IOException, ServletException {
         client = new IntegrationTestHelper();
+        client.createEnviroment();
     }
 
     @BeforeClass
-    public static void setUpClass() throws IOException {
-        IntegrationTestHelper client = new IntegrationTestHelper();
-        List <Header> headers = new LinkedList<>();
-        headers.add(new BasicHeader("Content-Type", "application/json"));
-
-        //Delete the collection
-        client.deleteCollection(collection, headers);
+    public static void setUpClass() {
     }
 
     @AfterClass
@@ -70,11 +66,17 @@ public class CollectionServicePostITTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        client.startEnviroment();
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        List <Header> headers = new LinkedList<>();
+        headers.add(new BasicHeader("Content-Type", "application/json"));
+        client.deleteCollection(collection, headers);
+
+        client.stopEnviroment();
     }
 
     /*
@@ -309,7 +311,7 @@ public class CollectionServicePostITTest {
         HttpResponse response = client.postCollection("resourceCollectionIn/A/B/C", IntegrationTestHelper.collectionToJson(resourceCollection), headers);
         client.deleteCollection("resourceCollectionIn", headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
-        assertEquals("http://localhost:12345/FiwareRepository/v2/collec/resourceCollectionIn/A/B/C/resourceCollectionTestN", response.getHeaders("Content-Location")[0].getValue());
+        assertEquals("http://localhost:"+client.getTomcatPort()+"/FiwareRepository/v2/collec/resourceCollectionIn/A/B/C/resourceCollectionTestN", response.getHeaders("Content-Location")[0].getValue());
     }
 
     @Test
