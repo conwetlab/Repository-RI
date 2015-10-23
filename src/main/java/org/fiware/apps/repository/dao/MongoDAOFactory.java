@@ -33,36 +33,35 @@ import java.net.UnknownHostException;
 
 import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
 import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
-import org.fiware.apps.repository.settings.RepositorySettings;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import java.util.Properties;
+import org.fiware.apps.repository.settings.DefaultProperties;
 
-public class MongoDAOFactory extends DAOFactory {
+public class MongoDAOFactory {
 
-    public synchronized static DB createConnection() {
+    public synchronized static DB createConnection(Properties properties) {
         Mongo m;
         DB db;
-        
+
         try {
-            m = new Mongo(RepositorySettings.getProperty("mongodb.host"),
-                    Integer.parseInt(RepositorySettings.getProperty("mongodb.port")));
-            db = m.getDB(RepositorySettings.getProperty("mongodb.db"));
+            m = new Mongo(properties.getProperty(DefaultProperties.MONGO_HOST.getPropertyName()),
+                    Integer.parseInt(properties.getProperty(DefaultProperties.MONGO_PORT.getPropertyName())));
+            db = m.getDB(properties.getProperty(DefaultProperties.MONGO_DB.getPropertyName()));
         } catch (UnknownHostException | MongoException ex) {
             throw new MongoException(ex.getLocalizedMessage());
         }
         return db;
     }
 
-    @Override
-    public ResourceDAO getResourceDAO() {
-        return new MongoResourceDAO();
+    public ResourceDAO getResourceDAO(Properties properties) {
+        return new MongoResourceDAO(properties);
     }
 
-    @Override
-    public CollectionDAO getCollectionDAO() {
-        return new MongoCollectionDAO();
+    public CollectionDAO getCollectionDAO(Properties properties) {
+        return new MongoCollectionDAO(properties);
     }
 
 

@@ -28,11 +28,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.dao;
+import java.util.Properties;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 
-public abstract class VirtuosoDAOFactory {
+public class VirtuosoDAOFactory {
 
-    static public VirtuosoResourceDAO getVirtuosoResourceDAO() {
-        return new VirtuosoResourceDAO();
+    public VirtuosoResourceDAO getVirtuosoResourceDAO(Properties properties) {
+        return new VirtuosoResourceDAO(properties);
     }
 }
