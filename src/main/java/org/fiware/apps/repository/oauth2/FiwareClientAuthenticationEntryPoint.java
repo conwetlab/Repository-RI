@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
+import org.fiware.apps.repository.settings.RepositorySettings;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.WebContext;
@@ -24,6 +25,11 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
     private static final Logger logger = LoggerFactory.getLogger(FiwareClientAuthenticationEntryPoint.class);
 
     private Client client;
+    private String propertiesPath;
+
+    public FiwareClientAuthenticationEntryPoint(String path) {
+        this.propertiesPath = path;
+    }
 
     @Override
     public void commence(final HttpServletRequest request, final HttpServletResponse response,
@@ -69,7 +75,7 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
     }
 
     private boolean isHTMLinfo(String uri) {
-        MongoResourceDAO resourceDAO = new MongoResourceDAO();
+        MongoResourceDAO resourceDAO = new MongoResourceDAO(new RepositorySettings(propertiesPath).getProperties());
         try {
             return uri.regionMatches(true, uri.length()-5, ".meta", 0, 5) || !resourceDAO.isResource(uri.substring(uri.indexOf("collec/")+7, uri.length()));
         } catch (DatasourceException ex) {

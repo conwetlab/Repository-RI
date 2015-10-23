@@ -50,22 +50,29 @@ import org.fiware.apps.repository.dao.impl.MongoUserDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
+import org.fiware.apps.repository.settings.RepositorySettings;
 
 public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
 
     // To store users information
-    private MongoUserDAO userDAO = new MongoUserDAO();
+    private MongoUserDAO userDAO;
 
     private String scopeValue = "";
     private String serverURL;
+    private String propertiesPath;
 
-	/**
-	 * Method to get the FIWARE IdM that is being in used
-	 * @return The FIWARE IdM that is being used to authenticate the users
-	 */
-	public String getServerURL() {
-		return this.serverURL;
-	}
+    public FIWAREClient(String path) {
+        this.propertiesPath = path;
+        this.userDAO = new MongoUserDAO(new RepositorySettings(this.propertiesPath).getProperties());
+    }
+
+    /**
+     * Method to get the FIWARE IdM that is being in used
+     * @return The FIWARE IdM that is being used to authenticate the users
+     */
+    public String getServerURL() {
+        return this.serverURL;
+    }
 
 	/**
 	 * Method to set the FIWARE IdM that will be use to authenticate the users
@@ -162,7 +169,7 @@ public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
 
     @Override
     protected BaseClient<OAuthCredentials, FIWAREProfile> newClient() {
-        FIWAREClient newClient = new FIWAREClient();
+        FIWAREClient newClient = new FIWAREClient(this.propertiesPath);
         return newClient;
     }
 }

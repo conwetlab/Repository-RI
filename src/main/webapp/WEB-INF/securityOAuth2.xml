@@ -41,11 +41,13 @@
     <!-- entry points -->
     <bean id="fiwareEntryPoint"
           class="org.fiware.apps.repository.oauth2.FiwareClientAuthenticationEntryPoint">
+        <constructor-arg value="/etc/default/Repository-RI.properties" index="0"/>
         <property name="client" ref="fiwareClient" />
     </bean>
 
     <!-- clients definition -->
-    <bean id="fiwareClient" class="org.fiware.apps.repository.oauth2.FIWAREClient"> 
+    <bean id="fiwareClient" class="org.fiware.apps.repository.oauth2.FIWAREClient">
+        <constructor-arg value="/etc/default/Repository-RI.properties" index="0"/>
         <property name="serverURL" value="${oauth2.server}" />
         <property name="key" value="${oauth2.key}" />
         <property name="secret" value="${oauth2.secret}" />

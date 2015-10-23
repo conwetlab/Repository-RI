@@ -32,8 +32,6 @@ package org.fiware.apps.repository.oauth2;
  * #L%
  */
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.fiware.apps.repository.dao.impl.MongoUserDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
@@ -54,8 +52,7 @@ import org.pac4j.core.context.WebContext;
 public class FIWAREClientTest {
 
 	@Mock private MongoUserDAO userDAO;
-	@InjectMocks private FIWAREClient client = new FIWAREClient();
-
+	@InjectMocks private FIWAREClient client = new FIWAREClient("path");
 
 	@Before
 	public void initMocks() {
