@@ -48,6 +48,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.ObjectId;
 import java.util.Objects;
+import java.util.Properties;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 
 public class MongoCollectionDAO implements CollectionDAO{
@@ -58,11 +59,11 @@ public class MongoCollectionDAO implements CollectionDAO{
     private DBCollection mongoCollectionResources;
     private VirtuosoResourceDAO virtuosoResourceDAO;
 
-    public MongoCollectionDAO(){
-        db = MongoDAOFactory.createConnection();
+    public MongoCollectionDAO(Properties properties){
+        db = MongoDAOFactory.createConnection(properties);
         mongoCollection = db.getCollection(MONGO_COLL_NAME);
         mongoCollectionResources = db.getCollection(MongoResourceDAO.MONGO_COLL_NAME);
-        virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
+        virtuosoResourceDAO = new VirtuosoDAOFactory().getVirtuosoResourceDAO(properties);
     }
 
     public MongoCollectionDAO(DB dbIn, DBCollection collection, DBCollection collectionResources, VirtuosoResourceDAO virtuosoResourceDAOIn) {
@@ -71,8 +72,6 @@ public class MongoCollectionDAO implements CollectionDAO{
         this.mongoCollectionResources = Objects.requireNonNull(collectionResources);
         this.virtuosoResourceDAO = Objects.requireNonNull(virtuosoResourceDAOIn);
     }
-
-
 
     @Override
     public ResourceCollection findCollection(String id) throws DatasourceException {

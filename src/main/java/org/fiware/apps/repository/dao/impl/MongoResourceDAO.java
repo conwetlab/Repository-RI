@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.fiware.apps.repository.dao.CollectionDAO;
-import org.fiware.apps.repository.dao.DAOFactory;
 import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.dao.ResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
@@ -50,6 +49,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.ObjectId;
+import java.util.Properties;
 
 public class MongoResourceDAO implements ResourceDAO{
 
@@ -57,17 +57,17 @@ public class MongoResourceDAO implements ResourceDAO{
 
     private DB db;
     private DBCollection mongoCollection;
-    private DAOFactory mongoFactory;
+    private MongoDAOFactory mongoFactory;
     private CollectionDAO collectionDAO;
 
-    public MongoResourceDAO(){
-        db = MongoDAOFactory.createConnection();
+    public MongoResourceDAO(Properties properties){
+        db = MongoDAOFactory.createConnection(properties);
         mongoCollection = db.getCollection(MONGO_COLL_NAME);
-        mongoFactory = DAOFactory.getDAOFactory(DAOFactory.MONGO);
-        collectionDAO = mongoFactory.getCollectionDAO();
+        mongoFactory = new MongoDAOFactory();
+        collectionDAO = mongoFactory.getCollectionDAO(properties);
     }
 
-    public MongoResourceDAO(DB db, DBCollection dBCollection, DAOFactory mongoFactory, CollectionDAO collectionDAO) {
+    public MongoResourceDAO(DB db, DBCollection dBCollection, MongoDAOFactory mongoFactory, CollectionDAO collectionDAO) {
         this.db = db;
         this.mongoCollection = dBCollection;
         this.mongoFactory = mongoFactory;

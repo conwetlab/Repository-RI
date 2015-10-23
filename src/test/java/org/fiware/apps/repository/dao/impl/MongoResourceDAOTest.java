@@ -37,7 +37,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.fiware.apps.repository.dao.CollectionDAO;
-import org.fiware.apps.repository.dao.DAOFactory;
+import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.model.Resource;
@@ -62,7 +62,7 @@ public class MongoResourceDAOTest {
     @Mock private DB db;
     @Mock private DBCollection mongoCollection;
     @Mock private DBObject dBObject;
-    @Mock private DAOFactory mongoFactory;
+    @Mock private MongoDAOFactory mongoFactory;
     @Mock private CollectionDAO collectionDAO;
     MongoResourceDAO toTest;
 
@@ -75,7 +75,7 @@ public class MongoResourceDAOTest {
         db = mock(DB.class);
         mongoCollection = mock(DBCollection.class);
         dBObject = mock(DBObject.class);
-        mongoFactory = mock(DAOFactory.class);
+        mongoFactory = mock(MongoDAOFactory.class);
         collectionDAO = mock(CollectionDAO.class);
 
         toTest = new MongoResourceDAO(db, mongoCollection, mongoFactory, collectionDAO);

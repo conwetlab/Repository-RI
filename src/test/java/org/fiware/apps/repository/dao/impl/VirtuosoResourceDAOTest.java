@@ -39,13 +39,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import org.fiware.apps.repository.dao.VirtModelFactory;
 import org.fiware.apps.repository.dao.VirtuosoQueryExecutionFactory;
-import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.model.Resource;
+import org.fiware.apps.repository.settings.DefaultProperties;
 import org.fiware.apps.repository.settings.RepositorySettings;
-import org.junit.Assert;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -64,6 +64,7 @@ public class VirtuosoResourceDAOTest {
     private VirtuosoQueryExecutionFactory virtuosoQueryExecutionFactory;
     private VirtuosoQueryExecution vqe;
     VirtuosoResourceDAO toTest;
+    private Properties properties;
 
     public VirtuosoResourceDAOTest() {
     }
@@ -77,8 +78,9 @@ public class VirtuosoResourceDAOTest {
         virtModelFactory= mock(VirtModelFactory.class);
         virtuosoQueryExecutionFactory = mock(VirtuosoQueryExecutionFactory.class);
         vqe = mock(VirtuosoQueryExecution.class);
+        properties = new RepositorySettings("").getProperties();
 
-        toTest = new VirtuosoResourceDAO(virtModelFactory, virtGraph, virtuosoQueryExecutionFactory);
+        toTest = new VirtuosoResourceDAO(virtModelFactory, virtGraph, virtuosoQueryExecutionFactory, properties);
     }
 
     @Test
@@ -88,8 +90,8 @@ public class VirtuosoResourceDAOTest {
         String type = "type";
         Resource result = null;
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
 
         try {
             result = toTest.getResource(graph, type);
@@ -98,8 +100,8 @@ public class VirtuosoResourceDAOTest {
         }
 
         verify(virtModelFactory).openDatabaseModel(eq(graph),
-                eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")));
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())));
         verify(virtModel).write(any(ByteArrayOutputStream.class), eq(type), isNull(String.class));
         verify(virtModel).close();
         assertNotNull(result);
@@ -111,8 +113,8 @@ public class VirtuosoResourceDAOTest {
         String graph = "graph";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         when(virtModel.write(any(ByteArrayOutputStream.class), eq(type), isNull(String.class))).thenThrow(Exception.class);
         toTest.getResource(graph, type);
     }
@@ -123,16 +125,16 @@ public class VirtuosoResourceDAOTest {
         String content = "content";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         try {
             toTest.insertResource(graph, content, type);
         } catch (DatasourceException ex) {
             fail("exception not expected:\n" + ex.getLocalizedMessage());
         }
         verify(virtModelFactory).openDatabaseModel(eq(graph),
-                eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")));
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())));
         verify(virtModel).read(any(InputStreamReader.class), isNull(String.class), eq(type));
         verify(virtModel).close();
     }
@@ -143,8 +145,8 @@ public class VirtuosoResourceDAOTest {
         String content = "content";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         when(virtModel.read(any(InputStreamReader.class), isNull(String.class), eq(type))).thenThrow(Exception.class);
         toTest.insertResource(graph, content, type);
     }
@@ -153,8 +155,8 @@ public class VirtuosoResourceDAOTest {
     public void isResourceTrueTest() {
         String graph = "graph";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         when(virtModel.isEmpty()).thenReturn(false);
         assertTrue(toTest.isResource(graph));
     }
@@ -163,8 +165,8 @@ public class VirtuosoResourceDAOTest {
     public void isResourceFalseTest() {
         String graph = "graph";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         when(virtModel.isEmpty()).thenReturn(true);
         assertFalse(toTest.isResource(graph));
     }
@@ -175,8 +177,8 @@ public class VirtuosoResourceDAOTest {
         String content = "content";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         try {
             toTest.updateResource(graph, content, type);
         } catch (DatasourceException ex) {
@@ -193,8 +195,8 @@ public class VirtuosoResourceDAOTest {
         String content = "content";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         when(virtModel.read(any(InputStreamReader.class), isNull(String.class), eq(type))).thenThrow(Exception.class);
         toTest.updateResource(graph, content, type);
     }
@@ -205,8 +207,8 @@ public class VirtuosoResourceDAOTest {
         String newGraph = "graph";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
 
         try {
             toTest.replaceResource(oldGraph, newGraph, type);
@@ -226,8 +228,8 @@ public class VirtuosoResourceDAOTest {
         String newGraph = "graph";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         when(virtModel.write(any(ByteArrayOutputStream.class), eq(type), isNull(String.class))).thenThrow(Exception.class);
         toTest.replaceResource(oldGraph, newGraph, type);
     }
@@ -238,8 +240,8 @@ public class VirtuosoResourceDAOTest {
         String newGraph = "graph";
         String type = "type";
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
         when(virtModel.read(any(InputStreamReader.class), isNull(String.class), eq(type))).thenThrow(Exception.class);
         toTest.replaceResource(oldGraph, newGraph, type);
     }
@@ -249,8 +251,8 @@ public class VirtuosoResourceDAOTest {
         String graph = "graph";
         boolean excepted;
 
-        when(virtModelFactory.openDatabaseModel(anyString(), eq(RepositorySettings.getProperty("virtuoso.host") + RepositorySettings.getProperty("virtuoso.port")),
-                eq(RepositorySettings.getProperty("virtuoso.user")), eq(RepositorySettings.getProperty("virtuoso.password")))).thenReturn(virtModel);
+        when(virtModelFactory.openDatabaseModel(anyString(), eq(properties.getProperty(DefaultProperties.VIRTUOSO_HOST.getPropertyName()) + properties.getProperty(DefaultProperties.VIRTUOSO_PORT.getPropertyName())),
+                eq(properties.getProperty(DefaultProperties.VIRTUOSO_USER.getPropertyName())), eq(properties.getProperty(DefaultProperties.VIRTUOSO_PASSWORD.getPropertyName())))).thenReturn(virtModel);
 
         excepted = toTest.deleteResource(graph);
 

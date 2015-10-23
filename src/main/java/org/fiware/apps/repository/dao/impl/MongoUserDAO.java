@@ -34,6 +34,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.ObjectId;
+import java.util.Properties;
 import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.dao.UserDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
@@ -48,8 +49,8 @@ public class MongoUserDAO implements UserDAO {
     private DB db;
     private DBCollection mongoCollection;
 
-    public MongoUserDAO() {
-        db = MongoDAOFactory.createConnection();
+    public MongoUserDAO(Properties properties) {
+        db = MongoDAOFactory.createConnection(properties);
         mongoCollection = db.getCollection(MONGO_USERS_NAME);
     }
 
