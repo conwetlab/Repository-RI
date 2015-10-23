@@ -29,20 +29,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.fiware.apps.repository.settings;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
-import static org.mockito.Matchers.any;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -51,33 +43,37 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({RepositorySettings.class, Properties.class})
 public class RepositorySettingsTest {
 
-    Properties properties;
+    private RepositorySettings toTest;
 
     public RepositorySettingsTest() {
     }
 
     @Before
     public void setUp() {
-        properties = mock(Properties.class);
-        try {
-            PowerMockito.whenNew(Properties.class).withNoArguments().thenReturn(properties);
-        } catch (Exception ex) {
-            Logger.getLogger(RepositorySettingsTest.class.getName()).log(Level.SEVERE, null, ex);
+        toTest = new RepositorySettings("");
+    }
+
+    @Test
+    public void RepositorySettingsConstructor() {
+        toTest = new RepositorySettings(RepositorySettingsTest.class.getClassLoader().getResource("testProperties/PropertiesTest.properties").getPath());
+
+        for (DefaultProperties prop : DefaultProperties.values()) {
+            assertNotEquals(toTest.getProperties().getProperty(prop.getPropertyName()), prop.getValue());
         }
     }
 
     @Test
-    public void getPropertyExceptionTest() {
-        try {
-            doThrow(IOException.class).when(properties).load(any(InputStream.class));
-        } catch (IOException ex) {
-            fail(ex.getLocalizedMessage());
-        }
-        assertNull(RepositorySettings.getProperty("hola"));
+    (expected = IllegalArgumentException.class)
+    public void RepositorySettingsConstructorBadPropertiesFile() {
+        toTest = new RepositorySettings(RepositorySettingsTest.class.getClassLoader().getResource("testProperties/BadPropertiesTest.properties").getPath());
     }
 
     @Test
-    public void RepositorySettingsConstructorTest() {
-        new RepositorySettings();
+    public void RepositorySettingsConstructorFileNotFound() {
+        toTest = new RepositorySettings("badpath");
+
+        for (DefaultProperties prop : DefaultProperties.values()) {
+            assertEquals(toTest.getProperties().getProperty(prop.getPropertyName()), prop.getValue());
+        }
     }
 }
