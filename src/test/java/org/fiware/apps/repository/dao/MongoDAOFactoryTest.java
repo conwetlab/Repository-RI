@@ -33,8 +33,10 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import java.net.UnknownHostException;
+import java.util.Properties;
 import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
 import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
+import org.fiware.apps.repository.settings.RepositorySettings;
 import org.junit.*;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
@@ -55,16 +57,9 @@ public class MongoDAOFactoryTest {
     @Mock DB db;
     @Mock MongoResourceDAO mongoResourceDAO;
     @Mock MongoCollectionDAO mongoCollectionDAO;
+    private Properties properties;
 
     public MongoDAOFactoryTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
     }
 
     @Before
@@ -72,7 +67,7 @@ public class MongoDAOFactoryTest {
         mongo = mock(Mongo.class);
         db = mock(DB.class);
         PowerMockito.whenNew(Mongo.class).withAnyArguments().thenReturn(mongo);
-
+        properties = new RepositorySettings("").getProperties();
     }
 
     @After
@@ -86,7 +81,7 @@ public class MongoDAOFactoryTest {
         } catch (Exception ex) {
             fail(ex.getLocalizedMessage());
         }
-        MongoDAOFactory.createConnection();
+        MongoDAOFactory.createConnection(properties);
 
     }
 
@@ -97,12 +92,12 @@ public class MongoDAOFactoryTest {
         } catch (Exception ex) {
             fail(ex.getLocalizedMessage());
         }
-        MongoDAOFactory.createConnection();
+        MongoDAOFactory.createConnection(properties);
     }
 
     @Test
     public void createConnection3Test() {
-        MongoDAOFactory.createConnection();
+        MongoDAOFactory.createConnection(properties);
         verify(mongo).getDB(anyString());
     }
 
@@ -110,23 +105,23 @@ public class MongoDAOFactoryTest {
     public void getResourceDAOTest() {
         mongoResourceDAO = mock(MongoResourceDAO.class);
         try {
-            PowerMockito.whenNew(MongoResourceDAO.class).withNoArguments().thenReturn(mongoResourceDAO);
+            PowerMockito.whenNew(MongoResourceDAO.class).withAnyArguments().thenReturn(mongoResourceDAO);
         } catch (Exception ex) {
             fail(ex.getLocalizedMessage());
         }
         toTest = new MongoDAOFactory();
-        toTest.getResourceDAO();
+        toTest.getResourceDAO(properties);
     }
 
     @Test
     public void getCollectionDAOTest() {
         mongoCollectionDAO = mock(MongoCollectionDAO.class);
         try {
-            PowerMockito.whenNew(MongoCollectionDAO.class).withNoArguments().thenReturn(mongoCollectionDAO);
+            PowerMockito.whenNew(MongoCollectionDAO.class).withAnyArguments().thenReturn(mongoCollectionDAO);
         } catch (Exception ex) {
             fail(ex.getLocalizedMessage());
         }
         toTest = new MongoDAOFactory();
-        toTest.getCollectionDAO();
+        toTest.getCollectionDAO(properties);
     }
 }

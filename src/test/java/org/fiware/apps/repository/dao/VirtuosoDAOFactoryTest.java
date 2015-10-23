@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.dao;
 
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
+import org.fiware.apps.repository.settings.RepositorySettings;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
@@ -51,10 +52,10 @@ public class VirtuosoDAOFactoryTest {
     public void getVirtuosoResourceDAO() {
         VirtuosoResourceDAO virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
         try {
-            PowerMockito.whenNew(VirtuosoResourceDAO.class).withNoArguments().thenReturn(virtuosoResourceDAO);
+            PowerMockito.whenNew(VirtuosoResourceDAO.class).withAnyArguments().thenReturn(virtuosoResourceDAO);
         } catch (Exception ex) {
             fail(ex.getLocalizedMessage());
         }
-        assertEquals(VirtuosoDAOFactory.getVirtuosoResourceDAO(), virtuosoResourceDAO);
+        assertEquals(new VirtuosoDAOFactory().getVirtuosoResourceDAO(new RepositorySettings("").getProperties()), virtuosoResourceDAO);
     }
 }
