@@ -1,10 +1,11 @@
 #! /bin/bash
+export tomcatVersion=8.0.28
 
 # Install tomcat 8
-wget http://apache.rediris.es/tomcat/tomcat-8/v8.0.26/bin/apache-tomcat-8.0.26.zip
-unzip apache-tomcat-8.0.26.zip
+wget http://apache.rediris.es/tomcat/tomcat-8/v$tomcatVersion/bin/apache-tomcat-$tomcatVersion.zip
+unzip apache-tomcat-$tomcatVersion.zip
 
-mv apache-tomcat-8.0.26 apache-tomcat
+mv apache-tomcat-$tomcatVersion apache-tomcat
 
 export CATALINA_HOME=$INSPWD/apache-tomcat
 echo "export CATALINA_HOME=\"$INSPWD/apache-tomcat\"" >> ~/.bashrc
