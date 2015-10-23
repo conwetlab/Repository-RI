@@ -32,8 +32,7 @@ package org.fiware.apps.repository.rest;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -46,7 +45,6 @@ import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.*;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -55,11 +53,14 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(VirtuosoDAOFactory.class)
+@PrepareForTest({VirtuosoDAOFactory.class, QueryService.class})
 public class QueryServiceTest {
 
-    @Mock private VirtuosoResourceDAO virtuosoResourceDAO;
+    private VirtuosoResourceDAO virtuosoResourceDAO;
+    private VirtuosoDAOFactory virtuosoDAOFactory;
+    private ServletContext servletContext;
     private QueryService toTest;
+
     private SelectQueryResponse querySelect = new SelectQueryResponse();
     private String queryConstruct = "Construct query";
     private String queryDescribe = "Describe query";
@@ -71,16 +72,17 @@ public class QueryServiceTest {
     }
 
     @Before
-    public void setUp() {
-        PowerMockito.mockStatic(VirtuosoDAOFactory.class);
+    public void setUp() throws Exception {
         virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
-        PowerMockito.when(VirtuosoDAOFactory.getVirtuosoResourceDAO()).thenReturn(virtuosoResourceDAO);
-        when(virtuosoResourceDAO.executeQuerySelect(anyString())).thenReturn(querySelect);
-        when(virtuosoResourceDAO.executeQueryConstruct(anyString(), anyString())).thenReturn(queryConstruct);
-        when(virtuosoResourceDAO.executeQueryDescribe(anyString(), anyString())).thenReturn(queryDescribe);
+        virtuosoDAOFactory = mock(VirtuosoDAOFactory.class);
+        servletContext = mock(ServletContext.class);
 
+        when(servletContext.getInitParameter("propertiesFile")).thenReturn("");
+        when(virtuosoDAOFactory.getVirtuosoResourceDAO(anyObject())).thenReturn(virtuosoResourceDAO);
 
-        toTest = new QueryService();
+        PowerMockito.whenNew(VirtuosoDAOFactory.class).withAnyArguments().thenReturn(virtuosoDAOFactory);
+
+        toTest = new QueryService(servletContext);
     }
 
     @Test
