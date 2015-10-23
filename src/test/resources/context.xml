@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context reloadable="true" privileged="true">
+    <Parameter name="propertiesFile" value="src/main/resources/testProperties/PropertiesIT.properties"
+         override="false"/>
+</Context>
