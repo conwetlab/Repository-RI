@@ -30,10 +30,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.it;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import javax.servlet.ServletException;
+import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.startup.Tomcat;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -43,20 +50,74 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 import org.fiware.apps.repository.settings.RepositorySettings;
+import org.junit.rules.TemporaryFolder;
 
 public class IntegrationTestHelper {
 
     private HttpClient client;
-    private final String collectionServiceUrl = "http://localhost:12345/FiwareRepository/" + "v2/" + RepositorySettings.COLLECTION_SERVICE_NAME + "/";
-    private final String queryServiceUrl = "http://localhost:12345/FiwareRepository/" + "v2/" + "services/"+RepositorySettings.QUERY_SERVICE_NAME;
+    private Tomcat tomcat;
+    private TemporaryFolder folder;
+    private File file;
+
+    private final String WEB_APP_NAME = "FiwareRepository";
+    private final String WAR_NAME = "target/FiwareRepository.war";
 
 
-    public IntegrationTestHelper() {
+    public IntegrationTestHelper() throws IOException {
+        folder = new TemporaryFolder();
+        folder.create();
+        file = folder.newFolder("webapps");
+        tomcat = new Tomcat();
+
         this.client = new DefaultHttpClient();
     }
 
+    public void createEnviroment() throws ServletException, IOException {
+        tomcat.setPort(getFreePort());
+        tomcat.setBaseDir(folder.getRoot().getAbsolutePath());
+	tomcat.addContext("", file.getAbsolutePath());
+        File war = new File(WAR_NAME);
+        Context context = tomcat.addWebapp(WEB_APP_NAME, war.getAbsolutePath());
+
+        File config = new File("src/test/resources/context.xml");
+
+        context.setConfigFile(config.toURI().toURL());
+
+        //context.getServletContext().setAttribute("propertiesFile", "testProperties/PropertiesIT.properties");
+        //context.getServletContext().setAttribute("propertiesFile", "testProperties/PropertiesIT.properties");
+        //context.getServletContext().setInitParameter("propertiesFile", "testProperties/PropertiesIT.properties");
+    }
+
+    public void destroyEnviroment() throws LifecycleException {
+        tomcat.destroy();
+    }
+
+    public void startEnviroment() throws LifecycleException {
+        tomcat.start();
+        //tomcat.getConnector().setProperty("propertiesFile", "testProperties/PropertiesIT.properties");
+        //tomcat.getConnector().setProperty("propertiesFile", "testProperties/PropertiesIT.properties");
+
+    }
+
+    public void stopEnviroment() throws LifecycleException {
+        tomcat.stop();
+    }
+
+
+    private String getCollectionServiceUrl() {
+        return "http://localhost:" + tomcat.getConnector().getPort() + "/FiwareRepository/" + "v2/" + RepositorySettings.COLLECTION_SERVICE_NAME + "/";
+    }
+
+    private String getQueryServiceUrl() {
+        return "http://localhost:" + tomcat.getConnector().getPort() + "/FiwareRepository/" + "v2/" + "services/"+RepositorySettings.QUERY_SERVICE_NAME;
+    }
+
+    public int getTomcatPort() {
+        return tomcat.getConnector().getPort();
+    }
+
     public HttpResponse getResourceMeta(String resourceId, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + resourceId + ".meta";
+        String finalURL = getCollectionServiceUrl() + resourceId + ".meta";
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
@@ -70,7 +131,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse getResourceContent(String resourceId, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + resourceId;
+        String finalURL = getCollectionServiceUrl() + resourceId;
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
@@ -84,7 +145,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse postResourceMeta(String collectionsId, String resource, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + collectionsId;
+        String finalURL = getCollectionServiceUrl() + collectionsId;
         HttpPost request = new HttpPost(finalURL);
 
         //Add Headers
@@ -105,7 +166,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse putResourceMeta(String resourceId, String resource, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + resourceId + ".meta";
+        String finalURL = getCollectionServiceUrl() + resourceId + ".meta";
         HttpPut request = new HttpPut(finalURL);
 
         //Add Headers
@@ -126,7 +187,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse putResourceContent(String resourceId, String resourceContent, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + resourceId;
+        String finalURL = getCollectionServiceUrl() + resourceId;
         HttpPut request = new HttpPut(finalURL);
 
         //Add Headers
@@ -147,7 +208,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse deleteResource(String resourceId, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + resourceId;
+        String finalURL = getCollectionServiceUrl() + resourceId;
         HttpDelete request = new HttpDelete(finalURL);
 
         //Add Headers
@@ -161,7 +222,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse getCollection(String collectionId, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + collectionId;
+        String finalURL = getCollectionServiceUrl() + collectionId;
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
@@ -175,7 +236,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse postCollection(String collectionId, String collection, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + collectionId;
+        String finalURL = getCollectionServiceUrl() + collectionId;
         HttpPost request = new HttpPost(finalURL);
 
         //Add Headers
@@ -196,7 +257,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse deleteCollection(String collectionId, List <Header> headers) throws IOException {
-        String finalURL = collectionServiceUrl + collectionId;
+        String finalURL = getCollectionServiceUrl() + collectionId;
         HttpDelete request = new HttpDelete(finalURL);
 
         //Add Headers
@@ -210,7 +271,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse getQuery(String query, List <Header> headers) throws IOException {
-        String finalURL = queryServiceUrl + "?query="+query;
+        String finalURL = getQueryServiceUrl() + "?query="+query;
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
@@ -224,7 +285,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse postQuery(String query, List <Header> headers) throws IOException {
-        String finalURL = queryServiceUrl;
+        String finalURL = getQueryServiceUrl();
         HttpPost request = new HttpPost(finalURL);
 
         //Add Headers
@@ -244,7 +305,7 @@ public class IntegrationTestHelper {
     }
 
     public HttpResponse getResourceByUrlContent(String contentUrl, List <Header> headers) throws IOException {
-        String finalURL = queryServiceUrl + "/" + contentUrl;
+        String finalURL = getQueryServiceUrl() + "/" + contentUrl;
         HttpGet request = new HttpGet(finalURL);
 
         //Add Headers
@@ -393,5 +454,14 @@ public class IntegrationTestHelper {
         resourceCollection.setName(name);
 
         return resourceCollection;
+    }
+
+    private int getFreePort() throws IOException {
+
+        ServerSocket socket = new ServerSocket(0);
+        int port = socket.getLocalPort();
+        socket.close();
+
+        return port;
     }
 }
