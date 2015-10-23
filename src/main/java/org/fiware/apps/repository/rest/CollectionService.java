@@ -35,6 +35,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import javax.servlet.ServletContext;
 
 import javax.ws.rs.*;
 import javax.ws.rs.HeaderParam;
@@ -44,11 +46,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import org.fiware.apps.repository.dao.CollectionDAO;
-import org.fiware.apps.repository.dao.DAOFactory;
+import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.dao.ResourceDAO;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
@@ -62,15 +63,23 @@ import org.fiware.apps.repository.settings.RepositorySettings;
 @Path("/"+RepositorySettings.COLLECTION_SERVICE_NAME)
 public class CollectionService {
 
-    private DAOFactory mongoFactory = DAOFactory.getDAOFactory(DAOFactory.MONGO);
-    private CollectionDAO mongoCollectionDAO = mongoFactory.getCollectionDAO();
-    private ResourceDAO mongoResourceDAO = mongoFactory.getResourceDAO();
-    private VirtuosoResourceDAO virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
-    JAXBContext ctx;
+    private MongoDAOFactory mongoFactory;
+    private CollectionDAO mongoCollectionDAO;
+    private ResourceDAO mongoResourceDAO;
+    private VirtuosoResourceDAO virtuosoResourceDAO;
+
+    public CollectionService(@Context ServletContext servletContext) {
+        RepositorySettings repositorySettings = new RepositorySettings(servletContext.getInitParameter("propertiesFile"));
+        Properties repositoryProperties = repositorySettings.getProperties();
+        this.mongoFactory = new MongoDAOFactory();
+        this.mongoCollectionDAO = mongoFactory.getCollectionDAO(repositoryProperties);
+        this.mongoResourceDAO = mongoFactory.getResourceDAO(repositoryProperties);
+        this.virtuosoResourceDAO = new VirtuosoDAOFactory().getVirtuosoResourceDAO(repositoryProperties);
+    }
 
     @GET
     @Path("/")
-    @Produces({"application/xml", "application/json"})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response getResourceRoot(@Context HttpHeaders headers) {
         return RestHelper.sendError("Please specify a collection or a resource", Status.NOT_FOUND, headers.getAcceptableMediaTypes());
     }

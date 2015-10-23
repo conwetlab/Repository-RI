@@ -32,6 +32,8 @@ package org.fiware.apps.repository.rest;
 
 import com.hp.hpl.jena.shared.JenaException;
 import java.util.List;
+import java.util.Properties;
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 
 import javax.ws.rs.core.Context;
@@ -39,7 +41,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
@@ -49,10 +50,14 @@ import org.fiware.apps.repository.settings.RepositorySettings;
 
 @Path("/services/"+RepositorySettings.QUERY_SERVICE_NAME)
 public class QueryService {
-    private VirtuosoResourceDAO virtuosoResourceDAO = VirtuosoDAOFactory.getVirtuosoResourceDAO();
+    private VirtuosoResourceDAO virtuosoResourceDAO;
 
-    @Context
-            UriInfo uriInfo;
+    public QueryService(@Context ServletContext servletContext) {
+        RepositorySettings repositorySettings = new RepositorySettings(servletContext.getInitParameter("propertiesFile"));
+        Properties repositoryProperties = repositorySettings.getProperties();
+
+        this.virtuosoResourceDAO = new VirtuosoDAOFactory().getVirtuosoResourceDAO(repositoryProperties);
+    }
 
     @GET
     public Response executeQuery(@Context HttpHeaders headers, @QueryParam("query") String query) {
@@ -164,6 +169,5 @@ public class QueryService {
         }
         return RestHelper.sendError("Query do not match any query form (SELECT, CONSTRUCT, DESCRIBE, ASK).", Status.BAD_REQUEST, accepts);
     }
-
 
 }

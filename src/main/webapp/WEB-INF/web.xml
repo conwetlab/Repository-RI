@@ -27,6 +27,13 @@
     </context-param>
     <!-- End of Spring Security -->
     
+    <!--Properties File Location-->
+    <context-param>
+        <param-name>propertiesFile</param-name>
+        <param-value>/etc/default/Repository-RI.properties</param-value>
+    </context-param>
+
+    
     <context-param>
         <param-name>resteasy.resources</param-name>
         <param-value>
