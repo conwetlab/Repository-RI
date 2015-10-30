@@ -413,11 +413,13 @@
                                     </bind>
                                 </volumes>
                                 <wait>
+                                    <log>Starting Virtuoso Server</log>
                                     <http>
                                         <url>http://localhost:${virtuoso.httpTestPort}</url>
                                         <method>GET</method>
                                         <status>200</status>
                                     </http>
+                                    <time>20000</time>
                                 </wait>
                             </run>
                         </image>
