@@ -30,8 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.it.collectionService;
 
 import org.fiware.apps.repository.it.IntegrationTestHelper;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,50 +47,22 @@ import static org.junit.Assert.*;
 
 public class CollectionServicePutITTest {
 
-    private IntegrationTestHelper client;
+    private IntegrationTestHelper helper;
     private final static String collection = "collectionTestPut";
-    private String rdfXmlExample;
-    private String rdfJsonExample;
-    private String rdfN3Example;
-    private String rdfTurttleExample;
-    private String dataExample;
+    private final String rdfXmlExample;
+    private final String rdfJsonExample;
+    private final String rdfN3Example;
+    private final String rdfTurttleExample;
+    private final String dataExample;
 
     public CollectionServicePutITTest() throws IOException, ServletException {
-        client = new IntegrationTestHelper();
-        client.createEnviroment();
+        helper = new IntegrationTestHelper();
 
-        rdfXmlExample = "";
-        FileReader file = new FileReader("src/test/resources/rdf+xml.rdf");
-        BufferedReader buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            rdfXmlExample = rdfXmlExample.concat(buffer.readLine());
-        }
-        buffer.close();
-
-        rdfJsonExample = "";
-        file = new FileReader("src/test/resources/rdf+json.rdf");
-        buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            rdfJsonExample = rdfJsonExample.concat(buffer.readLine());
-        }
-        buffer.close();
-
-        rdfN3Example = "";
-        file = new FileReader("src/test/resources/N3.rdf");
-        buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            rdfN3Example = rdfN3Example.concat(buffer.readLine());
-        }
-        buffer.close();
-
-        rdfTurttleExample = "";
-        file = new FileReader("src/test/resources/turttle.rdf");
-        buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            rdfTurttleExample = rdfTurttleExample.concat(buffer.readLine());
-        }
-        buffer.close();
-
+        rdfXmlExample = helper.readRDFFile("src/test/resources/rdf+xml.rdf");
+        rdfJsonExample = helper.readRDFFile("src/test/resources/rdf+json.rdf");
+        rdfN3Example = helper.readRDFFile("src/test/resources/N3.rdf");
+        rdfTurttleExample = helper.readRDFFile("src/test/resources/turttle.rdf");
+        
         dataExample = "Data example with nothing inside.";
     }
 
@@ -108,24 +78,25 @@ public class CollectionServicePutITTest {
 
     @Before
     public void setUp() throws Exception {
-        client.startEnviroment();
+        helper.createEnviroment();
+        helper.startEnviroment();
 
         String fileName = "fileNameExample";
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPut";
         String creator = "Me";
         String name = "resourceTestPut";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
 
         List <Header> headers = new LinkedList<>();
 
         //Create a resource in the repository
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
 
         resource.setName(name+"New");
         resource.setContentUrl(contentUrl+"New");
-        response = client.postResourceMeta(collection, IntegrationTestHelper.resourceToJson(resource), headers);
+        response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -133,26 +104,26 @@ public class CollectionServicePutITTest {
     public void tearDown() throws Exception {
         //Delete the collection
         List <Header> headers = new LinkedList<>();
-        client.deleteCollection(collection, headers);
+        helper.deleteCollection(collection, headers);
 
-        client.stopEnviroment();
+        helper.stopEnviroment();
+        helper.destroyEnviroment();
     }
 
     /*
     Resource meta tests
     */
-
     @Test
     public void putResourceMetaJsonTest() throws IOException {
         String fileName = "fileName";
         String creator = "Me";
         String name = "resourceTestPut";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, null, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, null, null, null, creator, null, null, name);
 
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.putResourceMeta(collection+"/"+name, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.putResourceMeta(collection+"/"+name, helper.resourceToJson(resource), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -161,12 +132,12 @@ public class CollectionServicePutITTest {
         String fileName = "fileName";
         String creator = "Me";
         String name = "resourceTestPut";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, null, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, null, null, null, creator, null, null, name);
 
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/xml"));
-        HttpResponse response = client.putResourceMeta(collection+"/"+name, IntegrationTestHelper.resourceToXML(resource), headers);
+        HttpResponse response = helper.putResourceMeta(collection+"/"+name, helper.resourceToXML(resource), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -175,12 +146,12 @@ public class CollectionServicePutITTest {
         String fileName = "fileName";
         String creator = "Me";
         String name = "resourceTestPutname";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, null, null, creator, null, null, "nombre");
+        Resource resource = helper.generateResource(null, fileName, null, null, null, creator, null, null, "nombre");
 
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.putResourceMeta(collection+"/"+name, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.putResourceMeta(collection+"/"+name, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -189,12 +160,12 @@ public class CollectionServicePutITTest {
         String fileName = "fileName";
         String creator = "Me";
         String name = "resourceTestPut";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, "application/xml", null, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, "application/xml", null, null, creator, null, null, name);
 
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.putResourceMeta(collection+"/"+name, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.putResourceMeta(collection+"/"+name, helper.resourceToJson(resource), headers);
         assertEquals(403, response.getStatusLine().getStatusCode());
     }
 
@@ -203,12 +174,12 @@ public class CollectionServicePutITTest {
         String fileName = "fileName";
         String creator = "Me";
         String name = "resourceTestPut";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, "newUrlContent", null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, null, "newUrlContent", null, creator, null, null, name);
 
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.putResourceMeta(collection+"/"+name, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.putResourceMeta(collection+"/"+name, helper.resourceToJson(resource), headers);
         assertEquals(403, response.getStatusLine().getStatusCode());
     }
 
@@ -218,12 +189,12 @@ public class CollectionServicePutITTest {
         String creator = "Me";
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPut"+"New";
         String name = "resourceTestPut"+"New";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
 
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.putResourceMeta(collection+"/"+name, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.putResourceMeta(collection+"/"+name, helper.resourceToJson(resource), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -233,12 +204,12 @@ public class CollectionServicePutITTest {
         String creator = "Me";
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPut2";
         String name = "resourceTestPut2";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, "name.meta");
+        Resource resource = helper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, "name.meta");
 
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.putResourceMeta(collection+"/"+name, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.putResourceMeta(collection+"/"+name, helper.resourceToJson(resource), headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -253,16 +224,16 @@ public class CollectionServicePutITTest {
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/rdf+xml"));
-        HttpResponse response = client.putResourceContent(collection+"/"+name, rdfXmlExample, headers);
+        HttpResponse response = helper.putResourceContent(collection+"/"+name, rdfXmlExample, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -273,16 +244,16 @@ public class CollectionServicePutITTest {
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/rdf+json"));
-        HttpResponse response = client.putResourceContent(collection+"/"+name, rdfJsonExample, headers);
+        HttpResponse response = helper.putResourceContent(collection+"/"+name, rdfJsonExample, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -293,16 +264,16 @@ public class CollectionServicePutITTest {
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "text/turtle"));
-        HttpResponse response = client.putResourceContent(collection+"/"+name, rdfTurttleExample, headers);
+        HttpResponse response = helper.putResourceContent(collection+"/"+name, rdfTurttleExample, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers.add(new BasicHeader("Accept", "text/turtle"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -313,16 +284,16 @@ public class CollectionServicePutITTest {
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "text/N3"));
-        HttpResponse response = client.putResourceContent(collection+"/"+name, rdfN3Example, headers);
+        HttpResponse response = helper.putResourceContent(collection+"/"+name, rdfN3Example, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers.add(new BasicHeader("Accept", "text/N3"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -333,11 +304,11 @@ public class CollectionServicePutITTest {
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/data"));
-        HttpResponse response = client.putResourceContent(collection+"/"+name, dataExample, headers);
+        HttpResponse response = helper.putResourceContent(collection+"/"+name, dataExample, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
-        response = client.getResourceContent(collection+"/"+name, headers);
+        response = helper.getResourceContent(collection+"/"+name, headers);
         assertEquals(204, response.getStatusLine().getStatusCode());
     }
 
@@ -348,7 +319,7 @@ public class CollectionServicePutITTest {
         //Update resource meta data
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/rdf+xml"));
-        HttpResponse response = client.putResourceContent(collection+"/"+name, rdfJsonExample, headers);
+        HttpResponse response = helper.putResourceContent(collection+"/"+name, rdfJsonExample, headers);
         assertEquals(500, response.getStatusLine().getStatusCode());
     }
 }

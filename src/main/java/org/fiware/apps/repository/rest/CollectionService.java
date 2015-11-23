@@ -48,9 +48,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
 
-import org.fiware.apps.repository.dao.CollectionDAO;
 import org.fiware.apps.repository.dao.MongoDAOFactory;
-import org.fiware.apps.repository.dao.ResourceDAO;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
@@ -59,22 +57,32 @@ import org.fiware.apps.repository.model.AbstractResource;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 import org.fiware.apps.repository.settings.RepositorySettings;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/"+RepositorySettings.COLLECTION_SERVICE_NAME)
 public class CollectionService {
 
+    @Autowired
     private MongoDAOFactory mongoFactory;
-    private CollectionDAO mongoCollectionDAO;
-    private ResourceDAO mongoResourceDAO;
-    private VirtuosoResourceDAO virtuosoResourceDAO;
 
-    public CollectionService(@Context ServletContext servletContext) {
-        RepositorySettings repositorySettings = new RepositorySettings(servletContext.getInitParameter("propertiesFile"));
-        Properties repositoryProperties = repositorySettings.getProperties();
-        this.mongoFactory = new MongoDAOFactory();
-        this.mongoCollectionDAO = mongoFactory.getCollectionDAO(repositoryProperties);
-        this.mongoResourceDAO = mongoFactory.getResourceDAO(repositoryProperties);
-        this.virtuosoResourceDAO = new VirtuosoDAOFactory().getVirtuosoResourceDAO(repositoryProperties);
+    @Autowired
+    private VirtuosoDAOFactory virtuosoDAOFactory;
+
+    @Context
+    private ServletContext servletContext;
+
+    private Properties repositoryProperties;
+
+    public CollectionService() {
+    }
+
+    private VirtuosoResourceDAO getVirtuosoResourceDao() {
+        if (this.repositoryProperties == null) {
+            RepositorySettings repositorySettings = new RepositorySettings(servletContext.getInitParameter("propertiesFile"));
+            repositoryProperties = repositorySettings.getProperties();
+        }
+
+        return this.virtuosoDAOFactory.getVirtuosoResourceDAO(repositoryProperties);
     }
 
     @GET
@@ -118,7 +126,7 @@ public class CollectionService {
 
         // Check if path is a resource or a collection.
         try {
-            resource = mongoResourceDAO.getResource(path);
+            resource = mongoFactory.getResourceDAO().getResource(path);
         } catch (DatasourceException ex) {
             return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
@@ -141,14 +149,14 @@ public class CollectionService {
 
                 //Check is posible to obtain the content from Mongo or from Virtuoso and return it.
                 if (typeString.equalsIgnoreCase(resource.getContentMimeType())) {
-                    resourceContent = mongoResourceDAO.getResourceContent(path);
+                    resourceContent = mongoFactory.getResourceDAO().getResourceContent(path);
                     if (resourceContent.getContent() != null && resourceContent.getContent() != "".getBytes()) {
                         return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
                     } else {
                         return RestHelper.sendError("No content", Status.NO_CONTENT, accepteds);
                     }
                 } else if (RestHelper.isRDF(typeString)) {
-                    resourceContent = virtuosoResourceDAO.getResource(resource.getContentUrl(), RestHelper.typeMap.get(typeString));
+                    resourceContent = getVirtuosoResourceDao().getResource(resource.getContentUrl(), RestHelper.typeMap.get(typeString));
                     if (resourceContent != null) {
                         return Response.status(Response.Status.OK).header("content-length", resourceContent.getContent().length).type(typeString).entity(resourceContent.getContent()).build();
                     } else {
@@ -169,7 +177,7 @@ public class CollectionService {
 
         try {
             // Get the metadata of a resource
-            resource = mongoResourceDAO.getResource(path);
+            resource = mongoFactory.getResourceDAO().getResource(path);
 
             if (resource == null) {
                 return RestHelper.sendError("Resource not found.", Status.NOT_FOUND, accepteds);
@@ -194,7 +202,7 @@ public class CollectionService {
 
         try {
             //Get a collection
-            collection = mongoCollectionDAO.getCollection(path);
+            collection = mongoFactory.getCollectionDAO().getCollection(path);
             if (collection == null) {
                 return RestHelper.sendError("Resource or collection not found.", Status.NOT_FOUND, accepteds);
             }
@@ -258,7 +266,7 @@ public class CollectionService {
                 return RestHelper.sendError("Field name do not comply the pattern.", Status.BAD_REQUEST, accepteds);
             }
 
-            if(mongoResourceDAO.isResourceByContentUrl(resource.getContentUrl())) {
+            if(mongoFactory.getResourceDAO().isResourceByContentUrl(resource.getContentUrl())) {
                 return RestHelper.sendError("Resource with field contentUrl '"+resource.getContentUrl()+"' already exists.", Status.CONFLICT, accepteds);
             }
 
@@ -271,12 +279,12 @@ public class CollectionService {
                 return RestHelper.sendError("Resource must be created in a collection.", Status.BAD_REQUEST, accepteds);
             }
             if ((!checkPath(path) && !path.equalsIgnoreCase("")) ||
-                    mongoCollectionDAO.getCollection(resource.getId()) != null ||
-                    mongoResourceDAO.getResource(resource.getId()) != null) {
+                    mongoFactory.getCollectionDAO().getCollection(resource.getId()) != null ||
+                    mongoFactory.getResourceDAO().getResource(resource.getId()) != null) {
                 return RestHelper.sendError("Path is a resource.", Status.CONFLICT, accepteds);
             }
 
-            mongoResourceDAO.insertResource(resource);
+            mongoFactory.getResourceDAO().insertResource(resource);
 
             return Response.status(Status.CREATED).type(MediaType.APPLICATION_JSON).contentLocation(new URI("collec/" + resource.getId())).build();
 
@@ -303,12 +311,12 @@ public class CollectionService {
             }
 
             if (!checkPath(path) ||
-                    mongoCollectionDAO.getCollection(resourceCollection.getId()) != null ||
-                    mongoResourceDAO.getResource(resourceCollection.getId()) != null) {
+                    mongoFactory.getCollectionDAO().getCollection(resourceCollection.getId()) != null ||
+                    mongoFactory.getResourceDAO().getResource(resourceCollection.getId()) != null) {
                 return RestHelper.sendError("Path is a resource.", Status.CONFLICT, accepteds);
             }
 
-            mongoCollectionDAO.insertCollection(resourceCollection);
+            mongoFactory.getCollectionDAO().insertCollection(resourceCollection);
             return Response.status(Status.CREATED).contentLocation(new URI("collec/" + resourceCollection.getId())).build();
         } catch (DatasourceException | URISyntaxException ex) {
             return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
@@ -318,7 +326,7 @@ public class CollectionService {
     }
 
     private boolean checkPath(String path) throws DatasourceException {
-        if (!mongoResourceDAO.isResource(path)) {
+        if (!mongoFactory.getResourceDAO().isResource(path)) {
             if (path.lastIndexOf("/") == -1) {
                 return true;
             } else {
@@ -374,7 +382,7 @@ public class CollectionService {
 
         Resource resource;
         try {
-            resource = mongoResourceDAO.getResourceContent(path);
+            resource = mongoFactory.getResourceDAO().getResourceContent(path);
             if (resource == null)
             {
                 return RestHelper.sendError("Resource not found.", Status.NOT_FOUND, accepteds);
@@ -382,13 +390,13 @@ public class CollectionService {
             resource.setContent(content.getBytes());
             resource.setContentMimeType(contentType);
             if(RestHelper.isRDF(contentType)) {
-                virtuosoResourceDAO.updateResource(resource.getContentUrl(), content,
+                getVirtuosoResourceDao().updateResource(resource.getContentUrl(), content,
                         RestHelper.typeMap.get(resource.getContentMimeType()));
             }
             else {
-                virtuosoResourceDAO.deleteResource(resource.getContentUrl());
+                getVirtuosoResourceDao().deleteResource(resource.getContentUrl());
             }
-            mongoResourceDAO.updateResourceContent(resource);
+            mongoFactory.getResourceDAO().updateResourceContent(resource);
 
         } catch (DatasourceException ex) {
             return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
@@ -402,7 +410,7 @@ public class CollectionService {
             return RestHelper.sendError("Field name do not comply the pattern.", Status.BAD_REQUEST, accepteds);
         }
         try {
-            Resource aux = mongoResourceDAO.getResource(path);
+            Resource aux = mongoFactory.getResourceDAO().getResource(path);
             if (aux == null)
             {
                 resource.setId(path);
@@ -414,7 +422,7 @@ public class CollectionService {
             resource.setCreationDate(aux.getCreationDate());
 
             if (!resource.getName().equalsIgnoreCase(aux.getName()) &&
-                    (mongoResourceDAO.isResource(resource.getId()) || (mongoCollectionDAO.getCollection(resource.getId()) != null))) {
+                    (mongoFactory.getResourceDAO().isResource(resource.getId()) || (mongoFactory.getCollectionDAO().getCollection(resource.getId()) != null))) {
                 return RestHelper.sendError("Resource or collection already exist.", Status.CONFLICT, accepteds);
             }
             if (!resource.getContentMimeType().equalsIgnoreCase("") && !resource.getContentMimeType().equals(aux.getContentMimeType())) {
@@ -427,7 +435,7 @@ public class CollectionService {
             resource.setContentUrl(aux.getContentUrl());
             resource.setContentMimeType(aux.getContentMimeType());
 
-            mongoResourceDAO.updateResource(path, resource);
+            mongoFactory.getResourceDAO().updateResource(path, resource);
         } catch (DatasourceException ex) {
             return RestHelper.sendError(ex.getMessage(), Status.INTERNAL_SERVER_ERROR, accepteds);
         }
@@ -451,14 +459,14 @@ public class CollectionService {
 
         // Check if the path is a resource or a collection and remove it.
         try {
-            Resource resource = mongoResourceDAO.getResource(path);
+            Resource resource = mongoFactory.getResourceDAO().getResource(path);
             if (resource != null) {
-                mongoResourceDAO.deleteResource(path);
-                virtuosoResourceDAO.deleteResource(resource.getContentUrl());
+                mongoFactory.getResourceDAO().deleteResource(path);
+                getVirtuosoResourceDao().deleteResource(resource.getContentUrl());
             }
             else {
-                if (mongoCollectionDAO.findCollection(path) != null) {
-                    mongoCollectionDAO.deleteCollection(path);
+                if (mongoFactory.getCollectionDAO().findCollection(path) != null) {
+                    mongoFactory.getCollectionDAO().deleteCollection(path);
                 } else {
                     return RestHelper.sendError("Resource or Collection not found.", Status.NOT_FOUND, accepts);
                 }

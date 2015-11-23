@@ -29,40 +29,65 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.dao;
 
-import java.net.UnknownHostException;
+import java.util.Properties;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
+import javax.annotation.PreDestroy;
 
 import org.fiware.apps.repository.dao.impl.MongoCollectionDAO;
 import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
-
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-import java.util.Properties;
+import org.fiware.apps.repository.dao.impl.MongoUserDAO;
 import org.fiware.apps.repository.settings.DefaultProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 
+
+@Component
+@Scope("singleton")
 public class MongoDAOFactory {
 
-    public synchronized static DB createConnection(Properties properties) {
-        Mongo m;
-        DB db;
+    @Autowired
+    private VirtuosoDAOFactory virtuosoDAOFactory;
 
-        try {
-            m = new Mongo(properties.getProperty(DefaultProperties.MONGO_HOST.getPropertyName()),
-                    Integer.parseInt(properties.getProperty(DefaultProperties.MONGO_PORT.getPropertyName())));
-            db = m.getDB(properties.getProperty(DefaultProperties.MONGO_DB.getPropertyName()));
-        } catch (UnknownHostException | MongoException ex) {
-            throw new MongoException(ex.getLocalizedMessage());
+    private MongoCollectionDAO collectionDao;
+    private MongoResourceDAO resourceDao;
+    private MongoUserDAO userDao;
+
+    private MongoDatabase db;
+    private MongoClient client;
+
+    public synchronized void createConnection (Properties properties) {
+
+        // Build connection and DAOs if not created
+        if (this.db == null) {
+            this.client = new MongoClient(properties.getProperty(DefaultProperties.MONGO_HOST.getPropertyName()),
+                Integer.parseInt(properties.getProperty(DefaultProperties.MONGO_PORT.getPropertyName())));
+
+            this.db = client.getDatabase(properties.getProperty(DefaultProperties.MONGO_DB.getPropertyName()));
+
+            this.collectionDao = new MongoCollectionDAO(this.db, this.virtuosoDAOFactory.getVirtuosoResourceDAO(properties));
+            this.resourceDao = new MongoResourceDAO(this.db);
+            this.userDao = new MongoUserDAO(this.db);
         }
-        return db;
     }
 
-    public ResourceDAO getResourceDAO(Properties properties) {
-        return new MongoResourceDAO(properties);
+    @PreDestroy
+    public void closeConnection() {
+        client.close();
     }
 
-    public CollectionDAO getCollectionDAO(Properties properties) {
-        return new MongoCollectionDAO(properties);
+    public ResourceDAO getResourceDAO() {
+        return this.resourceDao;
     }
 
+    public CollectionDAO getCollectionDAO() {
+        return this.collectionDao;
+    }
 
+    public UserDAO getUserDao() {
+        return this.userDao;
+    }
 }

@@ -30,8 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.it.collectionService;
 
 import org.fiware.apps.repository.it.IntegrationTestHelper;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,22 +47,14 @@ import static org.junit.Assert.*;
 
 public class CollectionServiceGetITTest {
 
-    private IntegrationTestHelper client;
+    private IntegrationTestHelper helper;
     private final String collection = "collectionTestGet";
     private static String rdfxmlExample;
 
     public CollectionServiceGetITTest() throws IOException, ServletException {
-        client = new IntegrationTestHelper();
-        client.createEnviroment();
-
-        String auxString = "";
-        FileReader file = new FileReader("src/test/resources/rdf+xml.rdf");
-        BufferedReader buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            auxString = auxString.concat(buffer.readLine());
-        }
-        buffer.close();
-        rdfxmlExample = auxString;
+        helper = new IntegrationTestHelper();
+        rdfxmlExample = helper.readRDFFile("src/test/resources/rdf+xml.rdf");
+        
     }
 
     @BeforeClass
@@ -78,24 +68,25 @@ public class CollectionServiceGetITTest {
 
     @Before
     public void setUp() throws Exception {
-        client.startEnviroment();
+        helper.createEnviroment();
+        helper.startEnviroment();
 
         String fileName = "fileNameExample";
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestGet";
         String creator = "Me";
         String name = "resourceTest";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
         List <Header> headers = new LinkedList<>();
 
         //Create a resource in the repository
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
 
         //Insert RDF content in the resource
         headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/rdf+xml"));
-        response = client.putResourceContent(collection+"/"+name, rdfxmlExample, headers);
+        response = helper.putResourceContent(collection+"/"+name, rdfxmlExample, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -103,9 +94,10 @@ public class CollectionServiceGetITTest {
     public void tearDown() throws Exception {
         //Delete the collection
         List <Header> headers = new LinkedList<>();
-        client.deleteCollection(collection, headers);
+        helper.deleteCollection(collection, headers);
 
-        client.stopEnviroment();
+        helper.stopEnviroment();
+        helper.destroyEnviroment();
     }
 
     /*
@@ -114,7 +106,7 @@ public class CollectionServiceGetITTest {
     private void getResourceMeta(String name, String type, String typeExpected, int status) throws IOException {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", type));
-        HttpResponse response = client.getResourceMeta(name, headers);
+        HttpResponse response = helper.getResourceMeta(name, headers);
 
         assertEquals(status, response.getStatusLine().getStatusCode());
         if (typeExpected != null) {
@@ -191,7 +183,7 @@ public class CollectionServiceGetITTest {
     private void getResourceContent(String name, String type, String typeExpected, int status) throws IOException {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", type));
-        HttpResponse response = client.getResourceContent(name, headers);
+        HttpResponse response = helper.getResourceContent(name, headers);
 
         assertEquals(status, response.getStatusLine().getStatusCode());
         if (typeExpected != null) {
@@ -235,7 +227,7 @@ public class CollectionServiceGetITTest {
     private void getCollection(String name, String type, String typeExpected, int status) throws IOException {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", type));
-        HttpResponse response = client.getCollection(name, headers);
+        HttpResponse response = helper.getCollection(name, headers);
 
         assertEquals(status, response.getStatusLine().getStatusCode());
         if (typeExpected != null) {

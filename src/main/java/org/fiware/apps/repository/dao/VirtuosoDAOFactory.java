@@ -29,11 +29,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.dao;
 import java.util.Properties;
+import javax.annotation.PreDestroy;
 import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope("singleton")
 public class VirtuosoDAOFactory {
 
+    VirtuosoResourceDAO resourceDao;
+
     public VirtuosoResourceDAO getVirtuosoResourceDAO(Properties properties) {
-        return new VirtuosoResourceDAO(properties);
+        if (this.resourceDao == null) {
+            this.resourceDao = new VirtuosoResourceDAO(properties);
+        }
+        return this.resourceDao;
+    }
+
+    @PreDestroy
+    public void closeConnection() {
+        this.resourceDao.closeConnection();
     }
 }

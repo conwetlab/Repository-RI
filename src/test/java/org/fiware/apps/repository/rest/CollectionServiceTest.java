@@ -34,6 +34,7 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
@@ -56,51 +57,39 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({MongoDAOFactory.class, VirtuosoDAOFactory.class, CollectionService.class})
+@PrepareForTest({CollectionService.class})
 public class CollectionServiceTest {
 
-    private MongoDAOFactory mongoFactory;
+    private @Mock MongoDAOFactory mongoFactory;
     private MongoCollectionDAO mongoCollectionDAO;
     private MongoResourceDAO mongoResourceDAO;
-    private VirtuosoDAOFactory virtuosoDAOFactory;
+
+    private @Mock VirtuosoDAOFactory virtuosoDAOFactory;
     private VirtuosoResourceDAO virtuosoResourceDAO;
-    private ServletContext servletContext;
-    private CollectionService toTest;
+
+    private @Mock ServletContext servletContext;
+    private @InjectMocks CollectionService toTest;
 
     public CollectionServiceTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
     }
 
     @Before
     public void setUp() throws Exception {
 
-        mongoFactory = mock(MongoDAOFactory.class);
-        mongoResourceDAO = mock(MongoResourceDAO.class);
-        mongoCollectionDAO = mock(MongoCollectionDAO.class);
-        virtuosoDAOFactory = mock(VirtuosoDAOFactory.class);
-        virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
-        servletContext = mock(ServletContext.class);
-
-        /*when(VirtuosoDAOFactory.getVirtuosoResourceDAO(anyObject())).thenReturn(virtuosoResourceDAO);*/
         when(servletContext.getInitParameter("propertiesFile")).thenReturn("");
-        when(mongoFactory.getResourceDAO(anyObject())).thenReturn(mongoResourceDAO);
-        when(mongoFactory.getCollectionDAO(anyObject())).thenReturn(mongoCollectionDAO);
-        when(virtuosoDAOFactory.getVirtuosoResourceDAO(anyObject())).thenReturn(virtuosoResourceDAO);
 
-        PowerMockito.whenNew(MongoDAOFactory.class).withAnyArguments().thenReturn(mongoFactory);
-        PowerMockito.whenNew(VirtuosoDAOFactory.class).withAnyArguments().thenReturn(virtuosoDAOFactory);
-
-        toTest = new CollectionService(servletContext);
-
+        mongoResourceDAO = mock(MongoResourceDAO.class);
+        when(mongoFactory.getResourceDAO()).thenReturn(mongoResourceDAO);
+        
+        mongoCollectionDAO = mock(MongoCollectionDAO.class);
+        when(mongoFactory.getCollectionDAO()).thenReturn(mongoCollectionDAO);
+        
+        virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
+        when(virtuosoDAOFactory.getVirtuosoResourceDAO((Properties) anyObject())).thenReturn(virtuosoResourceDAO);
     }
 
     @After
@@ -804,7 +793,7 @@ public class CollectionServiceTest {
         accpeted.add("application/json");
 
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
-        when(mongoResourceDAO.insertResource(anyObject())).thenReturn(null);
+        when(mongoResourceDAO.insertResource((Resource) anyObject())).thenReturn(null);
 
         putResource(path, accpeted, newResource, 200);
     }
@@ -852,7 +841,7 @@ public class CollectionServiceTest {
         accpeted.add("application/json");
 
         when(mongoResourceDAO.getResource(eq(path))).thenReturn(oldResource);
-        doThrow(DatasourceException.class).when(mongoResourceDAO).updateResource(eq(path), anyObject());
+        doThrow(DatasourceException.class).when(mongoResourceDAO).updateResource(eq(path), (Resource) anyObject());
 
         putResource(path, accpeted, newResource, 500);
     }

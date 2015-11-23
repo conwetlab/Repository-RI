@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletException;
-import org.apache.catalina.LifecycleException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHeader;
@@ -49,12 +48,11 @@ import static org.junit.Assert.*;
 
 public class CollectionServicePostITTest {
 
-    private IntegrationTestHelper client;
+    private IntegrationTestHelper helper;
     private static final String collection = "collectionTestPost";
 
     public CollectionServicePostITTest() throws IOException, ServletException {
-        client = new IntegrationTestHelper();
-        client.createEnviroment();
+        helper = new IntegrationTestHelper();
     }
 
     @BeforeClass
@@ -67,16 +65,18 @@ public class CollectionServicePostITTest {
 
     @Before
     public void setUp() throws Exception {
-        client.startEnviroment();
+        helper.createEnviroment();
+        helper.startEnviroment();
     }
 
     @After
     public void tearDown() throws Exception {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        client.deleteCollection(collection, headers);
+        helper.deleteCollection(collection, headers);
 
-        client.stopEnviroment();
+        helper.stopEnviroment();
+        helper.destroyEnviroment();
     }
 
     /*
@@ -89,12 +89,12 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost";
         String creator = "Me";
         String name = "resourceTestPost";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -105,12 +105,12 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost2";
         String creator = "Me";
         String name = "resourceTestPost2";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection + "/" + collection, client.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection + "/" + collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -123,12 +123,12 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost3";
         String creator = "Me";
         String name = "resourceTestPost3";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/xml"));
-        HttpResponse response = client.postResourceMeta(collection, client.resourceToXML(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToXML(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -139,12 +139,12 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost4";
         String creator = "Me";
         String name = "resourceTestPost4";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/xml"));
-        HttpResponse response = client.postResourceMeta(collection + "/" + collection, client.resourceToXML(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection + "/" + collection, helper.resourceToXML(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -155,15 +155,15 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost5";
         String creator = "Me";
         String name = "resourceTestPost5";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
 
-        response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(409, response.getStatusLine().getStatusCode());
     }
 
@@ -174,16 +174,16 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost6";
         String creator = "Me";
         String name = "resourceTestPost6";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
 
         resource.setName("resourceTestPost7");
-        response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(409, response.getStatusLine().getStatusCode());
     }
 
@@ -194,12 +194,12 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost7";
         String creator = "Me";
         String name = "resourceTestPost7.meta";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection, IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -210,12 +210,12 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost8";
         String creator = "Me";
         String name = "resourceTestPost8";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta("", IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta("", helper.resourceToJson(resource), headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -226,12 +226,12 @@ public class CollectionServicePostITTest {
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestPost9";
         String creator = "Me";
         String name = "resourceTestPost9";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, mimeType, contentUrl, null, creator, null, null, name);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta(collection+"/"+collection+".a", IntegrationTestHelper.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection+"/"+collection+".a", helper.resourceToJson(resource), headers);
         assertEquals(409, response.getStatusLine().getStatusCode());
     }
 
@@ -242,14 +242,14 @@ public class CollectionServicePostITTest {
     public void postCollectionJsonTest() throws IOException {
         String creator = "Me";
         String name = "resourceCollectionTest1";
-        ResourceCollection resourceCollection = IntegrationTestHelper.generateResourceCollection(null, name, creator, null, null);
+        ResourceCollection resourceCollection = helper.generateResourceCollection(null, name, creator, null, null);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        client.deleteCollection(name, headers);
-        HttpResponse response = client.postCollection("", IntegrationTestHelper.collectionToJson(resourceCollection), headers);
-        client.deleteCollection(name, headers);
+        helper.deleteCollection(name, headers);
+        HttpResponse response = helper.postCollection("", helper.collectionToJson(resourceCollection), headers);
+        helper.deleteCollection(name, headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -257,14 +257,14 @@ public class CollectionServicePostITTest {
     public void postCollectionJsonTest2() throws IOException {
         String creator = "Me";
         String name = "resourceCollectionTest2";
-        ResourceCollection resourceCollection = IntegrationTestHelper.generateResourceCollection(null, name, creator, null, null);
+        ResourceCollection resourceCollection = helper.generateResourceCollection(null, name, creator, null, null);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        client.deleteCollection(name, headers);
-        HttpResponse response = client.postCollection(collection+"/"+collection, IntegrationTestHelper.collectionToJson(resourceCollection), headers);
-        client.deleteCollection(name, headers);
+        helper.deleteCollection(name, headers);
+        HttpResponse response = helper.postCollection(collection+"/"+collection, helper.collectionToJson(resourceCollection), headers);
+        helper.deleteCollection(name, headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -272,14 +272,14 @@ public class CollectionServicePostITTest {
     public void postCollectionXmlTest() throws IOException {
         String creator = "Me";
         String name = "resourceCollectionTest3";
-        ResourceCollection resourceCollection = IntegrationTestHelper.generateResourceCollection(null, name, creator, null, null);
+        ResourceCollection resourceCollection = helper.generateResourceCollection(null, name, creator, null, null);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/xml"));
-        client.deleteCollection(name, headers);
-        HttpResponse response = client.postCollection("", IntegrationTestHelper.collectionToXml(resourceCollection), headers);
-        client.deleteCollection(name, headers);
+        helper.deleteCollection(name, headers);
+        HttpResponse response = helper.postCollection("", helper.collectionToXml(resourceCollection), headers);
+        helper.deleteCollection(name, headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -287,14 +287,14 @@ public class CollectionServicePostITTest {
     public void postCollectionXmlTest2() throws IOException {
         String creator = "Me";
         String name = "resourceCollectionTest4";
-        ResourceCollection resourceCollection = IntegrationTestHelper.generateResourceCollection(null, name, creator, null, null);
+        ResourceCollection resourceCollection = helper.generateResourceCollection(null, name, creator, null, null);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/xml"));
-        client.deleteCollection(name, headers);
-        HttpResponse response = client.postCollection(collection+"/"+collection, IntegrationTestHelper.collectionToXml(resourceCollection), headers);
-        client.deleteCollection(name, headers);
+        helper.deleteCollection(name, headers);
+        HttpResponse response = helper.postCollection(collection+"/"+collection, helper.collectionToXml(resourceCollection), headers);
+        helper.deleteCollection(name, headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
@@ -302,30 +302,30 @@ public class CollectionServicePostITTest {
     public void postCollectionInACollection() throws IOException {
         String creator = "Me";
         String name = "resourceCollectionTestN";
-        ResourceCollection resourceCollection = IntegrationTestHelper.generateResourceCollection(null, name, creator, null, null);
+        ResourceCollection resourceCollection = helper.generateResourceCollection(null, name, creator, null, null);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        client.deleteCollection("resourceCollectionIn", headers);
-        HttpResponse response = client.postCollection("resourceCollectionIn/A/B/C", IntegrationTestHelper.collectionToJson(resourceCollection), headers);
-        client.deleteCollection("resourceCollectionIn", headers);
+        helper.deleteCollection("resourceCollectionIn", headers);
+        HttpResponse response = helper.postCollection("resourceCollectionIn/A/B/C", helper.collectionToJson(resourceCollection), headers);
+        helper.deleteCollection("resourceCollectionIn", headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
-        assertEquals("http://localhost:"+client.getTomcatPort()+"/FiwareRepository/v2/collec/resourceCollectionIn/A/B/C/resourceCollectionTestN", response.getHeaders("Content-Location")[0].getValue());
+        assertEquals("http://localhost:"+helper.getTomcatPort()+"/FiwareRepository/v2/collec/resourceCollectionIn/A/B/C/resourceCollectionTestN", response.getHeaders("Content-Location")[0].getValue());
     }
 
     @Test
     public void postCollectionBadNameTest() throws IOException {
         String creator = "Me";
         String name = "resourceCollectionTest5.meta";
-        ResourceCollection resourceCollection = IntegrationTestHelper.generateResourceCollection(null, name, creator, null, null);
+        ResourceCollection resourceCollection = helper.generateResourceCollection(null, name, creator, null, null);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        client.deleteCollection(name, headers);
-        HttpResponse response = client.postCollection("", IntegrationTestHelper.collectionToJson(resourceCollection), headers);
-        client.deleteCollection(name, headers);
+        helper.deleteCollection(name, headers);
+        HttpResponse response = helper.postCollection("", helper.collectionToJson(resourceCollection), headers);
+        helper.deleteCollection(name, headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -333,15 +333,15 @@ public class CollectionServicePostITTest {
     public void postCollectionConflictTest() throws IOException {
         String creator = "Me";
         String name = "resourceCollectionTest6";
-        ResourceCollection resourceCollection = IntegrationTestHelper.generateResourceCollection(null, name, creator, null, null);
+        ResourceCollection resourceCollection = helper.generateResourceCollection(null, name, creator, null, null);
 
         //Create a resource
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        client.deleteCollection(name, headers);
-        client.postCollection("", IntegrationTestHelper.collectionToJson(resourceCollection), headers);
-        HttpResponse response = client.postCollection("", IntegrationTestHelper.collectionToJson(resourceCollection), headers);
-        client.deleteCollection(name, headers);
+        helper.deleteCollection(name, headers);
+        helper.postCollection("", helper.collectionToJson(resourceCollection), headers);
+        HttpResponse response = helper.postCollection("", helper.collectionToJson(resourceCollection), headers);
+        helper.deleteCollection(name, headers);
         assertEquals(409, response.getStatusLine().getStatusCode());
     }
 

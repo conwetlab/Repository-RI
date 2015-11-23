@@ -19,17 +19,17 @@ import static org.junit.Assert.*;
 
 public class CollectionServiceDeleteITTest {
 
-    private IntegrationTestHelper client;
+    private IntegrationTestHelper helper;
     private final String collection = "collectionTestDelete";
 
     public CollectionServiceDeleteITTest() throws IOException, ServletException {
-        client = new IntegrationTestHelper();
-        client.createEnviroment();
+        helper = new IntegrationTestHelper();
         
     }
 
     @BeforeClass
     public static void setUpClass() {
+        
     }
 
     @AfterClass
@@ -38,28 +38,30 @@ public class CollectionServiceDeleteITTest {
 
     @Before
     public void setUp() throws Exception {
-        client.startEnviroment();
+        helper.createEnviroment();
+        helper.startEnviroment();
 
         String fileName = "fileName";
         String contentUrl = "http://localhost:8080/contentUrl/resourceTestDelete";
         String creator = "Me";
         String name = "resourceTestDelete";
-        Resource resource = IntegrationTestHelper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
+        Resource resource = helper.generateResource(null, fileName, null, contentUrl, null, creator, null, null, name);
 
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
 
         //Delete the collection
-        HttpResponse response = client.deleteCollection(collection, headers);
+        helper.deleteCollection(collection, headers);
 
         //Create a resource
-        response = client.postResourceMeta(collection, client.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta(collection, helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
     }
 
     @After
     public void tearDown() throws LifecycleException {
-        client.stopEnviroment();
+        helper.stopEnviroment();
+        helper.destroyEnviroment();
     }
 
     /*
@@ -72,13 +74,13 @@ public class CollectionServiceDeleteITTest {
 
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.deleteResource(collection+"/"+name, headers);
+        HttpResponse response = helper.deleteResource(collection+"/"+name, headers);
         assertEquals(204, response.getStatusLine().getStatusCode());
 
-        response = client.getResourceMeta(collection+"/"+name, headers);
+        response = helper.getResourceMeta(collection+"/"+name, headers);
         assertEquals(404, response.getStatusLine().getStatusCode());
 
-        response = client.getCollection(collection, headers);
+        response = helper.getCollection(collection, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -92,13 +94,13 @@ public class CollectionServiceDeleteITTest {
 
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.deleteCollection(collection, headers);
+        HttpResponse response = helper.deleteCollection(collection, headers);
         assertEquals(204, response.getStatusLine().getStatusCode());
 
-        response = client.getResourceMeta(collection+"/"+name, headers);
+        response = helper.getResourceMeta(collection+"/"+name, headers);
         assertEquals(404, response.getStatusLine().getStatusCode());
 
-        response = client.getCollection(collection, headers);
+        response = helper.getCollection(collection, headers);
         assertEquals(404, response.getStatusLine().getStatusCode());
     }
 }

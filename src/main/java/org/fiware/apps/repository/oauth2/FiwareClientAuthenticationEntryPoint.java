@@ -5,7 +5,8 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.fiware.apps.repository.dao.impl.MongoResourceDAO;
+import org.fiware.apps.repository.dao.MongoDAOFactory;
+import org.fiware.apps.repository.dao.ResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.settings.RepositorySettings;
 import org.pac4j.core.client.Client;
@@ -16,6 +17,7 @@ import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -26,6 +28,9 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
 
     private Client client;
     private String propertiesPath;
+
+    @Autowired
+    private MongoDAOFactory mongoDAOFactory; 
 
     public FiwareClientAuthenticationEntryPoint(String path) {
         this.propertiesPath = path;
@@ -75,7 +80,9 @@ public final class FiwareClientAuthenticationEntryPoint implements Authenticatio
     }
 
     private boolean isHTMLinfo(String uri) {
-        MongoResourceDAO resourceDAO = new MongoResourceDAO(new RepositorySettings(propertiesPath).getProperties());
+        this.mongoDAOFactory.createConnection(new RepositorySettings(propertiesPath).getProperties());
+        ResourceDAO resourceDAO = this.mongoDAOFactory.getResourceDAO();
+
         try {
             return uri.regionMatches(true, uri.length()-5, ".meta", 0, 5) || !resourceDAO.isResource(uri.substring(uri.indexOf("collec/")+7, uri.length()));
         } catch (DatasourceException ex) {

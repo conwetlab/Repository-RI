@@ -45,33 +45,55 @@ import org.fiware.apps.repository.model.ResourceCollection;
 import org.fiware.apps.repository.model.ResourceFilter;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.ObjectId;
-import java.util.Properties;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MongoResourceDAO implements ResourceDAO{
 
     public static final String MONGO_COLL_NAME = "Resource";
 
-    private DB db;
-    private DBCollection mongoCollection;
-    private MongoDAOFactory mongoFactory;
+    private MongoDatabase db;
+    private MongoCollection mongoCollection;
     private CollectionDAO collectionDAO;
 
-    public MongoResourceDAO(Properties properties){
-        db = MongoDAOFactory.createConnection(properties);
-        mongoCollection = db.getCollection(MONGO_COLL_NAME);
-        mongoFactory = new MongoDAOFactory();
-        collectionDAO = mongoFactory.getCollectionDAO(properties);
+    @Autowired
+    private MongoDAOFactory mongoDAOFactory;
+
+    public MongoResourceDAO(MongoDatabase db){
+        this.db = db;
+        this.mongoCollection = db.getCollection(MONGO_COLL_NAME);
+        this.collectionDAO = mongoDAOFactory.getCollectionDAO();
     }
 
-    public MongoResourceDAO(DB db, DBCollection dBCollection, MongoDAOFactory mongoFactory, CollectionDAO collectionDAO) {
+    public MongoResourceDAO(
+            MongoDatabase db, MongoCollection mongoCollection, CollectionDAO collectionDao) {
         this.db = db;
-        this.mongoCollection = dBCollection;
-        this.mongoFactory = mongoFactory;
-        this.collectionDAO = collectionDAO;
+        this.mongoCollection = mongoCollection;
+        this.collectionDAO = collectionDao;
+    }
+
+    private Resource buildResource(BasicDBObject obj, boolean hasContent) {
+        Resource res = new Resource();
+        res.setId(obj.get("id").toString());
+        res.setName(obj.get("name").toString());
+        res.setCreator(obj.get("creator").toString());
+        res.setContentUrl(obj.get("contentUrl").toString());
+        res.setContentMimeType(obj.get("contentMimeType").toString());
+        res.setContentFileName(obj.get("contentFileName").toString());
+
+        if (hasContent) {
+            res.setContent((byte[]) obj.get("content"));
+        }
+
+        if(obj.get("creationDate")!=null){
+            res.setCreationDate((Date) obj.get("creationDate"));
+        }
+        if(obj.get("modificationDate")!=null){
+            res.setModificationDate((Date) obj.get("modificationDate"));
+        }
+        return res;
     }
 
     @Override
@@ -82,170 +104,114 @@ public class MongoResourceDAO implements ResourceDAO{
 
     @Override
     public List<Resource> getResources(String path, ResourceFilter filter) throws DatasourceException {
-        List <Resource> resources = new ArrayList<Resource>();
-        db.requestStart();
+        List <Resource> resources = new ArrayList<>();
 
         try{
 
             BasicDBObject query = filter.parseFilter();
-
-            Pattern p = Pattern.compile("^"+path+"/[a-zA-Z0-9_\\.\\-\\+]*$");
+            Pattern p = Pattern.compile("^" + path + "/[a-zA-Z0-9_\\.\\-\\+]*$");
 
             query.put("id", p);
 
-            List <DBObject> objs = mongoCollection.find(query).skip(filter.getOffset()).limit(filter.getLimit()).toArray();
+            MongoCursor objs = mongoCollection.
+                    find(query).
+                    skip(filter.getOffset()).
+                    limit(filter.getLimit()).
+                    iterator();
 
-            for(DBObject obj : objs){
-
-                Resource res = new Resource();
-                res.setId(obj.get("id").toString());
-                res.setName(obj.get("name").toString());
-                res.setCreator(obj.get("creator").toString());
-                res.setContentUrl(obj.get("contentUrl").toString());
-                res.setContentMimeType(obj.get("contentMimeType").toString());
-                res.setContentFileName(obj.get("contentFileName").toString());
-
-                if(obj.get("creationDate")!=null){
-                    res.setCreationDate((Date) obj.get("creationDate"));
-                }
-                if(obj.get("modificationDate")!=null){
-                    res.setModificationDate((Date) obj.get("modificationDate"));
-                }
-
-                resources.add(res);
+            while (objs.hasNext()) {
+                BasicDBObject obj = (BasicDBObject) objs.next();
+                resources.add(this.buildResource(obj, false));
             }
         }
         catch (Exception e){
-            db.requestDone();
             throw new DatasourceException(e.getMessage(), Resource.class );
         }
-        db.requestDone();
         return resources;
     }
 
-    @Override
-    public Resource getResource(String id) throws DatasourceException{
-        Resource r = new Resource();
-        db.requestStart();
-        DBObject obj =null;
-        try{
-
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            obj = mongoCollection.findOne(query);
-
-        }catch (Exception e){
-            db.requestDone();
-            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
-        }
-
-        if(obj == null){
-            db.requestDone();
-            return null;
-        }
-
-        r.setId(obj.get("id").toString());
-        r.setName(obj.get("name").toString());
-        r.setCreator(obj.get("creator").toString());
-        r.setContentUrl(obj.get("contentUrl").toString());
-        r.setContentMimeType(obj.get("contentMimeType").toString());
-        r.setContentFileName(obj.get("contentFileName").toString());
-
-        if(obj.get("creationDate")!=null){
-            r.setCreationDate((Date) obj.get("creationDate"));
-        }
-        if(obj.get("modificationDate")!=null){
-            r.setModificationDate((Date) obj.get("modificationDate"));
-        }
-
-
-        db.requestDone();
-        return r;
+    private MongoCursor searchResource(String field, String value) {
+        BasicDBObject query = new BasicDBObject();
+        query.put(field, value);
+        return mongoCollection.find(query).iterator();
     }
 
-    @Override
-    public Resource getResourceContent(String id) throws DatasourceException{
-        Resource r = new Resource();
-        db.requestStart();
-        DBObject obj =null;
+    private BasicDBObject getResourceInfo(String id) throws DatasourceException {
+        BasicDBObject obj = null;
         try{
 
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            obj = mongoCollection.findOne(query);
+            MongoCursor objs = this.searchResource("id", id);
 
+            while (objs.hasNext()) {
+                obj = (BasicDBObject) objs.next();
+            }
         }catch (Exception e){
-            db.requestDone();
-            throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
-        }
-
-        if(obj == null){
-            db.requestDone();
-            return null;
-        }
-
-        r.setId(obj.get("id").toString());
-        r.setName(obj.get("name").toString());
-        r.setCreator(obj.get("creator").toString());
-        r.setContentUrl(obj.get("contentUrl").toString());
-        r.setContentMimeType(obj.get("contentMimeType").toString());
-        r.setContentFileName(obj.get("contentFileName").toString());
-        r.setContent((byte[]) obj.get("content"));
-
-        if(obj.get("creationDate")!=null){
-            r.setCreationDate((Date) obj.get("creationDate"));
-        }
-        if(obj.get("modificationDate")!=null){
-            r.setModificationDate((Date) obj.get("modificationDate"));
-        }
-
-        db.requestDone();
-        return r;
-    }
-
-    public Boolean isResource (String id) throws DatasourceException{
-
-        db.requestStart();
-        DBObject obj =null;
-        try{
-
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            obj = mongoCollection.findOne(query);
-
-        }catch (Exception e){
-            db.requestDone();
             throw new DatasourceException("Error parsing " + id + " " + e.getMessage(), Resource.class );
         }
-        db.requestDone();
-        if(obj == null){
-            return false;
+
+        return obj;
+    }
+
+    @Override
+    public Resource getResource(String id) throws DatasourceException {
+        Resource res = null;
+        BasicDBObject obj = getResourceInfo(id);
+        if (obj != null) {
+            res = this.buildResource(obj, false);
+        }
+        return res;
+    }
+
+    @Override
+    public Resource getResourceContent(String id) throws DatasourceException {
+        Resource res = null;
+        BasicDBObject obj = getResourceInfo(id);
+        if (obj != null) {
+            res = this.buildResource(obj, true);
+        }
+        return res;
+    }
+
+    @Override
+    public Boolean isResource (String id) throws DatasourceException {
+        try{
+            return this.searchResource("id", id).hasNext();
+        }catch (Exception e){
+            throw new DatasourceException("Error parsing " + id + " " + e.getMessage(), Resource.class );
         }
 
-        return true;
     }
 
     @Override
     public Boolean isResourceByContentUrl (String contentUrl) throws DatasourceException{
-
-        db.requestStart();
-        DBObject obj =null;
         try{
-
-            BasicDBObject query = new BasicDBObject();
-            query.put("contentUrl", contentUrl);
-            obj = mongoCollection.findOne(query);
-
+            return this.searchResource("contentUrl", contentUrl).hasNext();
         }catch (Exception e){
-            db.requestDone();
             throw new DatasourceException("Error parsing " + contentUrl + " " + e.getMessage(), Resource.class );
         }
-        db.requestDone();
-        if(obj == null){
-            return false;
-        }
+    }
 
-        return true;
+    private void fillDBObjectContent(BasicDBObject obj, Resource r, boolean withContent) {
+        if (withContent) {
+            obj.put("content", r.getContent());
+        }
+        obj.put("contentMimeType", r.getContentMimeType());
+        obj.put("contentFileName", r.getContentFileName());
+
+        if(r.getCreationDate()!=null){
+            obj.put("creationDate", r.getCreationDate());
+        }else{
+            obj.put("creationDate", new Date());
+        }
+        obj.put("modificationDate", new Date());
+    }
+
+    private void fillBDObjectInfo(BasicDBObject obj, Resource r) {
+        obj.put("id", r.getId());
+        obj.put("name", r.getName());
+        obj.put("creator", r.getCreator());
+        obj.put("contentUrl", r.getContentUrl());
+        this.fillDBObjectContent(obj, r, false);
     }
 
     @Override
@@ -256,7 +222,7 @@ public class MongoResourceDAO implements ResourceDAO{
         }
 
         //Insert collections if they do not exist.
-        if(collectionDAO.getCollection(r.getId().substring(0, r.getId().lastIndexOf("/")))==null){
+        if(collectionDAO.getCollection(r.getId().substring(0, r.getId().lastIndexOf("/"))) == null){
             ResourceCollection col = new ResourceCollection();
             col.setCreator(r.getCreator());
             col.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
@@ -264,28 +230,12 @@ public class MongoResourceDAO implements ResourceDAO{
         }
 
         try{
-            db.requestStart();
-
             BasicDBObject obj = new BasicDBObject();
-
-            obj.put("id", r.getId());
-            obj.put("name", r.getName());
-            obj.put("creator", r.getCreator());
-            obj.put("contentUrl", r.getContentUrl());
-            obj.put("contentMimeType", r.getContentMimeType());
-            obj.put("contentFileName", r.getContentFileName());
-            if(r.getCreationDate()!=null){
-                obj.put("creationDate", r.getCreationDate());
-            }else{
-                obj.put("creationDate", new Date());
-            }
-            obj.put("modificationDate", new Date());
-
-            mongoCollection.insert(obj);
-            db.requestDone();
+            this.fillBDObjectInfo(obj, r);
+            
+            mongoCollection.insertOne(obj);
             return r;
         }catch (Exception e){
-            db.requestDone();
             throw new DatasourceException("Error parsing " + r.getId() + " " + e.getMessage(), Resource.class );
         }
 
@@ -296,107 +246,65 @@ public class MongoResourceDAO implements ResourceDAO{
         return getResource(id);
     }
 
+    @Override
     public Boolean updateResource(String path, Resource r) throws DatasourceException {
-        db.requestStart();
-        BasicDBObject query = new BasicDBObject();
-        query.put("id", path);
-        DBObject obj = mongoCollection.findOne(query);
 
-        if(obj==null){
-            db.requestDone();
+        BasicDBObject oldObj = this.getResourceInfo(path);
+        BasicDBObject newObj = this.getResourceInfo(path);
+
+        if(oldObj == null){
             return false;
         }
 
-        if(collectionDAO.getCollection(r.getId().substring(0, r.getId().lastIndexOf("/")))==null){
+        if(collectionDAO.getCollection(r.getId().substring(0, r.getId().lastIndexOf("/"))) == null){
             ResourceCollection col = new ResourceCollection();
             col.setCreator(r.getCreator());
             col.setId(r.getId().substring(0, r.getId().lastIndexOf("/")));
             try {
                 collectionDAO.insertCollection(col);
             } catch (SameIdException ex) {
-                db.requestDone();
                 throw new DatasourceException(ex.getLocalizedMessage(), ResourceCollection.class);
             }
         }
 
-        obj.put("id", r.getId());
-        obj.put("name", r.getName());
-        obj.put("creator", r.getCreator());
-        obj.put("contentUrl", r.getContentUrl());
-        obj.put("contentMimeType", r.getContentMimeType());
-        obj.put("contentFileName", r.getContentFileName());
-        if(r.getCreationDate()!=null){
-            obj.put("creationDate", r.getCreationDate());
-        }else{
-            obj.put("creationDate", new Date());
-        }
-        obj.put("modificationDate", new Date());
-        String internalId = obj.get("_id").toString();
+        this.fillBDObjectInfo(newObj, r);
 
         try{
-            mongoCollection.update(new BasicDBObject().append("_id", new ObjectId(internalId)), obj, false,false);
-            db.requestDone();
+            mongoCollection.updateOne(oldObj, newObj);
             return true;
 
         }catch (IllegalArgumentException e){
-            db.requestDone();
             throw new DatasourceException("Error updating Resource with ID " + r.getId() + " " + e.getMessage(), Resource.class );
         }
     }
 
+    @Override
     public Boolean updateResourceContent(Resource r) throws DatasourceException{
-        db.requestStart();
         try{
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", r.getId());
-            DBObject obj = mongoCollection.findOne(query);
+            BasicDBObject oldObj = this.getResourceInfo(r.getId());
+            BasicDBObject newObj = this.getResourceInfo(r.getId());
 
-            obj.put("content", r.getContent());
-            obj.put("contentMimeType", r.getContentMimeType());
-            obj.put("contentFileName", r.getContentFileName());
-            if(r.getCreationDate()!=null){
-                obj.put("creationDate", r.getCreationDate());
-            }else{
-                obj.put("creationDate", new Date());
-            }
-            obj.put("modificationDate", new Date());
-
-
-            String internalId = obj.get("_id").toString();
-
-            mongoCollection.update(new BasicDBObject().append("_id", new ObjectId(internalId)), obj, false,false);
-
+            this.fillDBObjectContent(newObj, r, true);
+            this.mongoCollection.updateOne(oldObj, newObj);
         }catch (IllegalArgumentException e){
-            db.requestDone();
             throw new DatasourceException("Error updating Resource with ID " + r.getId() + " " + e.getMessage(), Resource.class );
         }
 
-        db.requestDone();
         return true;
     }
 
     @Override
     public Boolean deleteResource(String id) throws DatasourceException {
 
+        boolean result = false;
         try{
-            db.requestStart();
-            BasicDBObject query = new BasicDBObject();
-            query.put("id", id);
-            DBObject obj = mongoCollection.findOne(query);
-            if(obj==null){
-                db.requestDone();
-                return false;
+            BasicDBObject db = this.getResourceInfo(id);
+            if (db != null) {
+                result = mongoCollection.deleteOne(db).wasAcknowledged();
             }
-            mongoCollection.remove(obj);
-            db.requestDone();
-            return true;
-
-        }catch (IllegalArgumentException e){
-            db.requestDone();
+        } catch (IllegalArgumentException e){
             throw new DatasourceException("Error deleting Collection with ID " + id + " " + e.getMessage(), Resource.class );
         }
-
+        return result;
     }
-
-
 }

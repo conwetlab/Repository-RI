@@ -47,15 +47,6 @@
         <param-value>/v2</param-value>
     </context-param>
 
-    
-    
-    <!--<context-param>
-        <param-name>repositoryProperties</param-name>    
-        <param-value>/WEB-INF/classes/properties/repository.properties</param-value>
-    </context-param>-->
-
-    
-
     <listener>
         <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
     </listener>

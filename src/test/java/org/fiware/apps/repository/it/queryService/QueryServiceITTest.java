@@ -50,20 +50,13 @@ import org.scribe.utils.OAuthEncoder;
 
 public class QueryServiceITTest {
 
-    private IntegrationTestHelper client;
+    private IntegrationTestHelper helper;
     private String rdfXmlExample;
 
     public QueryServiceITTest() throws IOException, ServletException {
-        client = new IntegrationTestHelper();
-        client.createEnviroment();
+        helper = new IntegrationTestHelper();
 
-        rdfXmlExample = "";
-        FileReader file = new FileReader("src/test/resources/storeRDF.rdf");
-        BufferedReader buffer = new BufferedReader(file);
-        while(buffer.ready()) {
-            rdfXmlExample = rdfXmlExample.concat(buffer.readLine()+"\n");
-        }
-        buffer.close();
+        rdfXmlExample = helper.readRDFFile("src/test/resources/storeRDF.rdf");
     }
 
     @BeforeClass
@@ -78,31 +71,33 @@ public class QueryServiceITTest {
 
     @Before
     public void setUp() throws Exception {
-        client.startEnviroment();
+        helper.createEnviroment();
+        helper.startEnviroment();
 
-        Resource resource = IntegrationTestHelper.generateResource(null, "fileName", null, "http://appTest", null, "Me", null, null, "queryResourceTest");
+        Resource resource = helper.generateResource(null, "fileName", null, "http://appTest", null, "Me", null, null, "queryResourceTest");
 
         List <Header> headers = new LinkedList<>();
-        client.deleteCollection("queryCollection", headers);
+        helper.deleteCollection("queryCollection", headers);
 
         //Create a resource
         headers.add(new BasicHeader("Content-Type", "application/json"));
-        HttpResponse response = client.postResourceMeta("queryCollection", client.resourceToJson(resource), headers);
+        HttpResponse response = helper.postResourceMeta("queryCollection", helper.resourceToJson(resource), headers);
         assertEquals(201, response.getStatusLine().getStatusCode());
 
         //Insert rdf content in the resource
         headers = new LinkedList<>();
         headers.add(new BasicHeader("Content-Type", "application/rdf+xml"));
-        response = client.putResourceContent("queryCollection/queryResourceTest", rdfXmlExample, headers);
+        response = helper.putResourceContent("queryCollection/queryResourceTest", rdfXmlExample, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
     @After
     public void tearDown() throws Exception {
         List <Header> headers = new LinkedList<>();
-        client.deleteCollection("queryCollection", headers);
+        helper.deleteCollection("queryCollection", headers);
 
-        client.stopEnviroment();
+        helper.stopEnviroment();
+        helper.destroyEnviroment();
     }
 
     @Test
@@ -111,7 +106,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/json"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -122,7 +117,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/xml"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -133,7 +128,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(406, response.getStatusLine().getStatusCode());
     }
 
@@ -145,7 +140,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -157,7 +152,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -169,7 +164,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -181,7 +176,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "text/N3"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -193,7 +188,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "text/turtle"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -205,7 +200,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(406, response.getStatusLine().getStatusCode());
     }
 
@@ -217,7 +212,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -229,7 +224,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -241,7 +236,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -253,7 +248,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "text/N3"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -265,7 +260,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "text/turtle"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -277,7 +272,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(406, response.getStatusLine().getStatusCode());
     }
 
@@ -289,7 +284,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -301,7 +296,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/xml"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -313,7 +308,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -325,7 +320,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(406, response.getStatusLine().getStatusCode());
     }
 
@@ -337,7 +332,7 @@ public class QueryServiceITTest {
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("Content-Type", "text/plain"));
 
-        HttpResponse response = client.getQuery(OAuthEncoder.encode(query), headers);
+        HttpResponse response = helper.getQuery(OAuthEncoder.encode(query), headers);
         assertEquals(400, response.getStatusLine().getStatusCode());
     }
 
@@ -348,7 +343,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+xml"));
 
-        HttpResponse response = client.getResourceByUrlContent(contentUrl, headers);
+        HttpResponse response = helper.getResourceByUrlContent(contentUrl, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -359,7 +354,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
 
-        HttpResponse response = client.getResourceByUrlContent(contentUrl, headers);
+        HttpResponse response = helper.getResourceByUrlContent(contentUrl, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -370,7 +365,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "text/turtle"));
 
-        HttpResponse response = client.getResourceByUrlContent(contentUrl, headers);
+        HttpResponse response = helper.getResourceByUrlContent(contentUrl, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -381,7 +376,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "text/N3"));
 
-        HttpResponse response = client.getResourceByUrlContent(contentUrl, headers);
+        HttpResponse response = helper.getResourceByUrlContent(contentUrl, headers);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
@@ -392,7 +387,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/json"));
 
-        HttpResponse response = client.getResourceByUrlContent(contentUrl, headers);
+        HttpResponse response = helper.getResourceByUrlContent(contentUrl, headers);
         assertEquals(406, response.getStatusLine().getStatusCode());
     }
 
@@ -403,7 +398,7 @@ public class QueryServiceITTest {
         List <Header> headers = new LinkedList<>();
         headers.add(new BasicHeader("Accept", "application/rdf+json"));
 
-        HttpResponse response = client.getResourceByUrlContent(contentUrl, headers);
+        HttpResponse response = helper.getResourceByUrlContent(contentUrl, headers);
         assertEquals(404, response.getStatusLine().getStatusCode());
     }
 }

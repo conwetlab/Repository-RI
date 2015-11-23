@@ -32,6 +32,7 @@ package org.fiware.apps.repository.oauth2;
  * #L%
  */
 
+import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.dao.impl.MongoUserDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
@@ -52,11 +53,13 @@ import org.pac4j.core.context.WebContext;
 public class FIWAREClientTest {
 
 	@Mock private MongoUserDAO userDAO;
-	@InjectMocks private FIWAREClient client = new FIWAREClient("path");
+        @Mock private MongoDAOFactory mongoDAOFactory;
+	@InjectMocks private FIWAREClient client;
 
 	@Before
 	public void initMocks() {
-		MockitoAnnotations.initMocks(this);
+            client = new FIWAREClient("path", mongoDAOFactory, userDAO);
+            MockitoAnnotations.initMocks(this);
 	}
 
 	@Test
@@ -146,10 +149,5 @@ public class FIWAREClientTest {
 	@Test
 	public void testNotCancelled() {
 		testHasBeenCancelled("internal_error", false);
-	}
-
-	@Test
-	public void testNewClient() {
-		assertEquals(client.newClient().getClass(),FIWAREClient.class);
 	}
 }

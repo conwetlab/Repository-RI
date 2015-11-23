@@ -47,16 +47,29 @@ import org.fiware.apps.repository.dao.impl.VirtuosoResourceDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.settings.RepositorySettings;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Path("/services/"+RepositorySettings.QUERY_SERVICE_NAME)
 public class QueryService {
-    private VirtuosoResourceDAO virtuosoResourceDAO;
+    
+    @Autowired
+    private VirtuosoDAOFactory virtuosoDAOFactory;
 
-    public QueryService(@Context ServletContext servletContext) {
-        RepositorySettings repositorySettings = new RepositorySettings(servletContext.getInitParameter("propertiesFile"));
-        Properties repositoryProperties = repositorySettings.getProperties();
+    @Context 
+    private ServletContext servletContext;
 
-        this.virtuosoResourceDAO = new VirtuosoDAOFactory().getVirtuosoResourceDAO(repositoryProperties);
+    private Properties repositoryProperties;
+
+    public QueryService() {
+    }
+
+    private VirtuosoResourceDAO getVirtuosoResourceDao() {
+        if (this.repositoryProperties == null) {
+            RepositorySettings repositorySettings = new RepositorySettings(servletContext.getInitParameter("propertiesFile"));
+            repositoryProperties = repositorySettings.getProperties();
+        }
+
+        return this.virtuosoDAOFactory.getVirtuosoResourceDAO(repositoryProperties);
     }
 
     @GET
@@ -84,7 +97,7 @@ public class QueryService {
                 String typeString = ("*/*".equalsIgnoreCase(type.getType()+"/"+type.getSubtype())) ? RestHelper.RdfDefaultType : type.getType()+"/"+type.getSubtype();
 
                 if(RestHelper.isRDF(typeString)) {
-                    resource = virtuosoResourceDAO.getResource(path, RestHelper.typeMap.get(typeString));
+                    resource = getVirtuosoResourceDao().getResource(path, RestHelper.typeMap.get(typeString));
                     if (resource != null) {
                         if (resource.getContent() == null || resource.getContent().equals("".getBytes())) {
                             return Response.status(Status.NO_CONTENT).build();
@@ -114,7 +127,7 @@ public class QueryService {
                 if (typeString.equalsIgnoreCase("application/xml") || typeString.equalsIgnoreCase("application/json")) {
                     try {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
-                                .entity(virtuosoResourceDAO.executeQuerySelect(query)).build();
+                                .entity(getVirtuosoResourceDao().executeQuerySelect(query)).build();
                     } catch (JenaException ex) {
                         return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);
                     }
@@ -128,7 +141,7 @@ public class QueryService {
                 if (RestHelper.isRDF(typeString)) {
                     try {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
-                                .entity(virtuosoResourceDAO.executeQueryConstruct(query, RestHelper.typeMap.get(typeString))).build();
+                                .entity(getVirtuosoResourceDao().executeQueryConstruct(query, RestHelper.typeMap.get(typeString))).build();
                     } catch (JenaException ex) {
                         return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);
                     }
@@ -142,7 +155,7 @@ public class QueryService {
                 if (RestHelper.isRDF(typeString)) {
                     try {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
-                                .entity(virtuosoResourceDAO.executeQueryDescribe(query, RestHelper.typeMap.get(typeString))).build();
+                                .entity(getVirtuosoResourceDao().executeQueryDescribe(query, RestHelper.typeMap.get(typeString))).build();
                     } catch (JenaException ex) {
                         return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);
                     }
@@ -156,10 +169,10 @@ public class QueryService {
                 try {
                     if (typeString.equalsIgnoreCase("application/json")) {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
-                                .entity(virtuosoResourceDAO.executeQueryAsk(query)).build();
+                                .entity(getVirtuosoResourceDao().executeQueryAsk(query)).build();
                     } else if (typeString.equalsIgnoreCase("application/xml")) {
                         return Response.status(Status.OK).type(MediaType.valueOf(typeString))
-                                .entity(Boolean.toString(virtuosoResourceDAO.executeQueryAsk(query))).build();
+                                .entity(Boolean.toString(getVirtuosoResourceDao().executeQueryAsk(query))).build();
                     }
                 } catch (JenaException ex) {
                     return RestHelper.sendError(ex.getMessage(), Status.BAD_REQUEST, accepts);

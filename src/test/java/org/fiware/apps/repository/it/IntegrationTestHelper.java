@@ -29,14 +29,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.it;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import javax.servlet.ServletException;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
@@ -67,12 +69,11 @@ public class IntegrationTestHelper {
         folder = new TemporaryFolder();
         folder.create();
         file = folder.newFolder("webapps");
-        tomcat = new Tomcat();
-
         this.client = new DefaultHttpClient();
     }
 
     public void createEnviroment() throws ServletException, IOException {
+        tomcat = new Tomcat();
         tomcat.setPort(getFreePort());
         tomcat.setBaseDir(folder.getRoot().getAbsolutePath());
 	tomcat.addContext("", file.getAbsolutePath());
@@ -82,10 +83,6 @@ public class IntegrationTestHelper {
         File config = new File("src/test/resources/context.xml");
 
         context.setConfigFile(config.toURI().toURL());
-
-        //context.getServletContext().setAttribute("propertiesFile", "testProperties/PropertiesIT.properties");
-        //context.getServletContext().setAttribute("propertiesFile", "testProperties/PropertiesIT.properties");
-        //context.getServletContext().setInitParameter("propertiesFile", "testProperties/PropertiesIT.properties");
     }
 
     public void destroyEnviroment() throws LifecycleException {
@@ -94,8 +91,6 @@ public class IntegrationTestHelper {
 
     public void startEnviroment() throws LifecycleException {
         tomcat.start();
-        //tomcat.getConnector().setProperty("propertiesFile", "testProperties/PropertiesIT.properties");
-        //tomcat.getConnector().setProperty("propertiesFile", "testProperties/PropertiesIT.properties");
 
     }
 
@@ -318,7 +313,7 @@ public class IntegrationTestHelper {
         return response;
     }
 
-    public static String resourceToJson(Resource resource) {
+    public String resourceToJson(Resource resource) {
         String resourceString = "{\n";
 
         if (resource.getContentFileName() != null) {
@@ -350,7 +345,7 @@ public class IntegrationTestHelper {
         return resourceString.concat("\n}");
     }
 
-    public static String resourceToXML(Resource resource) {
+    public String resourceToXML(Resource resource) {
         String resourceString = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n";
 
         if (resource.getId() != null) {
@@ -383,7 +378,7 @@ public class IntegrationTestHelper {
         return resourceString.concat("</resource>");
     }
 
-    public static String collectionToJson(ResourceCollection collection) {
+    public String collectionToJson(ResourceCollection collection) {
         String collectionString = "{\n";
         if (collection.getCreationDate() != null) {
             collectionString = collectionString.concat("\"creationDate\" : \""+collection.getCreationDate().toString()+"\",\n");
@@ -404,7 +399,7 @@ public class IntegrationTestHelper {
         return collectionString.concat("\n}");
     }
 
-    public static String collectionToXml(ResourceCollection collection) {
+    public String collectionToXml(ResourceCollection collection) {
         String collectionString = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n";
         if (collection.getId() != null) {
             collectionString = collectionString.concat("<collection id=\""+collection.getId()+"\">");
@@ -426,7 +421,7 @@ public class IntegrationTestHelper {
         return collectionString.concat("</collection>");
     }
 
-    public static Resource generateResource(String content, String fileName, String mimeType, String contentUrl,
+    public Resource generateResource(String content, String fileName, String mimeType, String contentUrl,
             Date creationDate, String creator, String id, Date modificationDate, String name) {
         Resource resource = new Resource();
         if (content == null) {
@@ -445,7 +440,7 @@ public class IntegrationTestHelper {
         return resource;
     }
 
-    public static ResourceCollection generateResourceCollection(String id, String name, String creator, Date creationDate, Date modificationDate) {
+    public ResourceCollection generateResourceCollection(String id, String name, String creator, Date creationDate, Date modificationDate) {
         ResourceCollection resourceCollection = new ResourceCollection();
         resourceCollection.setCreationDate(creationDate);
         resourceCollection.setCreator(creator);
@@ -456,11 +451,22 @@ public class IntegrationTestHelper {
         return resourceCollection;
     }
 
-    private int getFreePort() throws IOException {
+    public String readRDFFile(String path) throws FileNotFoundException, IOException{
+        String content = "";
+        FileReader file = new FileReader(path);
+        try (BufferedReader buffer = new BufferedReader(file)) {
+            while(buffer.ready()) {
+                content = content.concat(buffer.readLine());
+            }
+        }
+        return content;
+    }
 
-        ServerSocket socket = new ServerSocket(0);
-        int port = socket.getLocalPort();
-        socket.close();
+    private int getFreePort() throws IOException {
+        int port;
+        try (ServerSocket socket = new ServerSocket(0)) {
+            port = socket.getLocalPort();
+        }
 
         return port;
     }

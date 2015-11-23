@@ -46,28 +46,39 @@ import org.scribe.model.SignatureType;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.fiware.apps.repository.dao.impl.MongoUserDAO;
+import org.fiware.apps.repository.dao.MongoDAOFactory;
+import org.fiware.apps.repository.dao.UserDAO;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
 import org.fiware.apps.repository.settings.RepositorySettings;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class FIWAREClient extends BaseOAuth20Client<FIWAREProfile>{
 
     // To store users information
-    private MongoUserDAO userDAO;
+    private UserDAO userDAO;
 
     private String scopeValue = "";
     private String serverURL;
     private String propertiesPath;
 
+    @Autowired
+    private MongoDAOFactory mongoDAOFactory;
+
     public FIWAREClient(String path) {
         this.propertiesPath = path;
-        this.userDAO = new MongoUserDAO(new RepositorySettings(this.propertiesPath).getProperties());
+        this.mongoDAOFactory.createConnection(new RepositorySettings(this.propertiesPath).getProperties());
+        this.userDAO = this.mongoDAOFactory.getUserDao();
     }
 
+    public FIWAREClient(String path, MongoDAOFactory mongoDAOFactory, UserDAO userDAO) {
+        this.propertiesPath = path;
+        this.mongoDAOFactory = mongoDAOFactory;
+        this.userDAO = userDAO;
+    }
     /**
-     * Method to get the FIWARE IdM that is being in used
+     * Method to get the FIWARE IdM that is being used
      * @return The FIWARE IdM that is being used to authenticate the users
      */
     public String getServerURL() {

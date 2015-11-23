@@ -29,59 +29,52 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.fiware.apps.repository.dao.impl;
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.fiware.apps.repository.dao.MongoDAOFactory;
 import org.fiware.apps.repository.dao.VirtuosoDAOFactory;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
+import org.fiware.apps.repository.model.Resource;
 import org.fiware.apps.repository.model.ResourceCollection;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({DBCollection.class, DB.class, MongoDAOFactory.class, VirtuosoDAOFactory.class})
+@RunWith(MockitoJUnitRunner.class)
+@PrepareForTest({MongoCollection.class, MongoDatabase.class, MongoDAOFactory.class, VirtuosoDAOFactory.class})
 public class MongoCollectionDAOTest {
 
-    @Mock private DB db;
-    @Mock private DBCollection mongoCollection;
+    @Mock private MongoDatabase db;
+    @Mock private MongoCollection mongoCollection;
     @Mock private VirtuosoResourceDAO virtuosoResourceDAO;
-    @Mock private DBObject dBObject;
-    private MongoCollectionDAO toTest;
+    @Mock private MongoDAOFactory mongoDAOFactory;
+    @InjectMocks private MongoCollectionDAO toTest;
 
     public MongoCollectionDAOTest() {
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
     @Before
     public void setUp() {
-        db = mock(DB.class);
-        mongoCollection = mock(DBCollection.class);
-        virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
-        dBObject = mock(DBObject.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
+        toTest = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);
+        MockitoAnnotations.initMocks(this);
     }
 
     @After
@@ -89,60 +82,31 @@ public class MongoCollectionDAOTest {
 
     }
 
-    //Tests
     @Test
-    public void voidConstructorTest()
-    {
-    /*    PowerMockito.mockStatic(MongoDAOFactory.class);
-        PowerMockito.mockStatic(DB.class);
-        PowerMockito.mockStatic(VirtuosoDAOFactory.class);
-
-        PowerMockito.when(MongoDAOFactory.createConnection()).thenReturn(db);
-        when(db.getCollection(anyString())).thenReturn(mongoCollection);
-        PowerMockito.when(VirtuosoDAOFactory.getVirtuosoResourceDAO()).thenReturn(virtuosoResourceDAO);
-
-        MongoCollectionDAO voidConstructor = new MongoCollectionDAO();
-        MongoCollectionDAO notVoidConstructor = new MongoCollectionDAO(db, mongoCollection, virtuosoResourceDAO);*/
-    }
-
-
-    @Test
-    public void findCollectionTest() {
-        getCollectionTest();
-    }
-
-    @Test
-    public void findCollectionNullTest() {
-        getCollectionNullTest();
-    }
-
-    @Test(expected = DatasourceException.class)
-    public void findCollectionExceptionTest() throws DatasourceException {
-        getCollectionExceptionTest();
-    }
-
-    @Test
-    public void updateCollectionTest() {
+    public void updateCollectionTest() throws DatasourceException {
         String id = "/id";
         Date date = new Date();
         ResourceCollection resourceCollection = generateResourceCollection(id, date, true);
-        List list = new LinkedList();
-        boolean returned = false;
+        boolean returned;
 
-        list.add(dBObject);
-        rulesdbObjectCollection(id, date);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
-        doNothing().when(mongoCollection).update(any(DBObject.class), any(DBObject.class), anyBoolean(), anyBoolean());
+        when(mongoCollection.findOneAndUpdate(isA(BasicDBObject.class), isA(BasicDBObject.class))).thenReturn(new Object());
 
-        try {
-            returned = toTest.updateCollection(id, resourceCollection);
-        } catch (DatasourceException ex) {
-            fail("Exception not expected:\n" + ex.getLocalizedMessage());
-        }
-
+        returned = toTest.updateCollection(id, resourceCollection);
+        
+        // Validate result
         assertTrue(returned);
-        verify(db).requestStart();
-        verify(db).requestDone();
+        
+        // Validate calls
+        ArgumentCaptor<BasicDBObject> captorQuery = ArgumentCaptor.forClass(BasicDBObject.class);
+        ArgumentCaptor<BasicDBObject> captorUpdate = ArgumentCaptor.forClass(BasicDBObject.class);
+        verify(mongoCollection).findOneAndUpdate(captorQuery.capture(), captorUpdate.capture());
+
+        assertEquals(id, captorQuery.getValue().get("id"));
+        
+        BasicDBObject actualUpdate = captorUpdate.getValue();
+        assertEquals(resourceCollection.getId(), actualUpdate.get("id"));
+        assertEquals(resourceCollection.getCreator(), actualUpdate.get("creator"));
+        assertEquals(resourceCollection.getName(), actualUpdate.get("name"));
     }
 
     @Test
@@ -152,7 +116,7 @@ public class MongoCollectionDAOTest {
         ResourceCollection resourceCollection = generateResourceCollection(id, date, true);
         boolean returned = true;
 
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        when(mongoCollection.findOneAndUpdate(any(BasicDBObject.class), any(BasicDBObject.class))).thenReturn(null);
 
         try {
             returned = toTest.updateCollection(id, resourceCollection);
@@ -161,8 +125,6 @@ public class MongoCollectionDAOTest {
         }
 
         assertFalse(returned);
-        verify(db).requestStart();
-        verify(db).requestDone();
     }
 
     @Test(expected = DatasourceException.class)
@@ -171,86 +133,65 @@ public class MongoCollectionDAOTest {
         Date date = new Date();
         ResourceCollection resourceCollection = generateResourceCollection(id, date, true);
 
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenThrow(Exception.class);
+        when(mongoCollection.findOneAndUpdate(any(BasicDBObject.class), any(BasicDBObject.class))).thenThrow(IllegalArgumentException.class);
 
         toTest.updateCollection(id, resourceCollection);
     }
 
-    @Test(expected = DatasourceException.class)
-    public void updateCollectionExceptionTest2() throws DatasourceException {
-        String id = "/id";
-        Date date = new Date();
-        ResourceCollection resourceCollection = generateResourceCollection(id, date, false);
-        List list = new LinkedList();
+    private void mockDeleteOne(boolean result) {
+        DeleteResult delRes = mock(DeleteResult.class);
+        when(delRes.wasAcknowledged()).thenReturn(result);
 
-        list.add(dBObject);
-        rulesdbObjectCollection(id, date);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
-        doThrow(IllegalArgumentException.class).when(mongoCollection).update(any(DBObject.class), any(DBObject.class), anyBoolean(), anyBoolean());
-
-        toTest.updateCollection(id, resourceCollection);
+        when(mongoCollection.deleteOne(isA(BasicDBObject.class))).thenReturn(delRes);
     }
 
+    private void attachMockCursor(MongoCollection collection, Date date, BasicDBObject colObject) {
+        FindIterable it = mock(FindIterable.class);
+        MongoCursor cursor = mock(MongoCursor.class);
+        when(it.iterator()).thenReturn(cursor);
+
+        when(cursor.hasNext()).thenReturn(true, false);
+        when(cursor.next()).thenReturn(colObject);
+        
+        when(collection.find(isA(BasicDBObject.class))).thenReturn(it);
+    }
     @Test
-    public void deleteCollectionTest() {
+    public void deleteCollectionTest() throws DatasourceException {
         String id = "/id";
         Date date = new Date();
-        DBCursor dBCursor = mock(DBCursor.class);
-        List list = new LinkedList();
         Boolean returned = false;
 
-        DBCollection mongoResource = PowerMockito.mock(DBCollection.class);
-        db = PowerMockito.mock(DB.class);
-        mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
+        this.mockDeleteOne(true);
 
-        list.add(dBObject);
-        rulesdbObjectCollection(id, date);
-        PowerMockito.when(db.getCollection(anyString())).thenReturn(mongoResource);
-        PowerMockito.when(mongoResource.find(any(DBObject.class))).thenReturn(dBCursor);
-        PowerMockito.when(dBCursor.toArray()).thenReturn(list);
-        when(virtuosoResourceDAO.deleteResource(eq(id+"Id"))).thenReturn(true);
-        PowerMockito.doNothing().when(mongoResource).remove(dBObject);
-        PowerMockito.when(mongoCollection.find(any(DBObject.class))).thenReturn(dBCursor);
-        PowerMockito.doNothing().when(mongoCollection).remove(dBObject);
-        PowerMockito.when(mongoCollection.findOne(any(DBObject.class))).thenReturn(dBObject);
+        // Mock Mongo Collection
+        MongoCollection mongoResource = mock(MongoCollection.class);
+        when(db.getCollection(isA(String.class))).thenReturn(mongoResource);
 
-        try {
-            returned = toTest.deleteCollection(id);
-        } catch (DatasourceException ex) {
-            fail("Exception not expected:\n" + ex.getLocalizedMessage());
-        }
+        BasicDBObject colObject = generateDBCollection("/collection", date);
+        this.attachMockCursor(mongoResource, date, colObject);
+        this.attachMockCursor(mongoCollection, date, colObject);
+
+        returned = toTest.deleteCollection(id);
 
         assertTrue(returned);
-        verify(db, times(2)).requestStart();
-        verify(db, times(2)).requestDone();
+        ArgumentCaptor<BasicDBObject> colCaptor = ArgumentCaptor.forClass(BasicDBObject.class);
+        verify(mongoResource).deleteOne(colCaptor.capture());
+        assertEquals(colObject, colCaptor.getValue());
 
+        verify(virtuosoResourceDAO).deleteResource(colObject.getString("id"));
+        
+        ArgumentCaptor<BasicDBObject> mongoCaptor = ArgumentCaptor.forClass(BasicDBObject.class);
+        verify(mongoCollection, times(2)).deleteOne(mongoCaptor.capture());
+        assertEquals(id, mongoCaptor.getAllValues().get(0).getString("id"));
+        assertEquals(colObject, mongoCaptor.getAllValues().get(1));
     }
 
     @Test
-    public void deleteCollectionNullTest() {
+    public void deleteCollectionNotDeleted() {
         String id = "/id";
-        Date date = new Date();
-        DBCursor dBCursor = mock(DBCursor.class);
-        List list = new LinkedList();
         Boolean returned = false;
-
-        DBCollection mongoResource = PowerMockito.mock(DBCollection.class);
-        db = PowerMockito.mock(DB.class);
-        mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
-
-        list.add(dBObject);
-        rulesdbObjectCollection(id, date);
-        PowerMockito.when(db.getCollection(anyString())).thenReturn(mongoResource);
-        PowerMockito.when(mongoResource.find(any(DBObject.class))).thenReturn(dBCursor);
-        PowerMockito.when(dBCursor.toArray()).thenReturn(list);
-        when(virtuosoResourceDAO.deleteResource(eq(id+"Id"))).thenReturn(true);
-        PowerMockito.doNothing().when(mongoResource).remove(dBObject);
-        PowerMockito.when(mongoCollection.find(any(DBObject.class))).thenReturn(dBCursor);
-        PowerMockito.doNothing().when(mongoCollection).remove(dBObject);
-        PowerMockito.when(mongoCollection.findOne(any(DBObject.class))).thenReturn(null);
-
+        
+        this.mockDeleteOne(false);
         try {
             returned = toTest.deleteCollection(id);
         } catch (DatasourceException ex) {
@@ -258,9 +199,6 @@ public class MongoCollectionDAOTest {
         }
 
         assertFalse(returned);
-        verify(db, times(2)).requestStart();
-        verify(db, times(2)).requestDone();
-
     }
 
     @Test(expected = DatasourceException.class)
@@ -268,11 +206,8 @@ public class MongoCollectionDAOTest {
         String id = "/id";
         Date date = new Date();
 
-        db = PowerMockito.mock(DB.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
-
-        rulesdbObjectCollection(id, date);
-        PowerMockito.when(db.getCollection(anyString())).thenThrow(Exception.class);
+        this.mockDeleteOne(true);
+        when(db.getCollection(anyString())).thenThrow(Exception.class);
 
         toTest.deleteCollection(id);
 
@@ -282,55 +217,51 @@ public class MongoCollectionDAOTest {
     @Test(expected = DatasourceException.class)
     public void deleteCollectionExceptionTest2() throws DatasourceException {
         String id = "/id";
-        Date date = new Date();
-        DBCursor dBCursor = mock(DBCursor.class);
-        List list = new LinkedList();
 
-        DBCollection mongoResource = PowerMockito.mock(DBCollection.class);
-        db = PowerMockito.mock(DB.class);
-        mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
-
-        list.add(dBObject);
-        rulesdbObjectCollection(id, date);
-        PowerMockito.when(db.getCollection(anyString())).thenReturn(mongoResource);
-        PowerMockito.when(mongoResource.find(any(DBObject.class))).thenReturn(dBCursor);
-        PowerMockito.when(dBCursor.toArray()).thenReturn(list);
-        when(virtuosoResourceDAO.deleteResource(eq(id+"Id"))).thenReturn(true);
-        PowerMockito.doNothing().when(mongoResource).remove(dBObject);
-        PowerMockito.when(mongoCollection.find(any(DBObject.class))).thenReturn(dBCursor);
-        PowerMockito.doNothing().when(mongoCollection).remove(dBObject);
-        PowerMockito.when(mongoCollection.findOne(any(DBObject.class))).thenThrow(IllegalArgumentException.class);
-
+        when(mongoCollection.deleteOne(isA(BasicDBObject.class))).thenThrow(IllegalArgumentException.class);
         toTest.deleteCollection(id);
 
         //fail();
 
     }
 
+    private void mockFind(BasicDBObject dbObject) {
+        FindIterable it = mock(FindIterable.class);
+        MongoCursor cursor = mock(MongoCursor.class);
 
+        when(it.iterator()).thenReturn(cursor);
+        if (dbObject != null) {
+            when(cursor.hasNext()).thenReturn(true, false);
+            when(cursor.next()).thenReturn(dbObject);
+        } else {
+            when(cursor.hasNext()).thenReturn(false);
+        }
+
+        when(mongoCollection.find(isA(BasicDBObject.class))).thenReturn(it);
+    }
 
     @Test
-    public void getCollectionTest() {
+    public void getCollectionTest() throws DatasourceException {
         String id = "/id";
         Date date = new Date();
-        List list = new LinkedList();
         ResourceCollection returned = null;
-
-        list.add(dBObject);
-        rulesdbObjectCollection(id, null);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
-
+        BasicDBObject dBObject = generateDBCollection(id, date);
+    
+        this.mockFind(dBObject);
+        this.mockMongoDaoFactory();
         try {
             returned = toTest.findCollection(id);
         } catch (DatasourceException ex) {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
 
+        ArgumentCaptor<BasicDBObject> queryCaptor = ArgumentCaptor.forClass(BasicDBObject.class);
+        verify(mongoCollection, times(2)).find(queryCaptor.capture());
+
+        assertEquals(id, queryCaptor.getAllValues().get(0).getString("id"));
+
         assertEquals(id+"Id", returned.getId());
         assertEquals(id+"Creator", returned.getCreator());
-        verify(db, times(3)).requestStart();
-        verify(db, times(3)).requestDone();
     }
 
     @Test
@@ -339,8 +270,7 @@ public class MongoCollectionDAOTest {
         Date date = new Date();
         ResourceCollection returned = null;
 
-        rulesdbObjectCollection(id, date);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        this.mockFind(null);
 
         try {
             returned = toTest.findCollection(id);
@@ -349,16 +279,12 @@ public class MongoCollectionDAOTest {
         }
 
         assertNull(returned);
-        verify(db).requestStart();
-        verify(db).requestDone();
     }
 
     @Test(expected = DatasourceException.class)
     public void getCollectionExceptionTest() throws DatasourceException {
         String id = "/id";
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenThrow(Exception.class);
-
+        when(mongoCollection.find(isA(BasicDBObject.class))).thenThrow(Exception.class);
         toTest.findCollection(id);
     }
 
@@ -369,9 +295,7 @@ public class MongoCollectionDAOTest {
         ResourceCollection resourceCollection = generateResourceCollection(id, date, true);
         boolean returned = false;
 
-        rulesdbObjectCollection(id, date);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
-        doNothing().when(mongoCollection).insert(any(DBObject.class));
+        this.mockFind(null);
 
         try {
             returned = toTest.insertCollection(resourceCollection);
@@ -379,9 +303,20 @@ public class MongoCollectionDAOTest {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
 
+        ArgumentCaptor<BasicDBObject> insertCaptor = ArgumentCaptor.forClass(BasicDBObject.class);
+        verify(mongoCollection, times(2)).insertOne(insertCaptor.capture());
+        List<BasicDBObject> actual = insertCaptor.getAllValues();
+
+        // Check inserted collection
+        assertEquals(resourceCollection.getId(), actual.get(0).getString("id"));
+        assertEquals(resourceCollection.getCreator(), actual.get(0).getString("creator"));
+        assertEquals(resourceCollection.getName(), actual.get(0).getString("name"));
+        assertEquals(resourceCollection.getCreationDate(), actual.get(0).getDate("creationDate"));
+
+        // Check previous insertions
+        assertEquals("/id", actual.get(1).getString("id"));
+        
         assertTrue(returned);
-        verify(db, atLeast(1)).requestStart();
-        verify(db, atLeast(1)).requestDone();
     }
 
     @Test(expected = DatasourceException.class)
@@ -389,45 +324,28 @@ public class MongoCollectionDAOTest {
         String id = "/id/hola";
         Date date = new Date();
         ResourceCollection resourceCollection = generateResourceCollection(id, date, false);
-        boolean returned = false;
 
-        rulesdbObjectCollection(id, null);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
-        doNothing().doThrow(Exception.class).when(mongoCollection).insert(any(DBObject.class));
-
-
-        returned = toTest.insertCollection(resourceCollection);
-
-
-        assertTrue(returned);
-        verify(db, atLeast(1)).requestStart();
-        verify(db, atLeast(1)).requestDone();
-    }
-
-    @Test(expected = DatasourceException.class)
-    public void insertCollectionDatasourceExceptionTest() throws DatasourceException, SameIdException {
-        String id = "/id/hola";
-        Date date = new Date();
-        ResourceCollection resourceCollection = generateResourceCollection(id, date, false);
-
-        rulesdbObjectCollection(id, date);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
-        doThrow(Exception.class).when(mongoCollection).insert(any(DBObject.class));
+        this.mockFind(null);
+        doThrow(Exception.class).when(mongoCollection).insertOne(isA(BasicDBObject.class));
 
         toTest.insertCollection(resourceCollection);
-
     }
 
+    private void mockMongoDaoFactory() throws DatasourceException {
+        MongoResourceDAO resourceDao = mock(MongoResourceDAO.class);
+        List<Resource> res = new ArrayList<>();
+        when(resourceDao.getResources(isA(String.class))).thenReturn(res);
+        when(mongoDAOFactory.getResourceDAO()).thenReturn(resourceDao);
+    }
     @Test(expected = SameIdException.class)
     public void insertCollectionSameIdExceptionTest() throws DatasourceException, SameIdException {
         String id = "/id";
         Date date = new Date();
         ResourceCollection resourceCollection = generateResourceCollection(id, date, false);
-        List list = new LinkedList();
 
-        list.add(dBObject);
-        rulesdbObjectCollection(id, date);
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
+        this.mockMongoDaoFactory();
+        this.mockFind(this.generateDBCollection(id, date));
+        
 
         toTest.insertCollection(resourceCollection);
     }
@@ -436,105 +354,75 @@ public class MongoCollectionDAOTest {
     public void getCollectionsTest() {
         String id = "/id";
         Date date = new Date();
-        DBCursor dBCursor = mock(DBCursor.class);
-        List list = new LinkedList();
-
-        mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
-        list.add(dBObject);
-
-        PowerMockito.when(mongoCollection.find(any())).thenReturn(dBCursor);
-        rulesdbObjectCollection(id, date);
-        when(dBCursor.toArray()).thenReturn(list);
+        List<ResourceCollection> actual = null;
+        BasicDBObject expCol = this.generateDBCollection(id, date);
+        this.mockFind(expCol);
 
         try {
-            toTest.getCollections(id);
+            actual = toTest.getCollections(id);
         } catch (DatasourceException ex) {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
-
-        verify(db).requestStart();
-        verify(db).requestDone();
+        assertEquals(1, actual.size());
+        assertEquals(expCol.getString("id"), actual.get(0).getId());
+        assertEquals(expCol.getString("creator"), actual.get(0).getCreator());
+        assertEquals(expCol.getString("name"), actual.get(0).getName());
+        assertEquals(expCol.getDate("creationDate"), actual.get(0).getCreationDate());
     }
 
     @Test
     public void getCollectionsTest2() {
         String id = "/id";
-        Date date = new Date();
-        DBCursor dBCursor = mock(DBCursor.class);
-        List list = new LinkedList();
+        List<ResourceCollection> actual = null;
 
-        mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
-        list.add(dBObject);
-        list.add(null);
-
-        PowerMockito.when(mongoCollection.find(any())).thenReturn(dBCursor);
-        rulesdbObjectCollection(id, null);
-        when(dBCursor.toArray()).thenReturn(list);
+        this.mockFind(null);
 
         try {
-            toTest.getCollections(id);
+            actual = toTest.getCollections(id);
         } catch (DatasourceException ex) {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
-
-        verify(db).requestStart();
-        verify(db).requestDone();
+        assertTrue(actual.isEmpty());
     }
 
     @Test
     public void getCollectionsTest3() {
         String id = "/id";
         Date date = new Date();
-        DBCursor dBCursor = mock(DBCursor.class);
-        List list = new LinkedList();
+        List<ResourceCollection> actual = null;
+        BasicDBObject expCol = this.generateDBCollection(id, date);
+        expCol.put("id", null);
 
-        mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
-        list.add(dBObject);
-        list.add(dBObject);
-
-        PowerMockito.when(mongoCollection.find(any())).thenReturn(dBCursor);
-        rulesdbObjectCollection(id, date);
-        when(dBObject.get("id")).thenReturn(null);
-        when(dBCursor.toArray()).thenReturn(list);
+        this.mockFind(expCol);
 
         try {
-            toTest.getCollections(id);
+            actual = toTest.getCollections(id);
         } catch (DatasourceException ex) {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
-
-        verify(db).requestStart();
-        verify(db).requestDone();
+        assertTrue(actual.isEmpty());
     }
 
     @Test(expected = DatasourceException.class)
     public void getCollectionsExceptionTest() throws DatasourceException {
         String id = "/id";
-        Date date = new Date();
-
-        mongoCollection = PowerMockito.mock(DBCollection.class);
-        toTest = new MongoCollectionDAO(db, mongoCollection, mongoCollection, virtuosoResourceDAO);
-
-        PowerMockito.when(mongoCollection.find(any())).thenThrow(Exception.class);
-        rulesdbObjectCollection(id, date);
-
+        doThrow(Exception.class).when(mongoCollection).find(isA(BasicDBObject.class));
         toTest.getCollections(id);
 
         //fail();
     }
 
-    private void rulesdbObjectCollection(String string, Date date) {
-        if(date != null)
-            when(this.dBObject.get("creationDate")).thenReturn(date);
-        else
-            when(this.dBObject.get("creationDate")).thenReturn(null);
-        when(this.dBObject.get("id")).thenReturn(string + "Id");
-        when(this.dBObject.get("name")).thenReturn(string + "name");
-        when(this.dBObject.get("_id")).thenReturn("507f1f77bcf86cd799439011");
-        when(this.dBObject.get("creator")).thenReturn(string + "Creator");
+    private BasicDBObject generateDBCollection(String string, Date date) {
+        BasicDBObject dBObject = new BasicDBObject();
+
+        dBObject.put("creationDate", date);
+
+        dBObject.put("id", string + "Id");
+        dBObject.put("name", string + "name");
+        dBObject.put("_id", "507f1f77bcf86cd799439011");
+        dBObject.put("creator", string + "Creator");
+
+        return dBObject;
     }
 
     private ResourceCollection generateResourceCollection(String string, Date date, boolean creationDate) {

@@ -39,7 +39,6 @@ import java.io.InputStreamReader;
 
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.model.Resource;
-import org.fiware.apps.repository.settings.RepositorySettings;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.Iterator;
@@ -74,6 +73,10 @@ public class VirtuosoResourceDAO {
         this.set.setReadFromAllGraphs(true);
         this.modelFactory = Objects.requireNonNull(factory);
         this.queryExecutionFactory = Objects.requireNonNull(queryExecutionFactory);
+    }
+
+    public void closeConnection() {
+        this.set.close();
     }
 
     public Resource getResource(String graph, String type) throws DatasourceException {

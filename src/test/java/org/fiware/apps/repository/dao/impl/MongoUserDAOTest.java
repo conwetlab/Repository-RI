@@ -31,11 +31,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.fiware.apps.repository.dao.impl;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import java.util.LinkedList;
-import java.util.List;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import org.fiware.apps.repository.exceptions.db.DatasourceException;
 import org.fiware.apps.repository.exceptions.db.NotFoundException;
 import org.fiware.apps.repository.exceptions.db.SameIdException;
@@ -46,7 +45,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.*;
+import org.mockito.MockitoAnnotations;
 
 
 /**
@@ -55,9 +57,9 @@ import static org.mockito.Mockito.*;
  */
 public class MongoUserDAOTest {
 
-    private DB db;
-    private DBCollection mongoCollection;
-    private MongoUserDAO toTest;
+    private @Mock MongoDatabase db;
+    private @Mock MongoCollection mongoCollection;
+    private @InjectMocks MongoUserDAO toTest;
 
     public MongoUserDAOTest() {
 
@@ -74,14 +76,23 @@ public class MongoUserDAOTest {
 
     @Before
     public void setUp() {
-        db = mock(DB.class);
-        mongoCollection = mock(DBCollection.class);
-
         toTest = new MongoUserDAO(db, mongoCollection);
+        MockitoAnnotations.initMocks(this);
     }
 
     @After
     public void tearDown() {
+    }
+
+    private void mockFind(BasicDBObject userObj, Boolean toReturn, Boolean ... restReturn) {
+        FindIterable it = mock(FindIterable.class);
+        MongoCursor cursor = mock(MongoCursor.class);
+
+        when(it.iterator()).thenReturn(cursor);
+        when(mongoCollection.find(any(BasicDBObject.class))).thenReturn(it);
+
+        when(cursor.hasNext()).thenReturn(toReturn, restReturn);
+        when(cursor.next()).thenReturn(userObj);
     }
 
     @Test
@@ -93,14 +104,10 @@ public class MongoUserDAOTest {
         String token = "to ken";
         User returned = null;
 
-        DBObject userObj = createDummyDBObject(username, displayName, email, password, token);
-
         User user = createDummyUser(username, displayName, email, password, token);
-
-        List list = new LinkedList();
-        list.add(userObj);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
+        this.mockFind(
+                this.createDummyDBObject(username, displayName, email, password, token),
+                true, false);
 
         try {
             returned = toTest.getUser(username);
@@ -113,10 +120,6 @@ public class MongoUserDAOTest {
         assertEquals(user.getEmail(), returned.getEmail());
         assertEquals(user.getPassword(), returned.getPassword());
         assertEquals(user.getToken(), returned.getToken());
-
-        verify(db).requestStart();
-        verify(db).requestDone();
-
     }
 
     @Test
@@ -124,8 +127,7 @@ public class MongoUserDAOTest {
         String username = "userName";
         User returned = null;
 
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
-
+        this.mockFind(null, false);
 
         try {
             returned = toTest.getUser(username);
@@ -134,17 +136,13 @@ public class MongoUserDAOTest {
         }
 
         assertNull(returned);
-
-        verify(db).requestStart();
-        verify(db).requestDone();
     }
 
     @Test (expected = DatasourceException.class)
     public void getUserExceptionTest() throws DatasourceException {
         String username = "userName";
 
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenThrow(Exception.class);
-
+        when(mongoCollection.find(any(BasicDBObject.class))).thenThrow(Exception.class);
         toTest.getUser(username);
 
         //fail();
@@ -153,21 +151,18 @@ public class MongoUserDAOTest {
     @Test
     public void createUserTest() throws DatasourceException, SameIdException {
         String username = "userName";
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
-
+        this.mockFind(null, false);
+        
+        doNothing().when(mongoCollection).insertOne(any(BasicDBObject.class));
         toTest.createUser(username);
-
-        verify(db, times(2)).requestStart();
-        verify(db, times(2)).requestDone();
     }
 
     @Test (expected = DatasourceException.class)
     public void createUserDatasourceExceptionTest() throws DatasourceException, SameIdException {
         String username = "userName";
 
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
-        doThrow(DatasourceException.class).when(mongoCollection).insert(any(DBObject.class));
+        this.mockFind(null, false);
+        doThrow(DatasourceException.class).when(mongoCollection).insertOne(any(BasicDBObject.class));
 
         toTest.createUser(username);
     }
@@ -180,18 +175,10 @@ public class MongoUserDAOTest {
         String password = "pass word";
         String token = "to ken";
 
-        DBObject userObj = createDummyDBObject(username, displayName, email, password, token);
-
-        List list = new LinkedList();
-        list.add(userObj);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
+        BasicDBObject userObj = createDummyDBObject(username, displayName, email, password, token);
+        this.mockFind(userObj, true, false);
 
         toTest.createUser(username);
-
-
-        verify(db).requestStart();
-        verify(db).requestDone();
     }
 
     @Test
@@ -202,40 +189,29 @@ public class MongoUserDAOTest {
         String password = "pass word";
         String token = "to ken";
 
-        DBObject userObj = createDummyDBObject(username, displayName, email, password, token);
-
-        List list = new LinkedList();
-        list.add(userObj);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
+        BasicDBObject userObj = createDummyDBObject(username, displayName, email, password, token);
+        this.mockFind(userObj, true, false);
 
         boolean returned = toTest.isUser(username);
 
         assertTrue(returned);
-
-        verify(db).requestStart();
-        verify(db).requestDone();
     }
 
     @Test
     public void isNotUserTest() throws DatasourceException {
         String username = "name user";
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        this.mockFind(null, false);
 
         boolean returned = toTest.isUser(username);
 
         assertFalse(returned);
-
-        verify(db).requestStart();
-        verify(db).requestDone();
     }
 
     @Test (expected = DatasourceException.class)
     public void isUserDatasourceExceptionTest() throws DatasourceException {
         String username = "name user";
 
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenThrow(Exception.class);
+        when(mongoCollection.find(any(BasicDBObject.class))).thenThrow(Exception.class);
 
         toTest.isUser(username);
     }
@@ -252,24 +228,17 @@ public class MongoUserDAOTest {
         String password2 = "password";
         String token2 = "token";
 
-        DBObject userObj = createDummyDBObject(username, displayName, email, password, token);
+        BasicDBObject userObj = createDummyDBObject(username, displayName, email, password, token);
+        this.mockFind(userObj, true, false, true, false);
 
         User user = createDummyUser(username, displayName2, email2, password2, token2);
-
-        List list = new LinkedList();
-        list.add(userObj);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
-        doNothing().when(mongoCollection).update(any(DBObject.class), any(DBObject.class), eq(false), eq(false));
 
         try {
             toTest.updateUser(user);
         } catch (DatasourceException | NotFoundException ex) {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
-
-        verify(db).requestStart();
-        verify(db).requestDone();
+        verify(mongoCollection).updateOne(eq(userObj), isA(BasicDBObject.class));
     }
 
     @Test (expected = DatasourceException.class)
@@ -282,7 +251,7 @@ public class MongoUserDAOTest {
 
         User user = createDummyUser(username, displayName, email, password, token);
 
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenThrow(Exception.class);
+        when(mongoCollection.find(any(BasicDBObject.class))).thenThrow(Exception.class);
 
         toTest.updateUser(user);
 
@@ -301,15 +270,10 @@ public class MongoUserDAOTest {
         String password2 = "password";
         String token2 = "token";
 
-        DBObject userObj = createDummyDBObject(username, displayName, email, password, token);
-
+        BasicDBObject userObj = createDummyDBObject(username, displayName, email, password, token);
+        this.mockFind(userObj, true, false, true, false);
         User user = createDummyUser(username, displayName2, email2, password2, token2);
-
-        List list = new LinkedList();
-        list.add(userObj);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
-        doThrow(Exception.class).when(mongoCollection).update(any(DBObject.class), any(DBObject.class), eq(false), eq(false));
+        doThrow(Exception.class).when(mongoCollection).updateOne(any(BasicDBObject.class), any(BasicDBObject.class));
 
         toTest.updateUser(user);
 
@@ -317,7 +281,7 @@ public class MongoUserDAOTest {
     }
 
     @Test (expected = NotFoundException.class)
-    public void updateUserSameIdExceptionTest() throws DatasourceException, NotFoundException {
+    public void updateUserNotFoundExceptionTest() throws DatasourceException, NotFoundException {
         String username = "name user";
         String displayName = "display name";
         String email = "e-mail";
@@ -325,11 +289,9 @@ public class MongoUserDAOTest {
         String token = "to ken";
 
         User user = createDummyUser(username, displayName, email, password, token);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        this.mockFind(null, false);
 
         toTest.updateUser(user);
-        //fail()
     }
 
     @Test
@@ -340,29 +302,21 @@ public class MongoUserDAOTest {
         String password = "pass word";
         String token = "to ken";
 
-        DBObject userObj = createDummyDBObject(username, displayName, email, password, token);
-
-        List list = new LinkedList();
-        list.add(userObj);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
-        doNothing().when(mongoCollection).remove(eq(userObj));
+        BasicDBObject userObj = createDummyDBObject(username, displayName, email, password, token);
+        this.mockFind(userObj, true, false);
 
         try {
             toTest.deleteUser(username);
         } catch (DatasourceException | NotFoundException ex) {
             fail("Exception not expected:\n" + ex.getLocalizedMessage());
         }
-
-        verify(db).requestStart();
-        verify(db).requestDone();
+        verify(mongoCollection).deleteOne(userObj);
     }
 
     @Test (expected = NotFoundException.class)
     public void deleteUserNotFoundExceptionTest() throws DatasourceException, NotFoundException {
         String username = "name user";
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
+        this.mockFind(null, false);
 
         toTest.deleteUser(username);
     }
@@ -370,9 +324,7 @@ public class MongoUserDAOTest {
     @Test (expected = DatasourceException.class)
     public void deleteUserDatasourceException1Test() throws DatasourceException, NotFoundException {
         String username = "name user";
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenThrow(Exception.class);
-
+        when(mongoCollection.find(any(BasicDBObject.class))).thenThrow(Exception.class);
         toTest.deleteUser(username);
     }
 
@@ -385,22 +337,16 @@ public class MongoUserDAOTest {
         String password = "pass word";
         String token = "to ken";
 
-        DBObject userObj = createDummyDBObject(username, displayName, email, password, token);
-
-        List list = new LinkedList();
-        list.add(userObj);
-
-        when(mongoCollection.find(any(DBObject.class), any(DBObject.class), anyInt(), anyInt(), anyInt())).thenReturn(list.iterator());
-        doThrow(Exception.class).when(mongoCollection).remove(eq(userObj));
-
+        BasicDBObject userObj = createDummyDBObject(username, displayName, email, password, token);
+        this.mockFind(userObj, true, false);
+        doThrow(Exception.class).when(mongoCollection).deleteOne(eq(userObj));
         toTest.deleteUser(username);
-
     }
 
-    private DBObject createDummyDBObject(String username, String displayName,
+    private BasicDBObject createDummyDBObject(String username, String displayName,
             String email, String password, String token) {
 
-        DBObject userObj = new BasicDBObject();
+        BasicDBObject userObj = new BasicDBObject();
         userObj.put("_id", "507f1f77bcf86cd799439011");
         userObj.put("userName", username);
         userObj.put("displayName", displayName);

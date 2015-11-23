@@ -32,6 +32,7 @@ package org.fiware.apps.repository.rest;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
@@ -50,16 +51,20 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.*;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({VirtuosoDAOFactory.class, QueryService.class})
 public class QueryServiceTest {
 
+    private @Mock VirtuosoDAOFactory virtuosoDAOFactory;
     private VirtuosoResourceDAO virtuosoResourceDAO;
-    private VirtuosoDAOFactory virtuosoDAOFactory;
-    private ServletContext servletContext;
-    private QueryService toTest;
+    
+    private @Mock ServletContext servletContext;
+    private @InjectMocks QueryService toTest;
 
     private SelectQueryResponse querySelect = new SelectQueryResponse();
     private String queryConstruct = "Construct query";
@@ -73,16 +78,12 @@ public class QueryServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
-        virtuosoDAOFactory = mock(VirtuosoDAOFactory.class);
-        servletContext = mock(ServletContext.class);
 
         when(servletContext.getInitParameter("propertiesFile")).thenReturn("");
-        when(virtuosoDAOFactory.getVirtuosoResourceDAO(anyObject())).thenReturn(virtuosoResourceDAO);
 
-        PowerMockito.whenNew(VirtuosoDAOFactory.class).withAnyArguments().thenReturn(virtuosoDAOFactory);
+        virtuosoResourceDAO = mock(VirtuosoResourceDAO.class);
+        when(virtuosoDAOFactory.getVirtuosoResourceDAO((Properties) anyObject())).thenReturn(virtuosoResourceDAO);
 
-        toTest = new QueryService(servletContext);
     }
 
     @Test
