@@ -15,5 +15,5 @@ This project is part of `FIWARE <http://www.fiware.org>`__.
    :maxdepth: 3
    :caption: Documentation
 
-   installation-guide
+   user-and-programmer-guide
    
