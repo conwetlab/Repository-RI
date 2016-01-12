@@ -9,21 +9,11 @@ Moreover, the Repository provides a uniform API to perform smart searches over t
 This project is part of `FIWARE <http://www.fiware.org>`__.
 
 
-Index
-=====
-
-:doc:`installation-guide`
-  The guide for Repository-RI maintainers that explains how to install it.
-
-:doc:`user-and-programmer-guide`
-  The guide for user and programmers that explains how to browse resources and collections using a web browser, and how to integrate them using the existing APIs.
-
 .. _documentation:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Documentation
 
    installation-guide
-   user-and-programmer-guide
    
