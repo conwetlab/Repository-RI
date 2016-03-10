@@ -1,6 +1,6 @@
 # Repository-RI
 
- [![Build Status](https://build.conwet.fi.upm.es/jenkins/buildStatus/icon?job=Repository-Virtuoso)](https://build.conwet.fi.upm.es/jenkins/job/Repository-Virtuoso/)
+[![License](https://img.shields.io/badge/license-BSD%203%20Clause-blue.svg?style=flat)](https://opensource.org/licenses/BSD-3-Clause) [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](http://repository-ri.readthedocs.org/en/latest/) [![Docker](https://img.shields.io/docker/pulls/fiware/repository-ri.svg)](https://hub.docker.com/r/fiware/repository-ri) [![Support](https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org) [![Build Status](https://build.conwet.fi.upm.es/jenkins/buildStatus/icon?job=Repository-Virtuoso)](https://build.conwet.fi.upm.es/jenkins/job/Repository-Virtuoso/)
  
  * [Introduction](#introduction)
  * [GEi overall description](#gei-overall-description)
